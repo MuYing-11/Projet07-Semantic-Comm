@@ -1,0 +1,17 @@
+{
+ "name": "jscc_mse_snr0",
+ "kind": "jscc",
+ "loss": "mse",
+ "snr": [
+  0,
+  0
+ ],
+ "widths": [
+  8
+ ],
+ "epochs": 15,
+ "params": 421715,
+ "train_s": 322.77241230010986,
+ "val_metric": 21.499847412109375,
+ "device": "cuda"
+}

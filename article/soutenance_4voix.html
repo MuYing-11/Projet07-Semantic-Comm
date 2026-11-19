@@ -1,0 +1,511 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Soutenance Projet 07</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout : une colonne de lecture, quatre blocs de rôle repérés par une couleur de locuteur */
+:root{
+  --bg:#f7f6f3; --surface:#ffffff; --fg:#1b1d1f; --muted:#5e6367; --line:#dcd9d2;
+  --accent:#1f4e79;
+  --p1:#1f4e79; --p2:#8a5a16; --p3:#2f6b4f; --p4:#7a2f52;
+  --ok:#2f6b4f; --warn:#8a5a16; --bad:#9b2c2c;
+  --ff-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ff-head:"Space Grotesk","Inter",system-ui,sans-serif;
+  --ff-mono:"JetBrains Mono",ui-monospace,"Cascadia Code",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171a; --surface:#1d2024; --fg:#e8e6e1; --muted:#a0a6ac; --line:#32373d;
+  --accent:#7db3e0;
+  --p1:#7db3e0; --p2:#d9a85c; --p3:#79c79f; --p4:#dd93b4;
+  --ok:#79c79f; --warn:#d9a85c; --bad:#e58a8a;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171a; --surface:#1d2024; --fg:#e8e6e1; --muted:#a0a6ac; --line:#32373d;
+  --accent:#7db3e0;
+  --p1:#7db3e0; --p2:#d9a85c; --p3:#79c79f; --p4:#dd93b4;
+  --ok:#79c79f; --warn:#d9a85c; --bad:#e58a8a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--ff-body);font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+.wrap{max-width:1000px;margin:0 auto;padding-block:40px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4{font-family:var(--ff-head);text-wrap:balance;margin:0}
+h1{font-size:clamp(1.9rem,5vw,2.7rem);line-height:1.1;letter-spacing:-.02em}
+.eyebrow{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;font-family:var(--ff-head)}
+.lede{color:var(--muted);max-width:68ch;margin-top:14px}
+hr.sep{border:0;border-top:1px solid var(--line);margin:44px 0}
+
+/* ---- sommaire ---- */
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:28px}
+.toc a{display:block;text-decoration:none;color:inherit;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:4px;padding:14px 16px}
+.toc a:hover{border-color:var(--c)}
+.toc .n{font-family:var(--ff-mono);font-size:.78rem;color:var(--c);font-weight:600}
+.toc .who{font-family:var(--ff-head);font-weight:600;display:block;margin-top:2px}
+.toc .sub{font-size:.84rem;color:var(--muted);display:block}
+
+/* ---- blocs locuteur ---- */
+.person{margin-top:56px;scroll-margin-top:24px}
+.phead{border-top:3px solid var(--c);padding-top:18px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline}
+.phead .pn{font-family:var(--ff-mono);font-size:.8rem;font-weight:600;color:var(--c);letter-spacing:.08em}
+.phead h2{font-size:clamp(1.3rem,3.4vw,1.75rem);flex:1 1 320px;min-width:0}
+.phead .time{font-family:var(--ff-mono);font-size:.82rem;color:var(--muted);white-space:nowrap}
+.role{color:var(--muted);margin:10px 0 0;max-width:72ch}
+
+h3{font-size:1.05rem;margin-top:30px;display:flex;align-items:center;gap:10px}
+h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+h4{font-size:.95rem;margin-top:22px;color:var(--fg)}
+
+.say{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:18px 20px;margin-top:14px}
+.say > p:first-child{margin-top:0}
+.say p{margin:12px 0}
+.quote{font-size:1.02rem;border-left:3px solid var(--c);padding-left:14px;margin:14px 0;color:var(--fg)}
+ul,ol{padding-left:22px;margin:12px 0}
+li{margin:7px 0}
+li > strong{font-weight:600}
+code{font-family:var(--ff-mono);font-size:.88em;background:color-mix(in srgb,var(--fg) 8%,transparent);padding:1px 5px;border-radius:3px}
+
+/* ---- tableaux ---- */
+.tw{overflow-x:auto;margin-top:16px;border:1px solid var(--line);border-radius:4px;min-width:0}
+table{border-collapse:collapse;width:100%;font-size:.88rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+thead th{background:color-mix(in srgb,var(--fg) 5%,transparent);font-family:var(--ff-head);font-size:.8rem;font-weight:600}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+.hl{color:var(--ok);font-weight:600}
+.lo{color:var(--bad);font-weight:600}
+caption{caption-side:bottom;text-align:left;padding:10px 12px;font-size:.8rem;color:var(--muted)}
+
+/* ---- chiffres à retenir ---- */
+.keys{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:16px}
+.key{background:var(--surface);border:1px solid var(--line);border-top:2px solid var(--c);border-radius:3px;padding:12px 14px}
+.key b{display:block;font-family:var(--ff-mono);font-size:1.2rem;color:var(--c);font-variant-numeric:tabular-nums}
+.key span{font-size:.8rem;color:var(--muted);display:block;line-height:1.4;margin-top:3px}
+
+/* ---- questions ---- */
+.qa{margin-top:14px;border-top:1px solid var(--line)}
+.qa details{border-bottom:1px solid var(--line)}
+.qa summary{cursor:pointer;padding:12px 0;font-weight:600;font-size:.94rem;list-style:none;display:flex;gap:10px;align-items:flex-start}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::before{content:"?";font-family:var(--ff-mono);color:var(--c);font-weight:700;flex:none}
+.qa summary:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.qa .ans{padding:0 0 14px 22px;color:var(--muted);font-size:.93rem}
+.qa .ans strong{color:var(--fg)}
+
+/* ---- transitions ---- */
+.handoff{margin-top:24px;background:color-mix(in srgb,var(--c) 9%,var(--surface));border:1px dashed var(--c);border-radius:4px;padding:14px 16px;font-size:.94rem}
+.handoff .lab{font-family:var(--ff-head);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c);font-weight:600;display:block;margin-bottom:5px}
+
+.note{font-size:.88rem;color:var(--muted);margin-top:14px;padding-left:14px;border-left:2px solid var(--line)}
+.warnbox{background:color-mix(in srgb,var(--warn) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 45%,var(--line));border-radius:4px;padding:14px 16px;margin-top:16px;font-size:.93rem}
+.warnbox b{color:var(--warn)}
+a{color:var(--accent)}
+@media (max-width:460px){
+  th,td{padding:7px 9px;font-size:.82rem}
+  body{font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+<p class="eyebrow">Projet 07 &middot; INSAT 2026&ndash;2027</p>
+<h1>Soutenance à quatre voix</h1>
+<p class="lede">Communication sémantique apprise pour la transmission d'images et de vidéos. Découpage de l'exposé en quatre interventions, avec pour chacune le fil du discours, les chiffres à connaître par cœur, la phrase de passage de parole et les questions du jury avec leurs réponses.</p>
+
+<div class="tw">
+<table>
+<caption>Minutage pour un exposé de 20 minutes. Pour 30 minutes, multipliez chaque durée par 1,5 — le découpage ne change pas.</caption>
+<thead><tr><th>Partie</th><th>Qui</th><th>Sujet</th><th class="num">Durée</th><th class="num">Slides</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Personne 1</td><td>Le problème et la méthode d'évaluation</td><td class="num">5 min</td><td class="num">4–5</td></tr>
+<tr><td>2</td><td>Personne 2</td><td>L'architecture et l'apprentissage</td><td class="num">5 min</td><td class="num">4–5</td></tr>
+<tr><td>3</td><td>Personne 3</td><td>Les résultats sur images</td><td class="num">5 min</td><td class="num">5–6</td></tr>
+<tr><td>4</td><td>Personne 4</td><td>Vidéo, extension, conclusion</td><td class="num">5 min</td><td class="num">5–6</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="toc">
+<a href="#p1" style="--c:var(--p1)"><span class="n">PARTIE 1</span><span class="who">Pourquoi &amp; comment juger</span><span class="sub">Shannon, Weaver, les trois chaînes, les métriques</span></a>
+<a href="#p2" style="--c:var(--p2)"><span class="n">PARTIE 2</span><span class="who">Architecture &amp; apprentissage</span><span class="sub">Deep JSCC, canal différentiable, perte sémantique</span></a>
+<a href="#p3" style="--c:var(--p3)"><span class="n">PARTIE 3</span><span class="who">Résultats sur images</span><span class="sub">CIFAR, Kodak, agilité, désadaptation</span></a>
+<a href="#p4" style="--c:var(--p4)"><span class="n">PARTIE 4</span><span class="who">Vidéo &amp; extension</span><span class="sub">Rafraîchissement conditionnel, transmission orientée tâche</span></a>
+</div>
+
+<div class="note">Règle de répétition&nbsp;: chacun doit pouvoir répondre aux questions des <em>trois autres</em> parties au moins en une phrase. Le jury pose souvent la question à celui qui parle, pas à celui qui a fait la slide.</div>
+
+<hr class="sep">
+
+<!-- ===================== PERSONNE 1 ===================== -->
+<section class="person" id="p1" style="--c:var(--p1)">
+<div class="phead">
+  <span class="pn">PARTIE 1</span>
+  <h2>Pourquoi la communication sémantique, et comment on la juge</h2>
+  <span class="time">≈ 5 min</span>
+</div>
+<p class="role">Tu poses le problème et tu installes le vocabulaire que les trois autres vont réutiliser. Si tu rates ta partie, le jury ne comprendra pas les courbes de la partie 3. Ton objectif&nbsp;: à la fin de ta prise de parole, tout le monde dans la salle doit savoir ce que veut dire «&nbsp;niveau sémantique&nbsp;» et pourquoi le PSNR ne suffit pas.</p>
+
+<h3>Ce que tu dis</h3>
+
+<h4>1. L'ouverture — les trois niveaux de Weaver</h4>
+<div class="say">
+<p class="quote">«&nbsp;En 1949, Weaver, dans l'introduction au papier de Shannon, distingue trois niveaux de problèmes de communication. Le niveau technique&nbsp;: les symboles sont-ils reçus correctement&nbsp;? Le niveau sémantique&nbsp;: le sens reçu est-il celui qui a été émis&nbsp;? Le niveau pragmatique&nbsp;: le récepteur fait-il ce qu'on attendait&nbsp;? Shannon a résolu le premier de façon magistrale, et toute la théorie de l'information de 75 ans qui a suivi vit à ce niveau-là. Notre projet porte sur le deuxième.&nbsp;»</p>
+<p>Enchaîne tout de suite avec l'exemple concret, parce que c'est lui qui fait comprendre&nbsp;:</p>
+<p class="quote">«&nbsp;Prenez une image qu'un réseau doit transmettre pour qu'une machine la classe. Un bruit qui décale légèrement toutes les couleurs coûte beaucoup de PSNR et ne change rien à la classification. Un bruit qui efface le contour de l'objet coûte peu de PSNR et détruit complètement la décision. Le niveau technique traite ces deux erreurs comme équivalentes. Le niveau sémantique, non.&nbsp;»</p>
+</div>
+
+<h4>2. Le contexte — pourquoi maintenant</h4>
+<div class="say">
+<p>Trois phrases, pas plus. Tu justifies le sujet sans faire un cours&nbsp;:</p>
+<ul>
+<li>Le trafic est de plus en plus produit et consommé par des <strong>machines</strong>&nbsp;: surveillance, véhicules, agents, IoT. Le destinataire final n'est souvent pas un œil humain.</li>
+<li>La chaîne classique est <strong>séparée</strong>&nbsp;: compression source (JPEG), puis codage canal (convolutif, LDPC), puis modulation. Le théorème de séparation de Shannon dit que c'est optimal — mais <strong>seulement</strong> à longueur de bloc infinie et pour une source et un canal connus.</li>
+<li>En pratique, sur des paquets courts et des canaux variables, cette séparation produit l'<strong>effet falaise</strong> (<em>cliff effect</em>)&nbsp;: en dessous du SNR prévu, le décodeur canal décroche, le flux binaire est corrompu, et l'image n'est pas dégradée — elle est <strong>perdue</strong>.</li>
+</ul>
+</div>
+
+<h4>3. Les trois chaînes qu'on compare</h4>
+<div class="say">
+<p>C'est ta slide centrale. Présente-les comme trois concurrents sur la même ligne de départ, à la <strong>même largeur de bande</strong>.</p>
+<ol>
+<li><strong>La chaîne séparée numérique (la référence réaliste).</strong> JPEG — ou un auto-encodeur quantifié sur 4 bits pour CIFAR — puis un code convolutif poinçonné K = 7, générateurs (133, 171) en octal, puis une modulation QAM à étiquetage de Gray, QPSK à 64QAM. À la réception&nbsp;: LLR max-log et décodage de Viterbi. C'est une chaîne honnête, pas un épouvantail&nbsp;: on <strong>balaye tous les couples modulation–rendement</strong> et on garde le meilleur à chaque SNR.</li>
+<li><strong>La borne de capacité (la référence optimiste).</strong> Pour savoir si notre chaîne numérique est mauvaise ou si c'est le numérique qui est mauvais, on calcule aussi ce que donnerait un codage <strong>parfait</strong>&nbsp;: on alloue à la source le débit <code>k·log₂(1+SNR)</code> et on suppose zéro erreur résiduelle. C'est inatteignable en pratique, et ça nous sert de plafond.</li>
+<li><strong>Le Deep JSCC (notre proposition).</strong> Un seul réseau encodeur qui va de l'image aux symboles du canal, un seul réseau décodeur en face, entraînés ensemble à travers un modèle de canal différentiable. Pas de bits, pas de constellation&nbsp;: les symboles sont à valeurs continues.</li>
+</ol>
+<p class="note">Si le jury ne retient qu'une chose de ta slide&nbsp;: les trois chaînes sont comparées <strong>à largeur de bande égale</strong>, <code>k/n = 1/12</code> au point principal. Sans ça, aucune comparaison n'a de sens, et c'est la première chose qu'un jury attaque.</p>
+</div>
+
+<h4>4. Comment on mesure — et le piège qu'on a évité</h4>
+<div class="say">
+<p>C'est le passage qui donne sa crédibilité à tout le reste. Prends ton temps.</p>
+<ul>
+<li><strong>Métriques syntaxiques</strong>&nbsp;: PSNR et SSIM. Elles mesurent la fidélité pixel à pixel.</li>
+<li><strong>Métriques sémantiques</strong>&nbsp;: la précision de classification sur l'image reçue (CIFAR), et pour les images naturelles la <strong>similarité cosinus des descripteurs</strong> d'un ResNet-18 pré-entraîné sur ImageNet plus <strong>l'accord top-1</strong> entre la décision sur l'image reçue et la décision sur l'originale.</li>
+</ul>
+<p class="quote">«&nbsp;Et ici il y a un piège méthodologique qu'il faut nommer. Si on entraîne le modèle à plaire à un classifieur, et qu'on évalue ensuite avec ce même classifieur, on ne mesure plus rien&nbsp;: on mesure à quel point on a réussi à flatter un juge. On a donc <strong>deux réseaux distincts</strong>. Le classifieur A, gelé, sert pendant l'entraînement. Le classifieur B, d'architecture différente — de type VGG, 308 000 paramètres contre 298 000 — n'est jamais vu par l'entraînement et sert <strong>uniquement</strong> à juger.&nbsp;»</p>
+<p>Finis par le calibrage, qui donne l'échelle de lecture de toutes les courbes de la partie 3&nbsp;:</p>
+<p class="quote">«&nbsp;Sur les images CIFAR originales, non transmises, le juge B obtient 88,4&nbsp;% de précision. C'est notre plafond&nbsp;: aucune chaîne de transmission ne peut faire mieux que ça. Toutes les précisions que mon collègue va montrer doivent se lire par rapport à ce 88,4&nbsp;%.&nbsp;»</p>
+</div>
+
+<h3>Chiffres à connaître par cœur</h3>
+<div class="keys">
+<div class="key"><b>3</b><span>niveaux de Weaver — technique, sémantique, pragmatique</span></div>
+<div class="key"><b>88,4 %</b><span>précision du juge B sur les images originales = le plafond</span></div>
+<div class="key"><b>1/12</b><span>largeur de bande k/n du point de comparaison principal</span></div>
+<div class="key"><b>K = 7</b><span>code convolutif (133,171), décodage Viterbi</span></div>
+<div class="key"><b>2</b><span>classifieurs séparés : A entraîne, B juge</span></div>
+</div>
+
+<div class="handoff"><span class="lab">Phrase de passage</span>«&nbsp;Voilà le problème et la façon dont on va le mesurer. [Prénom] va maintenant vous montrer comment on construit concrètement un encodeur qui apprend à travers un canal bruité — y compris le point technique qui n'est pas évident&nbsp;: comment on fait passer un gradient à travers un canal de transmission.&nbsp;»</div>
+
+<h3>Questions probables</h3>
+<div class="qa">
+<details><summary>Ce n'est pas simplement de la compression avec pertes&nbsp;?</summary><div class="ans">Non, et la différence est structurelle. La compression avec pertes choisit <strong>quoi jeter</strong> en supposant que ce qui reste arrivera intact&nbsp;; elle produit des bits, qu'il faut ensuite protéger. Ici l'encodeur produit directement les <strong>symboles du canal</strong>, et il est entraîné en sachant que ces symboles seront bruités. Il n'optimise donc pas la compacité, il optimise la <strong>robustesse de la représentation au bruit</strong> — ce sont deux objectifs différents, et c'est ce qui supprime l'effet falaise.</div></details>
+<details><summary>Le théorème de séparation de Shannon ne garantit-il pas que votre approche jointe ne peut pas faire mieux&nbsp;?</summary><div class="ans">Il le garantit sous trois hypothèses&nbsp;: longueur de bloc <strong>infinie</strong>, source et canal <strong>stationnaires et connus</strong>, et un seul destinataire au niveau technique. Nous violons les trois&nbsp;: nos blocs sont courts (une image), le SNR instantané est inconnu à l'émission, et notre critère n'est pas la fidélité binaire. Le théorème reste vrai&nbsp;; il ne s'applique simplement pas à notre régime. C'est d'ailleurs pour ça qu'on a calculé la borne de capacité&nbsp;: elle montre où serait la limite si les hypothèses tenaient.</div></details>
+<details><summary>Pourquoi un classifieur comme juge, et pas une métrique perceptuelle standard&nbsp;?</summary><div class="ans">Parce que le niveau sémantique est défini par rapport à une <strong>tâche</strong>. Une métrique perceptuelle mesure ce qu'un humain verrait&nbsp;; nous, on veut mesurer si le sens utile a survécu. On utilise quand même deux métriques complémentaires&nbsp;: la précision de la tâche sur CIFAR, et sur Kodak et la vidéo la similarité des descripteurs ResNet-18, qui est plus proche d'une mesure perceptuelle de haut niveau.</div></details>
+<details><summary>Votre chaîne numérique de référence n'est-elle pas volontairement affaiblie&nbsp;?</summary><div class="ans">C'est la bonne question, et on l'a anticipée de deux façons. D'abord, on ne fixe pas la modulation&nbsp;: on balaye tous les couples modulation–rendement et on retient <strong>le meilleur</strong> à chaque SNR, ce qui est plus favorable que n'importe quel système réel à adaptation imparfaite. Ensuite, on ajoute la borne de capacité, qui est <strong>au-dessus</strong> de tout système numérique réalisable. Et nous assumons un résultat qui nous est défavorable&nbsp;: sur Kodak, cette borne bat nos modèles appris en PSNR. Mon collègue y reviendra.</div></details>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- ===================== PERSONNE 2 ===================== -->
+<section class="person" id="p2" style="--c:var(--p2)">
+<div class="phead">
+  <span class="pn">PARTIE 2</span>
+  <h2>L'architecture et l'apprentissage</h2>
+  <span class="time">≈ 5 min</span>
+</div>
+<p class="role">Tu es la partie technique. C'est toi qui dois convaincre que ce n'est pas une boîte noire&nbsp;: tu montres que chaque bloc a une raison d'être et que le canal est traité comme une couche du réseau. Deux idées doivent passer absolument&nbsp;: <strong>le canal est différentiable</strong>, et <strong>la perte a trois termes</strong>.</p>
+
+<h3>Ce que tu dis</h3>
+
+<h4>1. Le trajet d'un tenseur, de l'image aux symboles</h4>
+<div class="say">
+<p>Déroule la slide d'architecture en suivant les <strong>formes</strong> — c'est beaucoup plus clair qu'une description en mots&nbsp;:</p>
+<ul>
+<li>Entrée&nbsp;: <code>3 × 32 × 32</code>, normalisée par la moyenne et l'écart-type de CIFAR.</li>
+<li><strong>Encodeur entièrement convolutif</strong>, deux réductions par pas de 2 → carte latente <code>c × 8 × 8</code>.</li>
+<li><strong>Normalisation de puissance.</strong> Point important à annoncer explicitement&nbsp;: les symboles émis sont renormalisés pour respecter une contrainte de puissance moyenne unitaire. Sans ça, le réseau peut tricher en augmentant l'amplitude pour écraser le bruit, et le SNR annoncé ne veut plus rien dire.</li>
+<li><strong>Couche canal</strong> (voir ci-dessous).</li>
+<li><strong>Décodeur</strong> symétrique, deux sur-échantillonnages, retour à <code>3 × 32 × 32</code>.</li>
+</ul>
+<p>Le modèle complet fait <strong>421 715 paramètres</strong>. Dis-le&nbsp;: ça montre que l'ordre de grandeur est modeste et que le résultat ne vient pas d'un modèle surdimensionné.</p>
+</div>
+
+<h4>2. Le canal comme couche du réseau — le cœur technique</h4>
+<div class="say">
+<p class="quote">«&nbsp;Le point qui rend tout cela possible, c'est que le canal n'est pas un simulateur externe. C'est une couche du réseau, écrite en PyTorch, à travers laquelle le gradient remonte. Le bruit additif gaussien a une dérivée de 1 par rapport à l'entrée&nbsp;: une perturbation additive est transparente pour la rétropropagation. Le gradient traverse donc le canal sans obstacle, et l'encodeur reçoit l'information du bruit pendant l'apprentissage.&nbsp;»</p>
+<p>Puis les deux canaux implémentés&nbsp;:</p>
+<ul>
+<li><strong>AWGN</strong>&nbsp;: <code>y = x + n</code>, la variance de <code>n</code> est fixée par le SNR tiré pour l'échantillon.</li>
+<li><strong>Rayleigh par blocs</strong>&nbsp;: un gain complexe <code>h</code> tiré une fois par image et constant sur toute l'image. On suppose la <strong>CSI parfaite</strong> au récepteur et on égalise par <strong>forçage à zéro</strong> (<em>zero-forcing</em>). Conséquence à expliquer, car c'est elle qui compte&nbsp;: l'égalisation divise par <code>h</code>, donc le SNR instantané devient <code>SNR + 10·log₁₀|h|²</code>. Quand <code>h</code> est petit, l'évanouissement <strong>amplifie le bruit</strong>. C'est exactement ce que le réseau doit apprendre à encaisser.</li>
+</ul>
+<p>Et la décision d'entraînement qui en découle&nbsp;:</p>
+<p class="quote">«&nbsp;Comme le SNR n'est pas connu à l'émission, on tire le SNR <strong>uniformément entre 0 et 20 dB à chaque échantillon d'entraînement</strong>. Le modèle n'apprend donc pas un point de fonctionnement, il apprend une plage. Nous avons mesuré le prix de ce choix, et mon collègue montrera le résultat&nbsp;: il est faible, et la robustesse qu'il achète est considérable.&nbsp;»</p>
+</div>
+
+<h4>3. L'agilité en largeur de bande, sans réentraîner</h4>
+<div class="say">
+<p>Un point élégant et facile à retenir, à ne pas sauter&nbsp;:</p>
+<p class="quote">«&nbsp;La largeur de bande est pilotée en <strong>tronquant les canaux de la carte latente</strong>. On n'envoie que les <code>c</code> premiers canaux sur 16, ce qui donne <code>k/n = c/96</code>. Avec <code>c</code> dans {2, 4, 8, 12, 16} on couvre 1/48 à 1/6 avec <strong>un seul modèle entraîné</strong>, sans aucun réentraînement. Les canaux sont ordonnés par importance pendant l'apprentissage, donc tronquer dégrade progressivement au lieu de casser.&nbsp;»</p>
+</div>
+
+<h4>4. La perte sémantique — trois termes</h4>
+<div class="say">
+<p>C'est ta deuxième slide clé. Écris la formule et commente chaque terme avec <strong>ce qu'il force le réseau à faire</strong>.</p>
+<ul>
+<li><strong>Terme de reconstruction</strong>, l'erreur quadratique moyenne (MSE). Il maintient la fidélité pixel. Sans lui, l'image reçue devient méconnaissable même si elle reste classifiable.</li>
+<li><strong>Terme de descripteurs</strong>, pondéré <code>λ_feat = 0,01</code>. Distance entre les activations intermédiaires du classifieur A gelé pour l'image originale et pour l'image reçue. Il force le réseau à préserver les <strong>structures intermédiaires</strong> — contours, textures porteuses de sens — et non la valeur exacte des pixels.</li>
+<li><strong>Terme de tâche</strong>, pondéré <code>λ_task = 0,003</code>. Entropie croisée de la sortie de A sur l'image reçue. Il force la préservation de ce qui porte la <strong>décision</strong>.</li>
+</ul>
+<p>Insiste sur deux choses que le jury va vérifier&nbsp;:</p>
+<ul>
+<li>Le classifieur A est <strong>gelé</strong>. Ses poids ne bougent pas&nbsp;; il ne sert que de fonction de perte dérivable.</li>
+<li>Les poids sont <strong>petits</strong>, 0,01 et 0,003. Ce ne sont pas des réglages arbitraires pour forcer le résultat&nbsp;: ce sont de légères inflexions d'un objectif dominé par le MSE. Et c'est justement ce qui rend le résultat de la partie 3 frappant&nbsp;: une inflexion aussi faible produit plus de dix points de précision.</li>
+</ul>
+</div>
+
+<h4>5. Le protocole d'entraînement, en 30 secondes</h4>
+<div class="say">
+<ul>
+<li><strong>Neuf modèles</strong> entraînés&nbsp;: deux classifieurs (A et B), le JSCC-MSE, le JSCC-sémantique, trois JSCC spécialisés à SNR fixe (0, 10, 20 dB) pour l'étude de désadaptation, un auto-encodeur quantifié pour la chaîne numérique, et un modèle orienté tâche.</li>
+<li>15 à 25 époques selon le modèle, Adam, SNR tiré aléatoirement, augmentation par retournement et recadrage.</li>
+<li><strong>Sur GPU&nbsp;: 25,7 secondes par époque, contre environ 320 secondes sur CPU — un facteur 12.</strong> C'est ce qui a rendu l'étude complète possible dans le temps du projet.</li>
+<li><strong>Point de reprise sauvegardé à chaque époque.</strong> Mentionne-le&nbsp;: c'est un choix d'ingénierie, pas un détail. Une interruption en cours d'entraînement coûtait auparavant la totalité du run.</li>
+</ul>
+</div>
+
+<h3>Chiffres à connaître par cœur</h3>
+<div class="keys">
+<div class="key"><b>421 715</b><span>paramètres du modèle JSCC</span></div>
+<div class="key"><b>c × 8 × 8</b><span>forme de la carte latente, c ≤ 16</span></div>
+<div class="key"><b>k/n = c/96</b><span>1/48 à 1/6 avec un seul modèle</span></div>
+<div class="key"><b>0,01 / 0,003</b><span>λ_feat et λ_task</span></div>
+<div class="key"><b>0–20 dB</b><span>plage de SNR tirée à l'entraînement</span></div>
+<div class="key"><b>×12</b><span>accélération GPU (25,7 s/époque)</span></div>
+</div>
+
+<div class="handoff"><span class="lab">Phrase de passage</span>«&nbsp;Voilà donc deux modèles qui ne diffèrent que par deux termes de perte de poids 0,01 et 0,003, et une chaîne numérique de référence réglée au mieux. [Prénom] va vous dire ce que ça donne.&nbsp;»</div>
+
+<h3>Questions probables</h3>
+<div class="qa">
+<details><summary>Comment le gradient traverse-t-il un canal de transmission&nbsp;?</summary><div class="ans">Parce qu'il est modélisé comme une opération différentiable sur les tenseurs. Pour l'AWGN, <code>y = x + n</code> où <code>n</code> est un tirage <strong>indépendant de x</strong>&nbsp;: la dérivée de <code>y</code> par rapport à <code>x</code> est l'identité, et le gradient passe intact. Pour Rayleigh, <code>y = h·x + n</code> suivi de la division par <code>h</code>&nbsp;: ce sont des opérations linéaires, également dérivables. Ce qui n'est pas différentiable, c'est la <strong>quantification</strong> et la <strong>décision dure</strong> — et c'est précisément pour ça que la chaîne numérique ne peut pas être entraînée de bout en bout, alors que la nôtre peut.</div></details>
+<details><summary>Comment avez-vous choisi λ_feat et λ_task&nbsp;?</summary><div class="ans">Par ordre de grandeur, pour que les trois termes contribuent à des échelles comparables au gradient, le MSE restant dominant. Nous les assumons comme des valeurs non finement optimisées, et c'est un argument en notre faveur plutôt que contre nous&nbsp;: le gain sémantique est obtenu <strong>sans</strong> réglage fin, donc il ne vient pas d'un ajustement des hyperparamètres au jeu de test. Une recherche systématique sur ces deux poids est d'ailleurs dans nos perspectives.</div></details>
+<details><summary>Pourquoi supposer la CSI parfaite&nbsp;? Ce n'est pas réaliste.</summary><div class="ans">C'est effectivement une hypothèse optimiste, et nous la déclarons comme telle. Elle isole ce que nous voulons étudier&nbsp;: la robustesse de la <strong>représentation apprise</strong> à l'évanouissement, sans la mélanger avec l'erreur d'estimation de canal. Elle est aussi appliquée <strong>également</strong> aux trois chaînes comparées, donc elle ne biaise pas la comparaison. Lever cette hypothèse — CSI estimée, bruitée — est une extension directe de ce travail.</div></details>
+<details><summary>Pourquoi un seul gain h pour toute l'image&nbsp;?</summary><div class="ans">C'est le modèle de Rayleigh <strong>par blocs</strong>&nbsp;: il correspond à un canal dont le temps de cohérence dépasse la durée de transmission d'une image, ce qui est le cas réaliste pour une image de petite taille. C'est aussi le cas le <strong>plus difficile</strong> pour nous&nbsp;: un évanouissement profond frappe alors toute l'image à la fois, sans aucune diversité à exploiter. Un fading plus rapide serait plus favorable à nos modèles.</div></details>
+<details><summary>La troncature des canaux latents fonctionne-t-elle vraiment sans réentraînement&nbsp;?</summary><div class="ans">Oui, et c'est mesuré. À SNR = 10 dB, en passant de c = 16 à c = 2 — donc en divisant la largeur de bande par 8 — le PSNR du modèle sémantique passe de 26,87 à 21,04 dB&nbsp;: une dégradation continue, sans décrochage. Et le modèle sémantique résiste beaucoup mieux que le modèle MSE à la troncature extrême&nbsp;: à c = 2, 49,9&nbsp;% de précision contre 22,8&nbsp;%.</div></details>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- ===================== PERSONNE 3 ===================== -->
+<section class="person" id="p3" style="--c:var(--p3)">
+<div class="phead">
+  <span class="pn">PARTIE 3</span>
+  <h2>Les résultats sur images</h2>
+  <span class="time">≈ 5 min</span>
+</div>
+<p class="role">Tu portes la démonstration. Tu as beaucoup de chiffres&nbsp;: ne les lis pas tous. Choisis <strong>trois comparaisons</strong> et défends-les. C'est aussi toi qui annonces le résultat qui nous est défavorable sur Kodak — fais-le de face, c'est ce qui donnera au jury confiance dans le reste.</p>
+
+<h3>Ce que tu dis</h3>
+
+<h4>1. Le résultat principal — la perte sémantique achète du sens</h4>
+<div class="say">
+<p>Une seule ligne de comparaison, à SNR = 10 dB et <code>k/n = 1/12</code>, et tu la commentes&nbsp;:</p>
+<div class="tw"><table>
+<caption>CIFAR-10, AWGN, SNR = 10 dB, k/n = 1/12. Précision mesurée par le juge B, qui n'a jamais été vu par l'entraînement. Plafond : 88,4 % sur images originales.</caption>
+<thead><tr><th>Chaîne</th><th class="num">PSNR (dB)</th><th class="num">SSIM</th><th class="num">Précision</th></tr></thead>
+<tbody>
+<tr><td>JSCC — perte MSE</td><td class="num">25,99</td><td class="num">0,873</td><td class="num">67,6 %</td></tr>
+<tr><td>JSCC — perte sémantique</td><td class="num">25,48</td><td class="num">0,874</td><td class="num hl">78,2 %</td></tr>
+<tr><td>Numérique, meilleure MCS (QPSK 3/4)</td><td class="num">19,65</td><td class="num">0,600</td><td class="num lo">15,3 %</td></tr>
+<tr><td>Borne de capacité (inatteignable)</td><td class="num">24,51</td><td class="num">0,807</td><td class="num">29,7 %</td></tr>
+</tbody>
+</table></div>
+<p class="quote">«&nbsp;Regardez les deux premières lignes. On perd un demi-décibel de PSNR, 0,51 dB exactement, et on gagne <strong>10,6 points de précision</strong>. C'est le résultat central du projet&nbsp;: le PSNR et le sens ne sont pas la même quantité, et on peut échanger l'un contre l'autre. Et ce n'est pas un ajustement massif&nbsp;: rappelez-vous, les poids des termes sémantiques valent 0,01 et 0,003.&nbsp;»</p>
+<p class="quote">«&nbsp;Et regardez maintenant la troisième ligne. La chaîne numérique, réglée à son meilleur point de fonctionnement, obtient 15,3&nbsp;% — à peine mieux que le hasard, qui est à 10&nbsp;% sur dix classes. Même la borne de capacité, qui est inatteignable, plafonne à 29,7&nbsp;%. À cette largeur de bande et sur ce canal, le numérique séparé n'est pas un peu moins bon&nbsp;: il ne fonctionne pas.&nbsp;»</p>
+</div>
+
+<h4>2. L'effet falaise — le vrai argument de vente</h4>
+<div class="say">
+<p>C'est la comparaison la plus visuelle et la plus convaincante. Montre la courbe précision–SNR.</p>
+<div class="tw"><table>
+<caption>CIFAR-10, k/n = 1/12. Précision selon le SNR. La chaîne numérique est à chaque SNR réglée à sa meilleure MCS.</caption>
+<thead><tr><th>SNR</th><th class="num">JSCC sémantique</th><th class="num">JSCC MSE</th><th class="num">Numérique (meilleure MCS)</th></tr></thead>
+<tbody>
+<tr><td>0 dB</td><td class="num hl">56,4 %</td><td class="num">42,0 %</td><td class="num lo">9,8 %</td></tr>
+<tr><td>4 dB</td><td class="num hl">71,7 %</td><td class="num">55,5 %</td><td class="num lo">13,6 %</td></tr>
+<tr><td>10 dB</td><td class="num hl">78,2 %</td><td class="num">67,6 %</td><td class="num">15,3 %</td></tr>
+<tr><td>16 dB</td><td class="num hl">79,9 %</td><td class="num">69,9 %</td><td class="num">29,6 %</td></tr>
+<tr><td>20 dB</td><td class="num hl">80,2 %</td><td class="num">70,6 %</td><td class="num">40,5 %</td></tr>
+</tbody>
+</table></div>
+<p class="quote">«&nbsp;À 0 dB, la chaîne numérique est à 9,8&nbsp;%, c'est-à-dire exactement le hasard&nbsp;: elle est morte. Notre modèle sémantique est à 56,4&nbsp;%. Et surtout, regardez la <strong>forme</strong> des deux courbes&nbsp;: la nôtre décroît doucement et continûment, celle du numérique s'effondre. C'est la dégradation gracieuse contre l'effet falaise. Pour un lien dont on ne connaît pas le SNR à l'avance, cette différence de forme vaut plus que n'importe quel gain en décibels.&nbsp;»</p>
+<p>Note aussi, en une phrase, que l'écart sémantique est <strong>maximal à bas SNR</strong> — 14,4 points à 0 dB contre 9,6 à 20 dB. L'information sémantique est ce qui survit le plus longtemps quand le canal se dégrade.</p>
+</div>
+
+<h4>3. Le prix de la robustesse — l'étude de désadaptation</h4>
+<div class="say">
+<p>Trois modèles spécialisés, entraînés chacun à un SNR fixe, tous testés à 10 dB&nbsp;:</p>
+<div class="tw"><table>
+<caption>Tous testés à SNR = 10 dB, k/n = 1/12, perte MSE.</caption>
+<thead><tr><th>Modèle</th><th class="num">PSNR à 10 dB</th><th class="num">Précision</th></tr></thead>
+<tbody>
+<tr><td>Entraîné à 0 dB</td><td class="num lo">23,51</td><td class="num lo">30,2 %</td></tr>
+<tr><td>Entraîné à 10 dB (adapté)</td><td class="num hl">26,40</td><td class="num">69,5 %</td></tr>
+<tr><td>Entraîné à 20 dB</td><td class="num">25,58</td><td class="num">67,3 %</td></tr>
+<tr><td>Entraîné sur 0–20 dB (le nôtre)</td><td class="num">25,99</td><td class="num">67,6 %</td></tr>
+</tbody>
+</table></div>
+<p class="quote">«&nbsp;Le spécialiste parfaitement adapté gagne — mais il gagne <strong>0,41 dB</strong>. C'est le prix total de notre robustesse. Et le spécialiste de 0 dB, testé à 10 dB, tombe à 30&nbsp;% de précision&nbsp;: un modèle entraîné à un SNR fixe est fragile <strong>dans les deux sens</strong>. Un spécialiste bien adapté ne gagne presque rien, et un spécialiste mal adapté perd énormément. L'entraînement sur une plage de SNR est donc le bon choix, et nous avons le chiffre pour le dire.&nbsp;»</p>
+</div>
+
+<h4>4. L'honnêteté sur Kodak — à dire toi-même</h4>
+<div class="say">
+<p>Ne laisse pas le jury le découvrir dans une annexe. Annonce-le.</p>
+<div class="tw"><table>
+<caption>Kodak, images naturelles haute résolution, AWGN, SNR = 10 dB, k/n = 1/12.</caption>
+<thead><tr><th>Chaîne</th><th class="num">PSNR (dB)</th><th class="num">cos. descripteurs</th><th class="num">accord top-1</th></tr></thead>
+<tbody>
+<tr><td>JSCC sémantique</td><td class="num">27,34</td><td class="num">0,949</td><td class="num">75,0 %</td></tr>
+<tr><td>JSCC MSE</td><td class="num">27,11</td><td class="num">0,958</td><td class="num">70,8 %</td></tr>
+<tr><td>JPEG, borne de capacité</td><td class="num hl">32,27</td><td class="num hl">0,994</td><td class="num hl">95,8 %</td></tr>
+<tr><td>JPEG, meilleure MCS réelle</td><td class="num">29,77</td><td class="num">0,982</td><td class="num">91,7 %</td></tr>
+</tbody>
+</table></div>
+<p class="quote">«&nbsp;Il faut le dire clairement&nbsp;: sur Kodak, à haut SNR, la chaîne JPEG nous bat, et largement — 5 dB d'écart. L'explication est nette. Nos modèles sont entraînés sur CIFAR, des images de 32 × 32 pixels. Kodak, ce sont des photographies naturelles haute résolution. L'encodeur n'a jamais vu ces statistiques d'image, alors que JPEG, lui, a été conçu exactement pour elles. Ce n'est pas une limite de la communication sémantique&nbsp;: c'est une limite de <strong>notre</strong> entraînement, et elle se corrige en entraînant sur un corpus d'images naturelles.&nbsp;»</p>
+<p>Puis retourne la situation, parce que le résultat n'est pas uniforme&nbsp;:</p>
+<p class="quote">«&nbsp;Mais regardez le même tableau à 0 dB. JPEG à sa meilleure modulation tombe à 12,8 dB de PSNR et à un accord top-1 de <strong>zéro</strong> — aucune image n'est reconnue. Nos modèles sont à 22,7 dB. L'effet falaise est toujours là, et il est toujours décisif. La conclusion est donc une conclusion de <strong>régime</strong>&nbsp;: à haut SNR et sur des statistiques d'image connues, le numérique séparé reste excellent. Dans le bas SNR, dans l'incertitude, c'est l'approche apprise qui tient.&nbsp;»</p>
+</div>
+
+<h3>Chiffres à connaître par cœur</h3>
+<div class="keys">
+<div class="key"><b>+10,6 pts</b><span>de précision pour −0,51 dB de PSNR (10 dB, 1/12)</span></div>
+<div class="key"><b>9,8 %</b><span>le numérique à 0 dB = le hasard</span></div>
+<div class="key"><b>56,4 %</b><span>le JSCC sémantique au même point</span></div>
+<div class="key"><b>0,41 dB</b><span>le prix total de l'entraînement multi-SNR</span></div>
+<div class="key"><b>5 dB</b><span>ce que JPEG nous prend sur Kodak à haut SNR</span></div>
+<div class="key"><b>0 %</b><span>accord top-1 de JPEG sur Kodak à 0 dB</span></div>
+</div>
+
+<div class="handoff"><span class="lab">Phrase de passage</span>«&nbsp;Jusqu'ici, chaque image est traitée indépendamment. [Prénom] va montrer ce qui se passe quand on exploite le fait qu'une vidéo, c'est surtout de la redondance temporelle — et ce qui arrive quand on renonce complètement à reconstruire l'image.&nbsp;»</div>
+
+<h3>Questions probables</h3>
+<div class="qa">
+<details><summary>Le gain de précision ne vient-il pas du fait que vous avez entraîné contre un classifieur&nbsp;?</summary><div class="ans">C'est la question à laquelle notre protocole répond par construction. Le classifieur utilisé dans la perte est A&nbsp;; celui qui mesure les 78,2&nbsp;% est B, d'architecture différente, jamais vu par l'entraînement. Le gain est donc <strong>transféré</strong> à un juge indépendant, ce qui exclut le simple surajustement au juge. Nous rapportons d'ailleurs les deux mesures dans nos résultats détaillés, et elles vont dans le même sens.</div></details>
+<details><summary>À SNR = 20 dB le numérique remonte à 40&nbsp;%. Si on monte encore, ne finit-il pas par gagner&nbsp;?</summary><div class="ans">Oui, et c'est précisément ce qu'on observe sur Kodak, où le régime de haut SNR est atteint&nbsp;: JPEG y gagne de 5 dB. Notre conclusion n'est pas «&nbsp;l'appris bat le numérique&nbsp;», c'est «&nbsp;l'appris domine dans le régime bas SNR et à largeur de bande contrainte, le numérique domine à haut SNR sur des statistiques connues&nbsp;». Ce sont deux outils pour deux régimes.</div></details>
+<details><summary>Pourquoi le SSIM du modèle sémantique est-il égal à celui du modèle MSE alors que son PSNR est inférieur&nbsp;?</summary><div class="ans">C'est un résultat intéressant en soi. Le PSNR est une erreur pixel à pixel&nbsp;; le SSIM mesure la similarité <strong>structurelle</strong> — luminance, contraste, structure locale. Les termes sémantiques poussent le réseau à préserver la structure plutôt que la valeur exacte des pixels, donc il perd du PSNR sans perdre de SSIM. À 0 dB le modèle sémantique a même un SSIM <strong>supérieur</strong>&nbsp;: 0,677 contre 0,669. Autrement dit, l'objectif sémantique est partiellement aligné avec la perception structurelle.</div></details>
+<details><summary>Combien d'images dans vos tests&nbsp;? Vos écarts sont-ils significatifs&nbsp;?</summary><div class="ans">Sur CIFAR, les 10 000 images du jeu de test&nbsp;: un écart de 10 points de précision y est très largement au-delà du bruit d'échantillonnage. Sur Kodak, en revanche, 24 images seulement — c'est la taille du corpus standard. Les accords top-1 sur Kodak bougent donc par pas de 1/24, soit 4,2 points, et nous ne tirons pas de conclusion d'un écart inférieur à cela. C'est pour cette raison que nous appuyons nos conclusions sur CIFAR et que nous traitons Kodak comme un test de généralisation, pas comme une mesure fine.</div></details>
+</div>
+</section>
+
+<hr class="sep">
+
+<!-- ===================== PERSONNE 4 ===================== -->
+<section class="person" id="p4" style="--c:var(--p4)">
+<div class="phead">
+  <span class="pn">PARTIE 4</span>
+  <h2>Vidéo, extension orientée tâche, conclusion</h2>
+  <span class="time">≈ 5 min</span>
+</div>
+<p class="role">Tu as les deux morceaux les plus originaux du projet, et tu fermes la soutenance. Ton point fort&nbsp;: tu as un résultat qui échoue et tu sais <strong>pourquoi</strong> — c'est ce qui impressionne un jury. Garde 45 secondes pour la conclusion&nbsp;; ne te laisse pas déborder par la vidéo.</p>
+
+<h3>Ce que tu dis</h3>
+
+<h4>1. La vidéo image par image, puis l'idée du rafraîchissement conditionnel</h4>
+<div class="say">
+<p>Commence par la référence naïve&nbsp;: appliquer le modèle image à chaque trame, indépendamment. Ça marche, mais ça gaspille&nbsp;: dans une vidéo, l'essentiel d'une trame est déjà dans la précédente.</p>
+<p class="quote">«&nbsp;D'où notre proposition&nbsp;: le <strong>rafraîchissement conditionnel dans l'espace latent</strong>. On découpe la carte latente en blocs de 2 × 2. On transmet une trame clé complète tous les 10 — notre groupe d'images. Entre deux trames clés, on ne transmet que la <strong>fraction f des blocs latents qui ont le plus changé</strong>&nbsp;; le récepteur conserve les autres de la trame précédente.&nbsp;»</p>
+<p>Puis, immédiatement, l'honnêteté comptable — c'est elle qui rend le résultat recevable&nbsp;:</p>
+<p class="quote">«&nbsp;Le récepteur doit savoir <strong>quels</strong> blocs ont été rafraîchis. Cette carte de blocs est de l'information auxiliaire, et nous la facturons&nbsp;: <code>N·H(f)</code> bits, où <code>H</code> est l'entropie binaire et <code>N</code> le nombre de blocs. Toutes les largeurs de bande que je montre incluent ce coût. Sinon, le gain annoncé serait fictif.&nbsp;»</p>
+</div>
+
+<h4>2. Le résultat vidéo — et son échec instructif</h4>
+<div class="say">
+<div class="tw"><table>
+<caption>Trois séquences standard, 30 trames chacune. « Image par image » : chaque trame transmise intégralement. « Rafraîchissement conditionnel » : GOP = 10, coût de la carte de blocs inclus dans le ratio.</caption>
+<thead><tr><th>Séquence</th><th>Mouvement</th><th class="num">Image par image</th><th class="num">Rafraîch. conditionnel</th><th class="num">Largeur de bande</th></tr></thead>
+<tbody>
+<tr><td><code>akiyo</code></td><td>fond fixe, tête parlante</td><td class="num">26,46 dB</td><td class="num hl">26,41 dB</td><td class="num hl">−40 %</td></tr>
+<tr><td><code>foreman</code></td><td>sujet mobile, caméra fixe</td><td class="num">28,03 dB</td><td class="num">24,80 dB</td><td class="num">−40 %</td></tr>
+<tr><td><code>bus</code></td><td>panoramique rapide, scène entière</td><td class="num">25,31 dB</td><td class="num lo">18,15 dB</td><td class="num">−40 %</td></tr>
+</tbody>
+</table></div>
+<p class="quote">«&nbsp;Sur <code>akiyo</code>, une tête parlante sur fond fixe&nbsp;: on économise 40&nbsp;% de la largeur de bande pour 0,05 dB — autrement dit, pour rien. C'est exactement le comportement visé. Sur <code>foreman</code>, on perd 3,2 dB. Et sur <code>bus</code>, un panoramique rapide où toute la scène bouge, on perd 7,2 dB&nbsp;: le rafraîchissement conditionnel <strong>échoue</strong>.&nbsp;»</p>
+<p>Et la lecture du résultat, qui est le vrai contenu intellectuel de ta partie&nbsp;:</p>
+<p class="quote">«&nbsp;Cet échec n'est pas un bug, il est structurel, et on peut le nommer précisément. Notre schéma suppose que <strong>peu de blocs changent</strong>. Dans un panoramique, tous les blocs changent à la fois&nbsp;: la fraction <code>f</code> qu'on peut se permettre est alors très inférieure à ce qu'il faudrait, les blocs périmés s'accumulent sur tout le groupe d'images, et l'erreur se propage jusqu'à la trame clé suivante. Ce qui manque, c'est une <strong>compensation de mouvement</strong>&nbsp;: nous rafraîchissons des blocs à position fixe, alors qu'il faudrait les <strong>déplacer</strong>. Ajouter une estimation de mouvement dans l'espace latent est la suite naturelle de ce travail, et c'est exactement ce que font les codecs vidéo classiques depuis trente ans.&nbsp;»</p>
+<p class="note">Formulation à retenir&nbsp;: «&nbsp;notre gain est proportionnel à la redondance temporelle réelle de la scène&nbsp;». C'est une phrase qui désarme la question «&nbsp;alors ça ne marche pas&nbsp;?&nbsp;».</p>
+</div>
+
+<h4>3. L'extension — transmission orientée tâche</h4>
+<div class="say">
+<p>C'est ton résultat le plus spectaculaire. Pose la question avant de donner le chiffre.</p>
+<p class="quote">«&nbsp;Jusqu'ici, on transmet une image et on la juge sur une tâche. Mais si le destinataire est une machine qui ne veut <strong>que</strong> la décision, pourquoi reconstruire l'image&nbsp;? Nous avons donc entraîné une chaîne qui ne reconstruit rien du tout&nbsp;: un encodeur à pas 8 suivi directement d'une tête de classification, sans décodeur d'image. On ne transmet plus une image&nbsp;; on transmet le sens.&nbsp;»</p>
+<div class="tw"><table>
+<caption>CIFAR-10, AWGN, SNR = 10 dB. Précision selon la largeur de bande utilisée.</caption>
+<thead><tr><th>Chaîne</th><th class="num">k/n</th><th class="num">Précision</th></tr></thead>
+<tbody>
+<tr><td>JSCC sémantique (reconstruit l'image)</td><td class="num">1/12</td><td class="num">78,2 %</td></tr>
+<tr><td>Orientée tâche</td><td class="num hl">1/48</td><td class="num hl">76,9 %</td></tr>
+<tr><td>Orientée tâche</td><td class="num">1/96</td><td class="num">75,6 %</td></tr>
+<tr><td>Orientée tâche</td><td class="num">1/384</td><td class="num">70,5 %</td></tr>
+</tbody>
+</table></div>
+<p class="quote">«&nbsp;Quatre fois moins de largeur de bande pour 1,3 point de précision. Et même à 1/384 — trente-deux fois moins de bande que la chaîne qui reconstruit — on garde 70,5&nbsp;%, c'est-à-dire plus que ce que la chaîne numérique séparée obtenait avec trente-deux fois plus de ressources. Voilà, concrètement, ce que veut dire «&nbsp;ne transmettre que ce qui est utile&nbsp;». C'est le niveau pragmatique de Weaver&nbsp;: on n'optimise plus la ressemblance, on optimise l'action.&nbsp;»</p>
+</div>
+
+<h4>4. Limites — à énoncer avant le jury</h4>
+<div class="say">
+<p>Trois, nettes, sans t'étendre&nbsp;:</p>
+<ul>
+<li><strong>Entraînement sur CIFAR 32 × 32.</strong> C'est ce qui explique le retard sur Kodak. Les conclusions valent pour le régime étudié, pas pour la photographie haute résolution.</li>
+<li><strong>CSI parfaite</strong> sur le canal de Rayleigh. Hypothèse optimiste, assumée, appliquée identiquement aux trois chaînes.</li>
+<li><strong>Pas de compensation de mouvement</strong> en vidéo. Nous savons que c'est la limite, nous savons pourquoi, et nous l'avons mesurée sur trois régimes de mouvement.</li>
+</ul>
+</div>
+
+<h4>5. La conclusion — 45 secondes, apprise par cœur</h4>
+<div class="say">
+<p class="quote">«&nbsp;Nous avons construit et comparé trois chaînes de transmission à largeur de bande égale, et nous en tirons trois conclusions.<br><br>
+Premièrement, le sens et la fidélité pixel ne sont pas la même quantité, et on peut les échanger&nbsp;: un demi-décibel de PSNR contre dix points de précision.<br><br>
+Deuxièmement, ce que l'approche apprise apporte n'est pas d'abord un gain en décibels, c'est un changement de <strong>forme</strong> de la dégradation&nbsp;: la dégradation gracieuse remplace l'effet falaise, et c'est ce qui compte sur un lien dont on ne connaît pas le SNR.<br><br>
+Troisièmement, plus on sait précisément ce que le destinataire veut faire, moins on a besoin de bande&nbsp;: un facteur quatre pour un point de précision quand on renonce à reconstruire l'image.<br><br>
+Et nous assumons nos deux résultats défavorables&nbsp;: JPEG nous bat à haut SNR sur des images qu'on n'a pas apprises, et notre schéma vidéo échoue sur les scènes à mouvement global. Dans les deux cas nous savons pourquoi, et dans les deux cas la correction est identifiée. Merci.&nbsp;»</p>
+</div>
+
+<h3>Chiffres à connaître par cœur</h3>
+<div class="keys">
+<div class="key"><b>−40 % / 0,05 dB</b><span>le rafraîchissement conditionnel sur akiyo</span></div>
+<div class="key"><b>−7,2 dB</b><span>son échec sur bus (panoramique)</span></div>
+<div class="key"><b>GOP = 10</b><span>une trame clé toutes les 10 trames</span></div>
+<div class="key"><b>N·H(f)</b><span>coût facturé de la carte de blocs</span></div>
+<div class="key"><b>1/48 → 76,9 %</b><span>orientée tâche, 4× moins de bande, −1,3 pt</span></div>
+<div class="key"><b>1/384 → 70,5 %</b><span>32× moins de bande, toujours exploitable</span></div>
+</div>
+
+<h3>Questions probables</h3>
+<div class="qa">
+<details><summary>Votre rafraîchissement conditionnel échoue sur une séquence sur trois. Est-ce utilisable&nbsp;?</summary><div class="ans">Il est utilisable <strong>là où la redondance temporelle existe</strong>, et notre tableau dit exactement où. Les trois séquences ne sont pas un échantillon aléatoire&nbsp;: nous les avons choisies pour couvrir trois régimes de mouvement, du fond fixe au panoramique. C'est un résultat de <strong>caractérisation</strong>, pas un taux de réussite. Et comme la fraction <code>f</code> est un paramètre, un système réel peut la piloter selon l'activité mesurée de la scène — ce qui est précisément ce que nos trois points permettent de régler.</div></details>
+<details><summary>Pourquoi ne pas avoir implémenté la compensation de mouvement&nbsp;?</summary><div class="ans">Par choix de périmètre. La compensation de mouvement dans l'espace latent demande d'estimer un champ de déplacement, de le transmettre — donc de le facturer, comme nous facturons déjà la carte de blocs — et de rendre l'opération de déplacement différentiable pour l'entraîner de bout en bout. C'est un projet en soi. Nous avons préféré établir proprement la version sans compensation, <strong>mesurer</strong> précisément où elle casse et pourquoi, plutôt que livrer une version compensée non évaluée.</div></details>
+<details><summary>Si la transmission orientée tâche est si efficace, pourquoi ne pas tout faire comme ça&nbsp;?</summary><div class="ans">Parce qu'elle est <strong>irréversible</strong>. La chaîne orientée tâche ne transmet rien d'autre que ce qu'il faut pour la tâche apprise&nbsp;: on ne peut pas regarder l'image, ni la réutiliser pour une autre tâche, ni la relire plus tard. C'est un arbitrage explicite&nbsp;: une bande divisée par quatre contre la perte de tout usage non prévu. Pour un capteur dédié, c'est le bon choix. Pour un flux à usages multiples, non.</div></details>
+<details><summary>Comment ces résultats se transposeraient-ils à un système réel, 5G par exemple&nbsp;?</summary><div class="ans">Deux obstacles concrets, et nous ne les minimisons pas. D'abord, nos symboles sont à <strong>valeurs continues</strong>, alors que les chaînes déployées sont numériques jusqu'aux étages radio&nbsp;: il faudrait soit une interface analogique, soit une version quantifiée de notre encodeur — ce qui est un sujet de recherche actif. Ensuite, l'émetteur et le récepteur doivent partager <strong>exactement le même modèle appris</strong>, ce qui pose un problème de versionnement et de mise à jour qui n'existe pas avec une norme figée. Notre contribution est au niveau de la faisabilité et de la caractérisation, pas du déploiement.</div></details>
+<details><summary>Quelle serait la prochaine étape si vous aviez trois mois de plus&nbsp;?</summary><div class="ans">Trois choses, dans cet ordre. Réentraîner sur un corpus d'images naturelles, pour savoir si l'écart de 5 dB sur Kodak est bien un problème de domaine d'entraînement comme nous l'affirmons — c'est la question la plus importante parce qu'elle teste notre propre explication. Ensuite, la compensation de mouvement dans l'espace latent. Enfin, lever l'hypothèse de CSI parfaite, avec une estimation de canal bruitée.</div></details>
+</div>
+</section>
+
+<hr class="sep">
+
+<h2 style="font-size:1.25rem">Avant la soutenance</h2>
+<div class="warnbox">
+<p style="margin-top:0"><b>Les trois pièges de ce sujet.</b></p>
+<ol style="margin-bottom:0">
+<li><strong>Le jury va chercher la fuite méthodologique.</strong> «&nbsp;Vous entraînez contre un classifieur et vous mesurez avec un classifieur.&nbsp;» La réponse — A entraîne, B juge, architectures différentes — doit être donnée par <em>n'importe lequel</em> des quatre, pas seulement par la personne 1.</li>
+<li><strong>La comparaison à largeur de bande égale.</strong> Si quelqu'un soupçonne que les chaînes ne sont pas comparées à ressource égale, tout l'exposé s'effondre. Dites <code>k/n = 1/12</code> explicitement sur chaque tableau de résultats.</li>
+<li><strong>Les deux résultats défavorables.</strong> Annoncez-les vous-mêmes, avec leur explication. Un jury qui découvre lui-même une faiblesse cachée devient méfiant sur tout le reste&nbsp;; un jury à qui on présente une faiblesse analysée conclut que le travail est sérieux.</li>
+</ol>
+</div>
+<div class="note" style="margin-top:20px">Une répétition complète chronométrée, puis une seconde où chacun répond aux questions des parties des autres. Les transitions se répètent aussi&nbsp;: ce sont les trois moments où un exposé à quatre voix se casse.</div>
+
+</div>

@@ -1,0 +1,6 @@
+to train: ['jscc_sem', 'jscc_mse_snr0', 'jscc_mse_snr10', 'jscc_mse_snr20', 'task']
+jscc_mse_snr0: done in 5.5 min
+jscc_mse_snr10: done in 5.8 min
+jscc_mse_snr20: done in 5.9 min
+jscc_sem: done in 22.5 min
+task: done in 6.2 min

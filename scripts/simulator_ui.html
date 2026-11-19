@@ -1,0 +1,2511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Semantic Comm Explorer — Complete Interactive Studio (Projet 07)</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --panel: #111827;
+    --card: #161f32;
+    --border: #243047;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --digital: #f59e0b;
+    --mse: #38bdf8;
+    --sem: #10b981;
+    --channel: #f43f5e;
+    --accent: #6366f1;
+    --cap: #a855f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body.projector aside { display: none; }
+  body.projector header { height: 62px; }
+
+  /* Header */
+  header {
+    height: 58px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .brand { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
+  .brand-logo {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--sem), var(--mse));
+    display: grid; place-items: center; font-weight: 800; font-size: 13px; color: #06121e;
+  }
+  .brand h1 { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand span { font-size: 10.5px; color: var(--muted); display: block; }
+
+  .playback-bar {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--card); border: 1px solid var(--border);
+    padding: 3px 8px; border-radius: 9px; flex-shrink: 0;
+  }
+  .pb-btn {
+    background: transparent; border: 1px solid transparent; color: var(--text);
+    padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11.5px; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .pb-btn:hover { background: #1e293b; border-color: var(--border); }
+  .pb-btn.primary { background: var(--accent); color: white; }
+  .pb-btn.primary:hover { filter: brightness(1.12); }
+  .step-pills { display: flex; gap: 3px; margin: 0 4px; }
+  .step-pill {
+    width: 22px; height: 22px; border-radius: 6px; font-size: 10.5px; font-weight: 700;
+    display: grid; place-items: center; cursor: pointer;
+    background: #0f172a; border: 1px solid var(--border); color: var(--muted);
+    transition: all 0.2s;
+  }
+  .step-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); transform: scale(1.08); }
+  .step-pill.done { border-color: var(--sem); color: var(--sem); }
+  select.speed-sel {
+    background: #0f172a; color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 5px; font-size: 11px; cursor: pointer;
+  }
+
+  .view-nav {
+    background: #0e1422; border-bottom: 1px solid var(--border);
+    padding: 6px 14px; flex-shrink: 0;
+  }
+  .view-tabs { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .view-tab {
+    background: #131b2e; border: 1px solid var(--border); color: var(--muted);
+    padding: 5px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer;
+    white-space: nowrap; transition: all 0.15s;
+  }
+  .view-tab:hover { border-color: #475569; color: var(--text); }
+  .view-tab.active { background: #1e293b; color: #fff; border-color: var(--accent); box-shadow: 0 0 0 1px rgba(99,102,241,0.35); }
+  .proj-btn {
+    background: #0f172a; border: 1px solid var(--border); color: var(--muted);
+    padding: 5px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; cursor: pointer;
+    white-space: nowrap; margin-left: auto;
+  }
+  .proj-btn.active { background: rgba(245,158,11,0.18); border-color: var(--digital); color: #fcd34d; }
+
+  /* Layout */
+  .workspace { display: flex; flex: 1; min-height: 0; }
+
+  /* Sidebar */
+  aside {
+    width: 265px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    flex-shrink: 0;
+  }
+  .ctrl-group {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .ctrl-title {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--muted); margin-bottom: 7px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .seg-row { display: flex; gap: 5px; }
+  .seg-btn {
+    flex: 1; padding: 5px 6px; border-radius: 7px; border: 1px solid var(--border);
+    background: #0f172a; color: var(--muted); font-size: 10.5px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .seg-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .thumb-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;
+    max-height: 136px; overflow-y: auto; margin-top: 7px; padding-right: 2px;
+  }
+  .thumb-item {
+    border-radius: 6px; overflow: hidden; border: 2px solid transparent;
+    cursor: pointer; aspect-ratio: 1; background: #0f172a; position: relative;
+  }
+  .thumb-item.active { border-color: var(--sem); box-shadow: 0 0 0 1px var(--sem); }
+  .thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-item.pixelated img { image-rendering: pixelated; }
+
+  .snr-row { display: flex; align-items: center; gap: 10px; }
+  input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+  .badge {
+    font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 99px;
+    background: #1e293b; color: var(--text);
+  }
+  .badge.low { background: rgba(244,63,94,0.2); color: #fda4af; }
+  .badge.mid { background: rgba(245,158,11,0.2); color: #fcd34d; }
+  .badge.high { background: rgba(16,185,129,0.2); color: #6ee7b7; }
+
+  .pill-grid { display: flex; flex-wrap: wrap; gap: 4px; }
+  .mini-pill {
+    padding: 4px 7px; border-radius: 6px; font-size: 10.5px; font-weight: 600;
+    background: #0f172a; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+  }
+  .mini-pill.active { background: rgba(56,189,248,0.18); border-color: var(--mse); color: #fff; }
+
+  select.ctrl-select {
+    width: 100%; background: #0f172a; color: var(--text);
+    border: 1px solid var(--border); border-radius: 7px; padding: 6px 8px; font-size: 11.5px;
+  }
+  .side-btn {
+    width: 100%; margin-top: 7px; padding: 6px 8px; border-radius: 7px;
+    background: #1e293b; border: 1px solid var(--border); color: var(--text);
+    font-size: 11px; font-weight: 600; cursor: pointer;
+  }
+  .side-btn:hover { background: #273549; }
+  .side-btn.cliff-demo { background: rgba(244,63,94,0.14); border-color: rgba(244,63,94,0.45); color: #fecdd3; }
+
+  /* Main Stage */
+  main {
+    flex: 1; min-width: 0; padding: 12px 16px;
+    display: flex; flex-direction: column; gap: 10px; overflow-y: auto;
+  }
+  .hidden { display: none !important; }
+
+  .sys-bar {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  .sys-tabs { display: flex; gap: 7px; flex-wrap: wrap; }
+  .sys-tab {
+    padding: 6px 12px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--card); color: var(--muted); font-size: 11.5px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.15s;
+  }
+  .sys-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .sys-tab.active[data-sys="digital"] { border-color: var(--digital); color: #fff; background: rgba(245,158,11,0.12); }
+  .sys-tab.active[data-sys="jscc_mse"] { border-color: var(--mse); color: #fff; background: rgba(56,189,248,0.12); }
+  .sys-tab.active[data-sys="jscc_sem"] { border-color: var(--sem); color: #fff; background: rgba(16,185,129,0.12); }
+
+  .meta-strip { display: flex; gap: 6px; flex-wrap: wrap; font-size: 10.5px; color: var(--muted); }
+  .meta-chip { background: var(--card); border: 1px solid var(--border); padding: 4px 8px; border-radius: 7px; }
+  .meta-chip b { color: var(--text); }
+
+  /* Animated Pipeline Diagram */
+  .pipeline-box {
+    position: relative;
+    background: radial-gradient(circle at 50% 0%, #17223b 0%, #0e1424 75%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 14px;
+    min-height: 185px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+  #animCanvas {
+    position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;
+  }
+  .nodes-row {
+    position: relative; z-index: 2; width: 100%;
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: center;
+  }
+  .p-node {
+    background: rgba(17, 24, 39, 0.92);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(.2,.8,.2,1);
+    backdrop-filter: blur(6px);
+  }
+  .p-node:hover { transform: translateY(-3px); border-color: #475569; }
+  .p-node.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 22px rgba(99, 102, 241, 0.35);
+    transform: translateY(-4px) scale(1.03);
+  }
+  .p-node.channel-node.active {
+    border-color: var(--channel);
+    box-shadow: 0 0 24px rgba(244, 63, 94, 0.35);
+  }
+  .p-node .step-num {
+    font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--muted); margin-bottom: 4px;
+  }
+  .p-node.active .step-num { color: #a5b4fc; }
+  .p-node .node-icon { font-size: 20px; margin-bottom: 4px; }
+  .p-node .node-title { font-size: 11.5px; font-weight: 700; margin-bottom: 3px; }
+  .p-node .node-sub { font-size: 10px; color: var(--muted); line-height: 1.3; min-height: 26px; }
+
+  /* Bottom Inspector + Visual Probe */
+  .bottom-grid {
+    display: grid; grid-template-columns: 0.88fr 1.42fr; gap: 12px; flex: 1; min-height: 270px;
+  }
+  .panel-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 13px; display: flex; flex-direction: column; gap: 9px;
+  }
+  .panel-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border); padding-bottom: 7px; gap: 8px;
+  }
+  .panel-hdr h2 { font-size: 13px; font-weight: 700; }
+  .inspector-body { font-size: 12px; line-height: 1.5; color: #cbd5e1; }
+  .kv-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; margin-top: 6px;
+  }
+  .kv-item {
+    background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px;
+  }
+  .kv-item .k { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .kv-item .v { font-size: 12.5px; font-weight: 700; margin-top: 2px; font-family: ui-monospace, monospace; }
+  .cliff-alert {
+    background: rgba(244, 63, 94, 0.14); border: 1px solid rgba(244, 63, 94, 0.5);
+    color: #fecdd3; border-radius: 8px; padding: 8px 10px; font-size: 11.5px; font-weight: 600;
+  }
+
+  .probe-content {
+    display: flex; gap: 14px; align-items: center; justify-content: center; flex: 1; flex-wrap: wrap;
+  }
+  .probe-content.pair {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: center; width: 100%;
+  }
+  .img-frame {
+    display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;
+  }
+  .img-frame img {
+    max-height: 240px; max-width: 100%; border-radius: 8px; border: 1px solid var(--border);
+    background: #0b0f19;
+  }
+  .probe-content.pair .img-frame img:not(.pixelated) {
+    width: 100%; max-height: 245px; object-fit: contain;
+  }
+  .img-frame img.pixelated { width: 165px; height: 165px; image-rendering: pixelated; }
+  .img-frame img.latent-lg { width: 460px; max-width: 100%; max-height: 255px; image-rendering: pixelated; }
+  .img-frame img.latent-pair { width: 100%; max-width: 100%; max-height: 240px; image-rendering: pixelated; }
+  .img-cap { font-size: 11px; color: var(--muted); text-align: center; }
+  canvas.probe-canvas {
+    background: #0b0f19; border: 1px solid var(--border); border-radius: 10px;
+  }
+
+  /* Telemetry Drawer */
+  .telem-drawer {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 8px 12px; font-size: 11px;
+  }
+  .telem-hdr {
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    color: var(--muted); font-weight: 700;
+  }
+  .telem-body {
+    margin-top: 8px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    font-family: ui-monospace, monospace; font-size: 11px;
+  }
+  .telem-cell { background: #0b0f19; border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; }
+
+  /* 3-Way Comparison View */
+  .compare-hdr {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .compare-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .cmp-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .cmp-card h3 { font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+  .cmp-img-wrap {
+    background: #0b0f19; border: 1px solid var(--border); border-radius: 8px;
+    height: 175px; display: grid; place-items: center; overflow: hidden;
+  }
+  .cmp-img-wrap img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .cmp-img-wrap img.pixelated { width: 140px; height: 140px; image-rendering: pixelated; }
+  .metric-row { display: flex; justify-content: space-between; font-size: 11.5px; border-bottom: 1px dashed #1e293b; padding: 3px 0; }
+  .metric-row span:first-child { color: var(--muted); }
+  .metric-row span:last-child { font-weight: 700; font-family: ui-monospace, monospace; }
+
+  /* Sweep View */
+  .sweep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; flex: 1; }
+  .chart-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .chart-card h3 { font-size: 13px; font-weight: 700; }
+  .chart-wrap { position: relative; flex: 1; min-height: 290px; }
+  .chart-wrap canvas { width: 100%; height: 100%; display: block; }
+
+  /* Process Video & Race Views */
+  .video-card {
+    background: radial-gradient(circle at 50% 0%, #151f38 0%, #0b101d 80%);
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 12px; display: flex; flex-direction: column; gap: 10px; flex: 1;
+  }
+  .video-stage {
+    position: relative; flex: 1; min-height: 390px;
+    display: grid; place-items: center; background: #070b14;
+    border: 1px solid #1e293b; border-radius: 10px; overflow: hidden;
+  }
+  #videoCanvas, #raceCanvas { width: 100%; height: 100%; max-height: 495px; display: block; object-fit: contain; }
+  .video-controls {
+    display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 7px 11px;
+  }
+  .video-scrubber { flex: 1; min-width: 150px; accent-color: var(--sem); cursor: pointer; }
+  .chapter-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+  .chapter-pill {
+    padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+    background: #0f172a; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .chapter-pill.active { background: rgba(16,185,129,0.18); border-color: var(--sem); color: #fff; }
+
+  /* Video CR Lab */
+  .vcr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .vcr-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 11px;
+    display: flex; flex-direction: column; gap: 7px; min-width: 0;
+  }
+  .vcr-card h3 { font-size: 12.5px; font-weight: 700; }
+  .vcr-card img {
+    width: 100%; max-height: 220px; aspect-ratio: 352 / 288; object-fit: contain;
+    border-radius: 8px; border: 1px solid var(--border); background: #070b14;
+  }
+  .vcr-chart-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 11px 13px; display: flex; flex-direction: column; gap: 6px;
+  }
+  .vcr-chart-card h3 { font-size: 12.5px; font-weight: 700; }
+  .vcr-chart-wrap { position: relative; height: 150px; width: 100%; }
+  .vcr-chart-wrap canvas { width: 100%; height: 100%; display: block; }
+
+  /* Training & Results View */
+  .train-top-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+  .model-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .m-pill {
+    padding: 5px 9px; border-radius: 7px; font-size: 11px; font-weight: 600;
+    background: #0f172a; border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+  }
+  .m-pill.active { background: rgba(99,102,241,0.2); border-color: var(--accent); color: #fff; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .data-table th, .data-table td {
+    padding: 6px 8px; border-bottom: 1px solid #1e293b; text-align: left; font-family: ui-monospace, monospace; white-space: nowrap;
+  }
+  .data-table th { color: var(--muted); font-family: inherit; font-weight: 700; background: #0f172a; position: sticky; top: 0; z-index: 1; }
+
+  .loading-pill {
+    font-size: 10.5px; color: #a5b4fc; background: rgba(99,102,241,0.15);
+    padding: 2px 8px; border-radius: 99px; display: none;
+  }
+  .loading-pill.show { display: inline-block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">S7</div>
+    <div>
+      <h1>Semantic Comm Explorer</h1>
+      <span>Projet 07 · Complete Interactive Studio</span>
+    </div>
+  </div>
+
+  <div class="playback-bar">
+    <button class="pb-btn" id="btnReset" title="Reset to Step 1">⏮</button>
+    <button class="pb-btn" id="btnPrev" title="Previous Step">◀</button>
+    <button class="pb-btn primary" id="btnPlay">▶ Play</button>
+    <button class="pb-btn" id="btnNext" title="Next Step">▶</button>
+    <div class="step-pills" id="stepPills"></div>
+    <select class="speed-sel" id="speedSel" title="Animation Speed">
+      <option value="2400">0.7x</option>
+      <option value="1600" selected>1.0x</option>
+      <option value="900">1.8x</option>
+      <option value="0">Instant</option>
+    </select>
+  </div>
+
+  <button class="proj-btn" id="btnProjector" title="Toggle Projector / Defense Mode">🎥 Projector</button>
+</header>
+
+<nav class="view-nav">
+  <div class="view-tabs">
+    <button class="view-tab active" data-view="pipeline">🔀 Pipeline</button>
+    <button class="view-tab" data-view="video">🎬 Process Video</button>
+    <button class="view-tab" data-view="race">🏁 3-Way Race</button>
+    <button class="view-tab" data-view="compare">⚖️ Compare</button>
+    <button class="view-tab" data-view="sweep">📈 Curves</button>
+    <button class="view-tab" data-view="vcr">🎞️ Video CR</button>
+    <button class="view-tab" data-view="training">🎓 Training &amp; Results</button>
+  </div>
+</nav>
+
+<div class="workspace">
+  <aside>
+    <div class="ctrl-group">
+      <div class="ctrl-title">Source Image <span class="loading-pill" id="loadingPill">Simulating…</span></div>
+      <div class="seg-row">
+        <button class="seg-btn active" data-ds="kodak">Kodak</button>
+        <button class="seg-btn" data-ds="cifar10">CIFAR-10</button>
+        <button class="seg-btn" data-ds="custom">Custom</button>
+      </div>
+      <div class="thumb-grid" id="thumbGrid"></div>
+      <input type="file" id="uploadInput" accept="image/*" style="display:none;" />
+      <button class="side-btn" id="btnUpload">📤 Upload Your Own Image</button>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-title">Wireless Channel</div>
+      <div class="seg-row" style="margin-bottom: 8px;">
+        <button class="seg-btn active" data-ch="awgn">AWGN</button>
+        <button class="seg-btn" data-ch="rayleigh">Rayleigh Fading</button>
+      </div>
+      <div class="ctrl-title" style="margin-top:4px;">
+        <span>Average SNR</span>
+        <span class="badge mid" id="snrBadge">6 dB · Moderate</span>
+      </div>
+      <div class="snr-row">
+        <input type="range" id="snrSlider" min="0" max="20" step="1" value="6" />
+      </div>
+      <button class="side-btn" id="btnReroll">🎲 Re-roll Channel Noise / Fade</button>
+      <button class="side-btn cliff-demo" id="btnCliffDemo">⚡ Trigger Cliff Effect Demo</button>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-title">Bandwidth Ratio k/n</div>
+      <div class="pill-grid" id="widthPills"></div>
+    </div>
+
+    <div class="ctrl-group">
+      <div class="ctrl-title">Digital MCS &amp; JSCC Variant</div>
+      <select class="ctrl-select" id="mcsSelect" style="margin-bottom:6px;"></select>
+      <select class="ctrl-select" id="mseVarSelect" title="Syntactic JSCC Training SNR">
+        <option value="jscc_mse" selected>Syntactic JSCC: Universal U[0,20] dB</option>
+        <option value="jscc_mse_snr0">Mismatch Study: Trained @ 0 dB</option>
+        <option value="jscc_mse_snr10">Mismatch Study: Trained @ 10 dB</option>
+        <option value="jscc_mse_snr20">Mismatch Study: Trained @ 20 dB</option>
+      </select>
+    </div>
+  </aside>
+
+  <main>
+    <div class="sys-bar">
+      <div class="sys-tabs" id="sysTabs">
+        <button class="sys-tab active" data-sys="jscc_sem"><span class="sys-dot" style="background:var(--sem)"></span>Semantic Deep JSCC</button>
+        <button class="sys-tab" data-sys="jscc_mse"><span class="sys-dot" style="background:var(--mse)"></span>Syntactic Deep JSCC</button>
+        <button class="sys-tab" data-sys="digital"><span class="sys-dot" style="background:var(--digital)"></span>Separated Digital (Shannon)</button>
+      </div>
+      <div class="meta-strip" id="metaStrip"></div>
+    </div>
+
+    <!-- VIEW 1: ANIMATED PIPELINE -->
+    <section id="view-pipeline" style="display:flex; flex-direction:column; gap:10px; flex:1;">
+      <div class="pipeline-box" id="pipelineBox">
+        <canvas id="animCanvas"></canvas>
+        <div class="nodes-row" id="nodesRow"></div>
+      </div>
+
+      <div class="bottom-grid">
+        <div class="panel-card">
+          <div class="panel-hdr">
+            <h2 id="inspTitle">Step 1 · Source Image</h2>
+            <span class="badge" id="inspBadge">Tx</span>
+          </div>
+          <div class="inspector-body" id="inspBody">Loading simulator…</div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-hdr">
+            <h2 id="probeTitle">Visual Probe</h2>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <button class="mini-pill hidden" id="btnErrToggle">🔥 Show |x - x̂| Error Map</button>
+              <span class="badge" id="probeBadge">Live Tensor / Signal</span>
+            </div>
+          </div>
+          <div class="probe-content" id="probeContent"></div>
+        </div>
+      </div>
+
+      <div class="telem-drawer">
+        <div class="telem-hdr" id="telemToggle">
+          <span>📡 Packet &amp; Tensor Telemetry Inspector (Wireshark / Layer Breakdown)</span>
+          <span id="telemArrow">▼ Hide</span>
+        </div>
+        <div class="telem-body" id="telemBody"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: PROCESS VIDEO -->
+    <section id="view-video" class="hidden" style="flex:1; display:flex; flex-direction:column;">
+      <div class="video-card">
+        <div class="video-stage">
+          <canvas id="videoCanvas" width="1080" height="470"></canvas>
+        </div>
+        <div class="video-controls">
+          <button class="pb-btn primary" id="vidPlayBtn">⏸ Pause</button>
+          <button class="pb-btn" id="vidReplayBtn">↺ Replay</button>
+          <input type="range" class="video-scrubber" id="vidScrub" min="0" max="1000" value="0" />
+          <span class="badge" id="vidTimeBadge" style="font-family:ui-monospace,monospace;">0.0s / 21.0s</span>
+          <button class="mini-pill" id="vidErrToggle">🔥 Error Map in Scene 6</button>
+          <select class="speed-sel" id="vidSpeedSel">
+            <option value="0.6">0.6x</option>
+            <option value="1" selected>1.0x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2.0x</option>
+          </select>
+        </div>
+        <div class="chapter-pills" id="vidChapters">
+          <button class="chapter-pill active" data-t="0">1. Pixels (RGB)</button>
+          <button class="chapter-pill" data-t="3.0">2. Conv1 &amp; Conv2</button>
+          <button class="chapter-pill" data-t="7.5">3. ResBlocks &amp; Truncate</button>
+          <button class="chapter-pill" data-t="11.0">4. Power Norm (P=1)</button>
+          <button class="chapter-pill" data-t="14.5">5. I/Q &amp; Channel</button>
+          <button class="chapter-pill" data-t="17.5">6. Decoder &amp; Eval</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: 3-WAY SYNCHRONIZED RACE -->
+    <section id="view-race" class="hidden" style="flex:1; display:flex; flex-direction:column;">
+      <div class="video-card">
+        <div class="video-stage">
+          <canvas id="raceCanvas" width="1080" height="470"></canvas>
+        </div>
+        <div class="video-controls">
+          <button class="pb-btn primary" id="racePlayBtn">⏸ Pause</button>
+          <button class="pb-btn" id="raceReplayBtn">↺ Replay Race</button>
+          <input type="range" class="video-scrubber" id="raceScrub" min="0" max="1000" value="0" />
+          <span class="badge" id="raceTimeBadge" style="font-family:ui-monospace,monospace;">0.0s / 21.0s</span>
+          <span style="font-size:11px;color:var(--muted);">Watch Separated Digital vs Syntactic JSCC vs Semantic JSCC race simultaneously</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: 3-WAY COMPARISON + TASKJSCC + EXPORT -->
+    <section id="view-compare" class="hidden" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="compare-hdr">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="mini-pill active" id="cmpModeRecon">🖼 Reconstructed Images</button>
+          <button class="mini-pill" id="cmpModeErr">🔥 |x - x̂| Error Heatmaps</button>
+        </div>
+        <button class="pb-btn primary" id="btnExportPng">📸 Export Comparison PNG</button>
+      </div>
+      <div class="compare-grid" id="compareGrid"></div>
+      <div class="panel-card hidden" id="taskCard">
+        <div class="panel-hdr">
+          <h2>🎯 Extension: Task-Oriented JSCC (Stride-8, No Pixel Reconstruction)</h2>
+          <span class="badge" id="taskBadge">—</span>
+        </div>
+        <div id="taskBody" style="display:grid;grid-template-columns:1fr 1.6fr;gap:14px;align-items:center;"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: CURVES & CLIFF -->
+    <section id="view-sweep" class="hidden" style="flex:1; display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;">
+        <div style="display:flex;gap:6px;">
+          <button class="mini-pill active" id="curveModeSnr">SNR Sweep (0 → 20 dB + Capacity Bound)</button>
+          <button class="mini-pill" id="curveModeBw">Bandwidth Ratio Sweep (k/n: 1/48 → 1/6)</button>
+        </div>
+        <span style="font-size:11px;color:var(--muted);">Includes Shannon Capacity Bound k·log₂(1+SNR)</span>
+      </div>
+      <div class="sweep-grid">
+        <div class="chart-card">
+          <h3 id="psnrChartTitle">Pixel Fidelity: PSNR (dB) vs SNR</h3>
+          <div class="chart-wrap"><canvas id="psnrChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3 id="semChartTitle">Semantic Preservation vs SNR</h3>
+          <div class="chart-wrap"><canvas id="semChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 6: VIDEO CONDITIONAL REPLENISHMENT LAB -->
+    <section id="view-vcr" class="hidden" style="flex:1; display:flex; flex-direction:column; gap:10px;">
+      <div class="video-controls" style="justify-content:space-between;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <span style="font-size:11.5px;font-weight:700;">Clip:</span>
+          <select class="speed-sel" id="vcrClipSel">
+            <option value="foreman" selected>foreman (moderate motion)</option>
+            <option value="akiyo">akiyo (static talking head)</option>
+            <option value="bus">bus (fast camera pan)</option>
+          </select>
+          <span style="font-size:11.5px;font-weight:700;">Updated Blocks Frac:</span>
+          <select class="speed-sel" id="vcrFracSel">
+            <option value="0.2">20%</option>
+            <option value="0.35" selected>35%</option>
+            <option value="0.5">50%</option>
+            <option value="0.75">75%</option>
+          </select>
+          <button class="pb-btn primary" id="vcrRunBtn">▶ Run Video CR</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="pb-btn" id="vcrPlayBtn">⏸ Pause</button>
+          <input type="range" id="vcrScrub" min="0" max="11" value="0" style="width:140px;" />
+          <span class="badge" id="vcrFrameBadge">Frame 0 / 11</span>
+        </div>
+      </div>
+      <div class="meta-strip" id="vcrStatsStrip"></div>
+      <div class="vcr-grid" id="vcrGrid"></div>
+      <div class="vcr-chart-card">
+        <h3>📈 Per-Frame Quality vs Bandwidth Savings (Frame-by-Frame vs Conditional Replenishment)</h3>
+        <div class="vcr-chart-wrap"><canvas id="vcrChart"></canvas></div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: TRAINING ANIMATION & FULL RESULTS -->
+    <section id="view-training" class="hidden" style="flex:1; display:flex; flex-direction:column; gap:12px;">
+      <div class="train-top-grid">
+        <div class="panel-card">
+          <div class="panel-hdr">
+            <h2>🎓 Animated Training Pipeline (How the 9 Models Were Trained)</h2>
+            <div style="display:flex;gap:6px;">
+              <button class="pb-btn primary" id="trnPlayBtn">▶ Animate Epochs</button>
+              <button class="pb-btn" id="trnReplayBtn">↺</button>
+            </div>
+          </div>
+          <div class="model-pills" id="modelPills"></div>
+          <div id="modelRoleDesc" style="font-size:11.5px;color:#cbd5e1;line-height:1.45;"></div>
+          <div class="chart-wrap" style="height:245px;min-height:245px;flex:none;"><canvas id="trainChart"></canvas></div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-hdr">
+            <h2>🔄 4-Stage Training Architecture Diagram</h2>
+            <span class="badge" id="trnEpochBadge">Epoch —</span>
+          </div>
+          <div class="chart-wrap" style="height:315px;min-height:315px;flex:none;"><canvas id="trainArchCanvas"></canvas></div>
+        </div>
+      </div>
+
+      <div class="panel-card" style="min-height:290px; max-height:440px; display:flex; flex-direction:column;">
+        <div class="panel-hdr">
+          <h2>📊 Campaign Evaluation Summary (k/n = 1/12, Simulated AWGN · results/tables/summary.csv)</h2>
+          <div style="display:flex;gap:6px;">
+            <button class="mini-pill active" data-sumds="all">All</button>
+            <button class="mini-pill" data-sumds="cifar">CIFAR-10</button>
+            <button class="mini-pill" data-sumds="kodak">Kodak</button>
+            <button class="mini-pill" data-sumds="video">Video</button>
+          </div>
+        </div>
+        <div style="overflow:auto; flex:1; min-height:0;">
+          <table class="data-table" id="summaryTable"></table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const CIFAR10_CLASSES = ["airplane","automobile","bird","cat","deer","dog","frog","horse","ship","truck"];
+const state = {
+  dataset: "kodak",
+  sample_id: "kodim23",
+  snr_db: 6,
+  channel_kind: "awgn",
+  c_active: 8,
+  mcs: "16QAM 1/2",
+  mse_variant: "jscc_mse",
+  seed: 42,
+  sys: "jscc_sem",
+  view: "pipeline",
+  step: 0,
+  playing: false,
+  speedMs: 1600,
+  showErrProbe: false,
+  cmpErrMode: false,
+  curveMode: "snr",
+  telemOpen: true,
+  catalog: null,
+  data: null,
+  sweep: null,
+  bwSweep: null,
+  vcrData: null,
+  vcrFrame: 0,
+  vcrPlaying: true,
+  projectData: null,
+  selModel: "jscc_sem",
+  trnEpochIdx: 999,
+  trnPlaying: false,
+  sumFilter: "all",
+  timer: null,
+};
+
+const STEPS = [
+  { key: "source", icon: "🖼️", txRx: "Tx · Source" },
+  { key: "encode", icon: "🧠", txRx: "Tx · Encode" },
+  { key: "mod",    icon: "📡", txRx: "Tx · Map/Norm" },
+  { key: "chan",   icon: "〰️", txRx: "Wireless Link" },
+  { key: "decode", icon: "🔍", txRx: "Rx · Demod/Dec" },
+  { key: "recon",  icon: "✨", txRx: "Rx · Evaluate" },
+];
+
+const VID_DURATION = 21.0;
+const vidState = { t: 0, playing: false, speed: 1.0, errScene6: false, lastTs: 0, imgs: {} };
+const raceState = { t: 0, playing: false, lastTs: 0 };
+
+// ---- Init ----
+async function init() {
+  renderStepPills();
+  const res = await fetch("/api/catalog");
+  state.catalog = await res.json();
+  renderCatalogControls();
+  bindEvents();
+  bindVideoControls();
+  bindTrainingAndVcrControls();
+  startParticleLoop();
+  requestAnimationFrame(drawAnimationLoops);
+  await runSimulation();
+}
+
+function renderStepPills() {
+  const el = document.getElementById("stepPills");
+  el.innerHTML = STEPS.map((_, i) => `<div class="step-pill ${i === state.step ? 'active' : ''}" data-step="${i}">${i + 1}</div>`).join("");
+  el.querySelectorAll(".step-pill").forEach(p => {
+    p.onclick = () => { stopPlay(); setStep(Number(p.dataset.step)); };
+  });
+}
+
+function renderCatalogControls() {
+  renderThumbs();
+  const wp = document.getElementById("widthPills");
+  wp.innerHTML = state.catalog.widths.map(w =>
+    `<button class="mini-pill ${w.c === state.c_active ? 'active' : ''}" data-c="${w.c}">k/n=${w.ratio} (c=${w.c})</button>`
+  ).join("");
+  wp.querySelectorAll(".mini-pill").forEach(b => {
+    b.onclick = () => {
+      state.c_active = Number(b.dataset.c);
+      state.sweep = null; state.bwSweep = null; state.vcrData = null;
+      renderCatalogControls();
+      runSimulation();
+      if (state.view === "vcr") loadVideoCR();
+    };
+  });
+
+  const mcsSel = document.getElementById("mcsSelect");
+  if (!mcsSel.options.length) {
+    mcsSel.innerHTML = state.catalog.mcs_list.map(m =>
+      `<option value="${m}" ${m === state.mcs ? 'selected' : ''}>MCS: ${m}</option>`
+    ).join("");
+  }
+}
+
+function renderThumbs() {
+  const items = state.catalog[state.dataset] || [];
+  const grid = document.getElementById("thumbGrid");
+  const isCifar = state.dataset === "cifar10";
+  if (!items.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;font-size:11px;color:var(--muted);padding:10px;text-align:center;">No custom images yet. Click Upload below or drop an image!</div>`;
+    return;
+  }
+  grid.innerHTML = items.map(it =>
+    `<div class="thumb-item ${isCifar ? 'pixelated' : ''} ${it.id === state.sample_id ? 'active' : ''}" data-id="${it.id}" title="${it.label}">
+      <img src="${it.thumb}" alt="${it.label}" />
+    </div>`
+  ).join("");
+  grid.querySelectorAll(".thumb-item").forEach(el => {
+    el.onclick = () => {
+      state.sample_id = el.dataset.id;
+      state.sweep = null; state.bwSweep = null;
+      renderThumbs();
+      runSimulation();
+    };
+  });
+}
+
+function bindEvents() {
+  document.querySelectorAll("[data-ds]").forEach(b => b.onclick = () => {
+    state.dataset = b.dataset.ds;
+    const list = state.catalog[state.dataset] || [];
+    if (list.length) {
+      state.sample_id = list[state.dataset === "kodak" ? Math.min(22, list.length - 1) : 0].id;
+    }
+    state.sweep = null; state.bwSweep = null;
+    document.querySelectorAll("[data-ds]").forEach(x => x.classList.toggle("active", x === b));
+    renderThumbs();
+    if (list.length) runSimulation();
+  });
+
+  // Upload & drag-drop custom image
+  const upInput = document.getElementById("uploadInput");
+  document.getElementById("btnUpload").onclick = () => upInput.click();
+  const handleFile = async (file) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data_url: reader.result, name: file.name }),
+      });
+      const item = await res.json();
+      state.catalog.custom = state.catalog.custom || [];
+      state.catalog.custom.push(item);
+      state.dataset = "custom";
+      state.sample_id = item.id;
+      state.sweep = null; state.bwSweep = null;
+      document.querySelectorAll("[data-ds]").forEach(x => x.classList.toggle("active", x.dataset.ds === "custom"));
+      renderThumbs();
+      runSimulation();
+    };
+    reader.readAsDataURL(file);
+  };
+  upInput.onchange = (e) => handleFile(e.target.files[0]);
+  const tg = document.getElementById("thumbGrid");
+  tg.ondragover = (e) => e.preventDefault();
+  tg.ondrop = (e) => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); };
+
+  document.querySelectorAll("[data-ch]").forEach(b => b.onclick = () => {
+    state.channel_kind = b.dataset.ch;
+    state.sweep = null; state.bwSweep = null;
+    document.querySelectorAll("[data-ch]").forEach(x => x.classList.toggle("active", x === b));
+    runSimulation();
+  });
+
+  const snrSlider = document.getElementById("snrSlider");
+  snrSlider.oninput = () => { state.snr_db = Number(snrSlider.value); updateSnrBadge(); };
+  snrSlider.onchange = () => {
+    state.bwSweep = null; state.vcrData = null;
+    runSimulation();
+    if (state.view === "vcr") loadVideoCR();
+  };
+
+  document.getElementById("btnReroll").onclick = () => {
+    state.seed = Math.floor(Math.random() * 10000);
+    state.sweep = null; state.bwSweep = null; state.vcrData = null;
+    runSimulation();
+    if (state.view === "vcr") loadVideoCR();
+  };
+
+  // Trigger Cliff Effect Demo
+  document.getElementById("btnCliffDemo").onclick = async () => {
+    state.sys = "digital";
+    state.mcs = "16QAM 3/4";
+    document.getElementById("mcsSelect").value = "16QAM 3/4";
+    state.channel_kind = "awgn";
+    document.querySelectorAll("[data-ch]").forEach(x => x.classList.toggle("active", x.dataset.ch === "awgn"));
+    document.querySelectorAll(".sys-tab").forEach(x => x.classList.toggle("active", x.dataset.sys === "digital"));
+    state.snr_db = 4;
+    snrSlider.value = 4;
+    updateSnrBadge();
+    state.sweep = null; state.bwSweep = null;
+    setStep(4);
+    await runSimulation();
+  };
+
+  document.getElementById("mcsSelect").onchange = (e) => {
+    state.mcs = e.target.value; state.sweep = null; state.bwSweep = null; runSimulation();
+  };
+  document.getElementById("mseVarSelect").onchange = (e) => {
+    state.mse_variant = e.target.value; state.sweep = null; state.bwSweep = null; runSimulation();
+  };
+
+  document.querySelectorAll(".sys-tab").forEach(b => b.onclick = () => {
+    state.sys = b.dataset.sys;
+    document.querySelectorAll(".sys-tab").forEach(x => x.classList.toggle("active", x === b));
+    renderAll();
+  });
+
+  document.querySelectorAll(".view-tab").forEach(b => b.onclick = () => switchView(b.dataset.view));
+
+  document.getElementById("btnProjector").onclick = () => {
+    document.body.classList.toggle("projector");
+    document.getElementById("btnProjector").classList.toggle("active", document.body.classList.contains("projector"));
+  };
+
+  document.getElementById("btnReset").onclick = () => { stopPlay(); setStep(0); };
+  document.getElementById("btnPrev").onclick = () => { stopPlay(); setStep((state.step + 5) % 6); };
+  document.getElementById("btnNext").onclick = () => { stopPlay(); setStep((state.step + 1) % 6); };
+  document.getElementById("btnPlay").onclick = togglePlay;
+  document.getElementById("speedSel").onchange = (e) => {
+    state.speedMs = Number(e.target.value);
+    if (state.speedMs === 0) { stopPlay(); setStep(5); }
+    else if (state.playing) { stopPlay(); togglePlay(); }
+  };
+
+  document.getElementById("btnErrToggle").onclick = () => {
+    state.showErrProbe = !state.showErrProbe;
+    document.getElementById("btnErrToggle").classList.toggle("active", state.showErrProbe);
+    renderInspectorAndProbe();
+  };
+
+  document.getElementById("telemToggle").onclick = () => {
+    state.telemOpen = !state.telemOpen;
+    document.getElementById("telemBody").classList.toggle("hidden", !state.telemOpen);
+    document.getElementById("telemArrow").textContent = state.telemOpen ? "▼ Hide" : "▶ Show";
+  };
+
+  document.getElementById("cmpModeRecon").onclick = () => {
+    state.cmpErrMode = false;
+    document.getElementById("cmpModeRecon").classList.add("active");
+    document.getElementById("cmpModeErr").classList.remove("active");
+    renderCompareView();
+  };
+  document.getElementById("cmpModeErr").onclick = () => {
+    state.cmpErrMode = true;
+    document.getElementById("cmpModeErr").classList.add("active");
+    document.getElementById("cmpModeRecon").classList.remove("active");
+    renderCompareView();
+  };
+  document.getElementById("btnExportPng").onclick = exportComparisonPng;
+
+  document.getElementById("curveModeSnr").onclick = () => {
+    state.curveMode = "snr";
+    document.getElementById("curveModeSnr").classList.add("active");
+    document.getElementById("curveModeBw").classList.remove("active");
+    loadSweep();
+  };
+  document.getElementById("curveModeBw").onclick = () => {
+    state.curveMode = "bw";
+    document.getElementById("curveModeBw").classList.add("active");
+    document.getElementById("curveModeSnr").classList.remove("active");
+    loadBwSweep();
+  };
+
+  window.addEventListener("resize", () => {
+    if (state.view === "sweep") drawActiveCharts();
+    if (state.view === "training" && state.projectData) drawTrainingVisuals();
+    if (state.view === "vcr" && state.vcrData) drawVcrChart();
+  });
+
+  // Keyboard shortcuts for defense presentation
+  window.addEventListener("keydown", (e) => {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+    if (e.code === "Space") {
+      e.preventDefault();
+      if (state.view === "pipeline") togglePlay();
+      else if (state.view === "video") document.getElementById("vidPlayBtn").click();
+      else if (state.view === "race") document.getElementById("racePlayBtn").click();
+    } else if (e.code === "ArrowRight") {
+      if (state.view === "pipeline") { stopPlay(); setStep((state.step + 1) % 6); }
+    } else if (e.code === "ArrowLeft") {
+      if (state.view === "pipeline") { stopPlay(); setStep((state.step + 5) % 6); }
+    } else if (e.key === "1") { document.querySelector('[data-sys="jscc_sem"]').click(); }
+    else if (e.key === "2") { document.querySelector('[data-sys="jscc_mse"]').click(); }
+    else if (e.key === "3") { document.querySelector('[data-sys="digital"]').click(); }
+  });
+}
+
+function switchView(view) {
+  state.view = view;
+  document.querySelectorAll(".view-tab").forEach(x => x.classList.toggle("active", x.dataset.view === view));
+  ["pipeline", "video", "race", "compare", "sweep", "vcr", "training"].forEach(v => {
+    document.getElementById(`view-${v}`).classList.toggle("hidden", v !== view);
+  });
+  if (view === "sweep") { state.curveMode === "snr" ? loadSweep() : loadBwSweep(); }
+  if (view === "video") { vidState.playing = true; document.getElementById("vidPlayBtn").textContent = "⏸ Pause"; }
+  if (view === "race") { raceState.playing = true; document.getElementById("racePlayBtn").textContent = "⏸ Pause"; }
+  if (view === "vcr") {
+    if (!state.vcrData) loadVideoCR();
+    else requestAnimationFrame(() => renderVideoCRFrame());
+  }
+  if (view === "training") {
+    if (!state.projectData) loadProjectData();
+    else requestAnimationFrame(() => drawTrainingVisuals());
+  }
+}
+
+function updateSnrBadge() {
+  const v = state.snr_db;
+  const b = document.getElementById("snrBadge");
+  const cls = v <= 4 ? "low" : v <= 12 ? "mid" : "high";
+  const tag = v <= 4 ? "Hostile" : v <= 12 ? "Moderate" : "Clean";
+  b.className = `badge ${cls}`;
+  b.textContent = `${v} dB · ${tag}`;
+}
+
+function togglePlay() {
+  if (state.playing) { stopPlay(); return; }
+  if (state.speedMs === 0) { setStep(5); return; }
+  state.playing = true;
+  document.getElementById("btnPlay").textContent = "⏸ Pause";
+  state.timer = setInterval(() => setStep((state.step + 1) % 6), state.speedMs);
+}
+function stopPlay() {
+  state.playing = false;
+  document.getElementById("btnPlay").textContent = "▶ Play";
+  if (state.timer) { clearInterval(state.timer); state.timer = null; }
+}
+function setStep(s) {
+  state.step = s;
+  document.querySelectorAll(".step-pill").forEach((p, i) => {
+    p.classList.toggle("active", i === s);
+    p.classList.toggle("done", i < s);
+  });
+  renderPipelineNodes();
+  renderInspectorAndProbe();
+}
+
+// ---- API Calls ----
+async function runSimulation() {
+  document.getElementById("loadingPill").classList.add("show");
+  const res = await fetch("/api/simulate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      dataset: state.dataset,
+      sample_id: state.sample_id,
+      snr_db: state.snr_db,
+      channel_kind: state.channel_kind,
+      c_active: state.c_active,
+      mcs: state.mcs,
+      mse_variant: state.mse_variant,
+      seed: state.seed,
+    }),
+  });
+  state.data = await res.json();
+  document.getElementById("loadingPill").classList.remove("show");
+  renderAll();
+  if (state.view === "sweep") { state.curveMode === "snr" ? loadSweep() : loadBwSweep(); }
+}
+
+async function loadSweep() {
+  if (!state.sweep) {
+    document.getElementById("loadingPill").classList.add("show");
+    const res = await fetch("/api/sweep", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dataset: state.dataset, sample_id: state.sample_id, channel_kind: state.channel_kind,
+        c_active: state.c_active, mcs: state.mcs, mse_variant: state.mse_variant, seed: state.seed,
+      }),
+    });
+    state.sweep = await res.json();
+    document.getElementById("loadingPill").classList.remove("show");
+  }
+  drawActiveCharts();
+}
+
+async function loadBwSweep() {
+  if (!state.bwSweep) {
+    document.getElementById("loadingPill").classList.add("show");
+    const res = await fetch("/api/bw_sweep", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dataset: state.dataset, sample_id: state.sample_id, snr_db: state.snr_db,
+        channel_kind: state.channel_kind, mcs: state.mcs, mse_variant: state.mse_variant, seed: state.seed,
+      }),
+    });
+    state.bwSweep = await res.json();
+    document.getElementById("loadingPill").classList.remove("show");
+  }
+  drawActiveCharts();
+}
+
+function renderAll() {
+  if (!state.data) return;
+  renderMetaStrip();
+  renderPipelineNodes();
+  renderInspectorAndProbe();
+  renderTelemetryDrawer();
+  renderCompareView();
+  preloadVideoAssets();
+}
+
+function renderMetaStrip() {
+  const m = state.data.meta;
+  const fadeTxt = m.channel_kind === "rayleigh" ? ` · |h|²=${m.fading_gain} (${m.fading_db} dB) → Inst. ${m.inst_snr_db} dB` : "";
+  document.getElementById("metaStrip").innerHTML = `
+    <div class="meta-chip">Image <b>${m.sample_id}</b> (${m.W}×${m.H})</div>
+    <div class="meta-chip">Label <b>${m.orig_label}</b></div>
+    <div class="meta-chip">k/n <b>${m.ratio_str}</b> (${m.k_symbols.toLocaleString()} sym)</div>
+    <div class="meta-chip">Channel <b>${m.channel_kind.toUpperCase()}</b> ${m.snr_db} dB${fadeTxt}</div>
+  `;
+}
+
+function renderPipelineNodes() {
+  if (!state.data) return;
+  const d = state.data, isDig = state.sys === "digital", cur = d[state.sys], m = d.meta;
+  const titles = isDig
+    ? ["Source Image", "Source Coding", "Conv. + QAM", "Wireless Channel", "Soft Viterbi", "Decoded Output"]
+    : ["Source Image", "CNN Encoder", "Power Norm.", "Wireless Channel", "CNN Decoder", "Semantic Eval"];
+  const subs = isDig
+    ? [
+        `${m.W}×${m.H} RGB<br>n=${m.n_real.toLocaleString()}`,
+        `${cur.source_param}<br>${cur.n_info_bits.toLocaleString()} bits`,
+        `${cur.mcs}<br>${cur.n_symbols.toLocaleString()} sym`,
+        `${m.channel_kind.toUpperCase()} ${m.inst_snr_db} dB<br>σ²=${m.sigma2}`,
+        `BER ${(cur.ber * 100).toFixed(2)}%<br>${cur.cliff_hit ? '⚠ CLIFF' : '✓ OK'}`,
+        `PSNR ${cur.psnr} dB<br>${cur.pred_label}`,
+      ]
+    : [
+        `${m.W}×${m.H} RGB<br>n=${m.n_real.toLocaleString()}`,
+        `Stride 4 CNN<br>${cur.latent_shape.join('×')}`,
+        `E[|z|²]=1<br>${cur.k_symbols.toLocaleString()} sym`,
+        `${m.channel_kind.toUpperCase()} ${m.inst_snr_db} dB<br>σ²=${m.sigma2}`,
+        `Direct Analog<br>No Cliff Effect`,
+        `PSNR ${cur.psnr} dB<br>${cur.pred_label}`,
+      ];
+  const row = document.getElementById("nodesRow");
+  row.innerHTML = STEPS.map((st, i) => `
+    <div class="p-node ${i === 3 ? 'channel-node' : ''} ${i === state.step ? 'active' : ''}" data-step="${i}">
+      <div class="step-num">Step ${i + 1}</div>
+      <div class="node-icon">${st.icon}</div>
+      <div class="node-title">${titles[i]}</div>
+      <div class="node-sub">${subs[i]}</div>
+    </div>
+  `).join("");
+  row.querySelectorAll(".p-node").forEach(n => {
+    n.onclick = () => { stopPlay(); setStep(Number(n.dataset.step)); };
+  });
+}
+
+function renderInspectorAndProbe() {
+  if (!state.data) return;
+  const d = state.data, m = d.meta, cur = d[state.sys], isDig = state.sys === "digital";
+  const isCifar = m.dataset === "cifar10", pixCls = isCifar ? "pixelated" : "";
+  const inspTitle = document.getElementById("inspTitle");
+  const inspBadge = document.getElementById("inspBadge");
+  const inspBody = document.getElementById("inspBody");
+  const probeTitle = document.getElementById("probeTitle");
+  const probeBadge = document.getElementById("probeBadge");
+  const probe = document.getElementById("probeContent");
+  const errBtn = document.getElementById("btnErrToggle");
+
+  inspBadge.textContent = STEPS[state.step].txRx;
+  errBtn.classList.toggle("hidden", state.step !== 5);
+  probe.classList.toggle("pair", (state.step === 4 && !isDig) || state.step === 5);
+
+  if (state.step === 0) {
+    inspTitle.textContent = "Step 1 · Source Image Input";
+    inspBody.innerHTML = `
+      <p>Input RGB tensor <code>x ∈ [0,1]<sup>3×${m.H}×${m.W}</sup></code> containing <b>${m.n_real.toLocaleString()}</b> real source values.</p>
+      <div class="kv-grid">
+        <div class="kv-item"><div class="k">Bandwidth Budget</div><div class="v">k/n = ${m.ratio_str}</div></div>
+        <div class="kv-item"><div class="k">Channel Uses (k)</div><div class="v">${m.k_symbols.toLocaleString()} complex</div></div>
+        <div class="kv-item"><div class="k">Reference Label</div><div class="v">${m.orig_label}</div></div>
+        <div class="kv-item"><div class="k">Dataset</div><div class="v">${m.dataset.toUpperCase()}</div></div>
+      </div>`;
+    probeTitle.textContent = "Original Source Image";
+    probeBadge.textContent = `${m.W}×${m.H} RGB`;
+    probe.innerHTML = `<div class="img-frame"><img class="${pixCls}" src="${m.orig_b64}" /><div class="img-cap">Original · "${m.orig_label}"</div></div>`;
+  } else if (state.step === 1) {
+    if (isDig) {
+      inspTitle.textContent = "Step 2 · Source Compression (Shannon Separation)";
+      inspBody.innerHTML = `
+        <p>Classical chain compresses the image into an exact bit-stream using <b>${cur.source_desc}</b>, oblivious to channel SNR.</p>
+        <div class="kv-grid">
+          <div class="kv-item"><div class="k">Source Codec</div><div class="v">${cur.source_param}</div></div>
+          <div class="kv-item"><div class="k">Info Bits</div><div class="v">${cur.n_info_bits.toLocaleString()} bits</div></div>
+        </div>`;
+      probeTitle.textContent = "Source Bitstream Budget";
+      probeBadge.textContent = `${cur.n_info_bits.toLocaleString()} bits`;
+      probe.innerHTML = `<div class="img-frame"><img class="${pixCls}" src="${m.orig_b64}" /><div class="img-cap">Compressed to ${cur.n_info_bits.toLocaleString()} bits (${cur.source_param})</div></div>`;
+    } else {
+      const label = state.sys === "jscc_sem" ? "Semantic Loss (MSE + Feature + Task)" : `Syntactic Loss (${cur.model_name})`;
+      inspTitle.textContent = "Step 2 · Deep JSCC Neural Encoder";
+      inspBody.innerHTML = `
+        <p>Stride-4 CNN encoder maps pixels into continuous latent feature maps. Model: <b>${label}</b>.</p>
+        <div class="kv-grid">
+          <div class="kv-item"><div class="k">Latent Tensor</div><div class="v">${cur.latent_shape.join(' × ')}</div></div>
+          <div class="kv-item"><div class="k">Active Channels</div><div class="v">${m.c_active} / 16</div></div>
+        </div>`;
+      probeTitle.textContent = "Transmitted Latent Feature Maps (Top Channels)";
+      probeBadge.textContent = `${cur.latent_shape.join('×')}`;
+      probe.innerHTML = `<div class="img-frame"><img class="latent-lg" src="${cur.latent_tx_b64}" /><div class="img-cap">Clean Latent Channels z[0..${Math.min(7, m.c_active-1)}]</div></div>`;
+    }
+  } else if (state.step === 2) {
+    if (isDig) {
+      inspTitle.textContent = "Step 3 · Convolutional Coding & Gray QAM";
+      inspBody.innerHTML = `
+        <p>Split into <b>${cur.n_packets}</b> packet(s) ≤1024 bits, K=7 <code>(133, 171)</code> convolutional code, punctured, mapped to <b>${cur.mcs}</b>.</p>
+        <div class="kv-grid">
+          <div class="kv-item"><div class="k">Packets</div><div class="v">${cur.n_packets}</div></div>
+          <div class="kv-item"><div class="k">Coded Bits</div><div class="v">${cur.n_coded_bits.toLocaleString()}</div></div>
+          <div class="kv-item"><div class="k">QAM Symbols</div><div class="v">${cur.n_symbols.toLocaleString()}</div></div>
+          <div class="kv-item"><div class="k">Modulation</div><div class="v">${cur.mcs}</div></div>
+        </div>`;
+    } else {
+      inspTitle.textContent = "Step 3 · Power Normalization & Analog Mapping";
+      inspBody.innerHTML = `
+        <p>Pairs of real latent values form <b>${cur.k_symbols.toLocaleString()}</b> complex symbols <code>I + jQ</code>, normalized to unit average power <code>E[|s|²] = 1</code>.</p>
+        <div class="kv-grid">
+          <div class="kv-item"><div class="k">Raw Power → Norm</div><div class="v">${cur.norm_stats ? cur.norm_stats.raw_power : '—'} → 1.0</div></div>
+          <div class="kv-item"><div class="k">Scale α = √(k/E)</div><div class="v">${cur.norm_stats ? cur.norm_stats.scale : '—'}</div></div>
+        </div>`;
+    }
+    probeTitle.textContent = "Transmitted I/Q Constellation (Clean Tx)";
+    probeBadge.textContent = isDig ? cur.mcs : "Continuous Analog I/Q";
+    probe.innerHTML = `<canvas id="iqCanvas" class="probe-canvas" width="240" height="220"></canvas>`;
+    drawIQCanvas(cur.iq_points, false, state.sys);
+  } else if (state.step === 3) {
+    inspTitle.textContent = `Step 4 · Wireless Channel (${m.channel_kind.toUpperCase()})`;
+    const fadeLine = m.channel_kind === "rayleigh"
+      ? `<p>Block Rayleigh phasor <code>h = ${m.h_real} + j(${m.h_imag})</code>, <code>|h|² = ${m.fading_gain}</code> (${m.fading_db} dB) → instantaneous SNR <b>${m.inst_snr_db} dB</b>.</p>`
+      : `<p>AWGN adds <code>n ~ CN(0, σ²)</code> with complex noise variance <code>σ² = 10<sup>-${m.snr_db}/10</sup> = ${m.sigma2}</code>.</p>`;
+    inspBody.innerHTML = fadeLine + `
+      <div class="kv-grid">
+        <div class="kv-item"><div class="k">Target SNR</div><div class="v">${m.snr_db} dB</div></div>
+        <div class="kv-item"><div class="k">Instantaneous SNR</div><div class="v">${m.inst_snr_db} dB</div></div>
+        <div class="kv-item"><div class="k">Noise Variance σ²</div><div class="v">${m.sigma2}</div></div>
+        <div class="kv-item"><div class="k">Channel Type</div><div class="v">${m.channel_kind.toUpperCase()}</div></div>
+      </div>`;
+    probeTitle.textContent = "Noisy Received I/Q Constellation (Tx vs Rx)";
+    probeBadge.textContent = `SNR ${m.inst_snr_db} dB`;
+    probe.innerHTML = `<canvas id="iqCanvas" class="probe-canvas" width="240" height="220"></canvas>`;
+    drawIQCanvas(cur.iq_points, true, state.sys);
+  } else if (state.step === 4) {
+    if (isDig) {
+      inspTitle.textContent = "Step 5 · Soft Demodulation (LLR) & Viterbi";
+      const alertHtml = cur.cliff_hit
+        ? `<div class="cliff-alert">⚠ CLIFF EFFECT! ${cur.bit_errors} bit errors (BER ${(cur.ber*100).toFixed(2)}%) broke the bit-stream.</div>`
+        : `<p style="color:var(--sem);font-weight:600;">✓ All packets decoded cleanly (0 residual bit errors).</p>`;
+      inspBody.innerHTML = alertHtml + `
+        <div class="kv-grid">
+          <div class="kv-item"><div class="k">Bit Error Rate</div><div class="v">${(cur.ber * 100).toFixed(3)}%</div></div>
+          <div class="kv-item"><div class="k">Bit Errors</div><div class="v">${cur.bit_errors} / ${cur.n_info_bits}</div></div>
+        </div>`;
+      probeTitle.textContent = "Constellation & Soft LLR Confidence Histogram";
+      probeBadge.textContent = `BER ${(cur.ber*100).toFixed(2)}%`;
+      probe.innerHTML = `
+        <canvas id="iqCanvas" class="probe-canvas" width="215" height="205"></canvas>
+        <canvas id="llrCanvas" class="probe-canvas" width="235" height="205"></canvas>`;
+      drawIQCanvas(cur.iq_points, true, state.sys);
+      drawLLRCanvas(cur.llr_hist || []);
+    } else {
+      inspTitle.textContent = "Step 5 · Neural Decoder (Graceful Degradation)";
+      inspBody.innerHTML = `
+        <p>Noisy latent tensor <code>ŷ</code> goes directly to the CNN decoder—no hard bit decisions, no cliff effect.</p>
+        <div class="kv-grid">
+          <div class="kv-item"><div class="k">Cliff Effect?</div><div class="v" style="color:var(--sem)">None (Analog)</div></div>
+          <div class="kv-item"><div class="k">Latency</div><div class="v">${cur.time_ms} ms</div></div>
+        </div>`;
+      probeTitle.textContent = "Latent Features: Clean Tx vs Noisy Rx";
+      probeBadge.textContent = `σ²=${m.sigma2}`;
+      probe.innerHTML = `
+        <div class="img-frame"><img class="latent-pair" src="${cur.latent_tx_b64}" /><div class="img-cap">Tx Latent</div></div>
+        <div class="img-frame"><img class="latent-pair" src="${cur.latent_rx_b64}" /><div class="img-cap">Rx Noisy Latent</div></div>`;
+    }
+  } else {
+    inspTitle.textContent = "Step 6 · Reconstruction & Semantic Evaluation";
+    const matchBadge = cur.label_match
+      ? `<span style="color:var(--sem);font-weight:700;">✓ Match (${cur.pred_label})</span>`
+      : `<span style="color:var(--channel);font-weight:700;">✗ Misclassified (${cur.pred_label})</span>`;
+    inspBody.innerHTML = `
+      <p>Independent semantic judge predicts: ${matchBadge} (${cur.pred_conf}% confidence).</p>
+      <div class="kv-grid">
+        <div class="kv-item"><div class="k">PSNR</div><div class="v">${cur.psnr} dB</div></div>
+        <div class="kv-item"><div class="k">SSIM</div><div class="v">${cur.ssim}</div></div>
+        <div class="kv-item"><div class="k">${cur.sem_metric}</div><div class="v">${cur.sem_score}</div></div>
+        <div class="kv-item"><div class="k">Predicted Class</div><div class="v">${cur.pred_label}</div></div>
+      </div>`;
+    const rightSrc = state.showErrProbe ? cur.err_b64 : cur.recon_b64;
+    const rightCap = state.showErrProbe ? `|x - x̂| Pixel Error Heatmap` : `Received (${cur.pred_label})`;
+    probeTitle.textContent = state.showErrProbe ? "Original vs |x - x̂| Error Heatmap" : "Original vs Reconstructed";
+    probeBadge.textContent = `PSNR ${cur.psnr} dB`;
+    probe.innerHTML = `
+      <div class="img-frame"><img class="${pixCls}" src="${m.orig_b64}" /><div class="img-cap">Original (${m.orig_label})</div></div>
+      <div class="img-frame"><img class="${pixCls}" src="${rightSrc}" /><div class="img-cap">${rightCap}</div></div>`;
+  }
+}
+
+function renderTelemetryDrawer() {
+  if (!state.data) return;
+  const d = state.data, m = d.meta, cur = d[state.sys], isDig = state.sys === "digital";
+  document.getElementById("telemBody").innerHTML = `
+    <div class="telem-cell"><b>Source:</b> ${m.W}×${m.H}×3 (${m.n_real.toLocaleString()} floats)</div>
+    <div class="telem-cell"><b>Channel Uses:</b> k=${m.k_symbols.toLocaleString()} sym (k/n=${m.ratio_str})</div>
+    <div class="telem-cell"><b>${isDig ? 'Packets/Code' : 'Latent Shape'}:</b> ${isDig ? `${cur.n_packets} pk · ${cur.mcs}` : cur.latent_shape.join('×')}</div>
+    <div class="telem-cell"><b>Compute Time:</b> ${cur.time_ms} ms (CPU)</div>
+  `;
+}
+
+function renderCompareView() {
+  if (!state.data) return;
+  const d = state.data, m = d.meta, pixCls = m.dataset === "cifar10" ? "pixelated" : "";
+  const pickImg = (sysObj) => state.cmpErrMode ? sysObj.err_b64 : sysObj.recon_b64;
+  const cards = [
+    { title: "Original Source", color: "#94a3b8", img: m.orig_b64, psnr: "∞", ssim: "1.000", sem: "1.000", label: m.orig_label, match: true, sub: `${m.W}×${m.H} · n=${m.n_real.toLocaleString()}` },
+    { title: "Separated Digital", color: "var(--digital)", img: pickImg(d.digital), psnr: `${d.digital.psnr} dB`, ssim: d.digital.ssim, sem: d.digital.sem_score, label: d.digital.pred_label, match: d.digital.label_match, sub: `${d.digital.mcs} · BER ${(d.digital.ber*100).toFixed(2)}%`, cliff: d.digital.cliff_hit },
+    { title: "Syntactic Deep JSCC", color: "var(--mse)", img: pickImg(d.jscc_mse), psnr: `${d.jscc_mse.psnr} dB`, ssim: d.jscc_mse.ssim, sem: d.jscc_mse.sem_score, label: d.jscc_mse.pred_label, match: d.jscc_mse.label_match, sub: `${d.jscc_mse.model_name} · k/n=${m.ratio_str}` },
+    { title: "Semantic Deep JSCC", color: "var(--sem)", img: pickImg(d.jscc_sem), psnr: `${d.jscc_sem.psnr} dB`, ssim: d.jscc_sem.ssim, sem: d.jscc_sem.sem_score, label: d.jscc_sem.pred_label, match: d.jscc_sem.label_match, sub: `MSE+Feat+Task · k/n=${m.ratio_str}` },
+  ];
+  document.getElementById("compareGrid").innerHTML = cards.map(c => `
+    <div class="cmp-card">
+      <h3><span class="sys-dot" style="background:${c.color}"></span>${c.title}</h3>
+      <div style="font-size:10.5px;color:var(--muted);">${c.sub}</div>
+      <div class="cmp-img-wrap"><img class="${pixCls}" src="${c.img}" /></div>
+      ${c.cliff ? `<div class="cliff-alert" style="padding:4px 7px;font-size:10.5px;">⚠ Cliff Effect (Decode Failed)</div>` : ""}
+      <div class="metric-row"><span>PSNR</span><span>${c.psnr}</span></div>
+      <div class="metric-row"><span>SSIM</span><span>${c.ssim}</span></div>
+      <div class="metric-row"><span>Semantic Score</span><span>${c.sem}</span></div>
+      <div class="metric-row"><span>Judge Label</span><span style="color:${c.match ? 'var(--sem)' : 'var(--channel)'}">${c.match ? '✓' : '✗'} ${c.label}</span></div>
+    </div>
+  `).join("");
+
+  // Task-Oriented Card on CIFAR-10
+  const tc = document.getElementById("taskCard");
+  if (d.task) {
+    tc.classList.remove("hidden");
+    const tk = d.task;
+    document.getElementById("taskBadge").textContent = `${tk.k_symbols} symbols (${tk.ratio_str}) · ${tk.label_match ? '✓ Correct' : '✗ Wrong'}: ${tk.pred_label} (${tk.pred_conf}%)`;
+    const bars = tk.probs.map((p, i) => `
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;">
+        <span style="width:74px;color:var(--muted);">${CIFAR10_CLASSES[i]}</span>
+        <div style="flex:1;height:10px;background:#0b0f19;border-radius:4px;overflow:hidden;">
+          <div style="width:${p}%;height:100%;background:${CIFAR10_CLASSES[i] === tk.pred_label ? 'var(--sem)' : 'var(--accent)'};"></div>
+        </div>
+        <span style="width:40px;text-align:right;font-family:monospace;">${p}%</span>
+      </div>`).join("");
+    document.getElementById("taskBody").innerHTML = `
+      <div style="font-size:12px;line-height:1.5;color:#cbd5e1;">
+        <b>TaskJSCC</b> skips pixel reconstruction completely! A stride-8 encoder sends only <b>${tk.k_symbols} complex symbols</b> across the ${m.channel_kind.toUpperCase()} channel directly to a classifier head.<br><br>
+        Ground truth: <b>${m.orig_label}</b><br>
+        Prediction: <b style="color:${tk.label_match ? 'var(--sem)' : 'var(--channel)'}">${tk.pred_label} (${tk.pred_conf}%)</b>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;">${bars}</div>`;
+  } else {
+    tc.classList.add("hidden");
+  }
+}
+
+async function exportComparisonPng() {
+  if (!state.data) return;
+  const d = state.data, m = d.meta;
+  const c = document.createElement("canvas");
+  c.width = 1200; c.height = 460;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#0b0f19"; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.fillStyle = "#e2e8f0"; ctx.font = "bold 18px sans-serif";
+  ctx.fillText(`Projet 07 · ${m.sample_id} · ${m.channel_kind.toUpperCase()} SNR ${m.snr_db} dB · k/n=${m.ratio_str} · ${d.digital.mcs}`, 24, 34);
+
+  const items = [
+    { t: "Original", src: m.orig_b64, sub: `Label: ${m.orig_label}` },
+    { t: "Separated Digital", src: d.digital.recon_b64, sub: `PSNR ${d.digital.psnr} dB | Sem ${d.digital.sem_score}` },
+    { t: "Syntactic JSCC", src: d.jscc_mse.recon_b64, sub: `PSNR ${d.jscc_mse.psnr} dB | Sem ${d.jscc_mse.sem_score}` },
+    { t: "Semantic JSCC", src: d.jscc_sem.recon_b64, sub: `PSNR ${d.jscc_sem.psnr} dB | Sem ${d.jscc_sem.sem_score}` },
+  ];
+  await Promise.all(items.map((it, i) => new Promise((resolve) => {
+    const im = new Image();
+    im.onload = () => {
+      const x = 24 + i * 292;
+      ctx.fillStyle = "#161f32"; ctx.fillRect(x, 56, 276, 376);
+      ctx.fillStyle = "#fff"; ctx.font = "bold 14px sans-serif"; ctx.fillText(it.t, x + 12, 82);
+      ctx.imageSmoothingEnabled = m.dataset !== "cifar10";
+      ctx.drawImage(im, x + 12, 98, 252, 252);
+      ctx.fillStyle = "#94a3b8"; ctx.font = "12px monospace"; ctx.fillText(it.sub, x + 12, 382);
+      resolve();
+    };
+    im.src = it.src;
+  })));
+  const a = document.createElement("a");
+  a.download = `semcom_${m.sample_id}_snr${m.snr_db}.png`;
+  a.href = c.toDataURL("image/png");
+  a.click();
+}
+
+// ---- Probe Canvases: I/Q + LLR ----
+function drawIQCanvas(pts, showNoisy, sys) {
+  const c = document.getElementById("iqCanvas");
+  if (!c) return;
+  const ctx = c.getContext("2d"), W = c.width, H = c.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(W/2, 8); ctx.lineTo(W/2, H-8); ctx.moveTo(8, H/2); ctx.lineTo(W-8, H/2); ctx.stroke();
+  const scale = Math.min(W, H) * 0.24, cx = W/2, cy = H/2;
+  if (showNoisy) {
+    ctx.fillStyle = "rgba(244, 63, 94, 0.55)";
+    for (const [ti, tq, ri, rq] of pts) {
+      ctx.beginPath(); ctx.arc(cx + ri * scale, cy - rq * scale, 2.2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  ctx.fillStyle = sys === "digital" ? "#f59e0b" : sys === "jscc_mse" ? "#38bdf8" : "#10b981";
+  for (const [ti, tq] of pts) {
+    ctx.beginPath(); ctx.arc(cx + ti * scale, cy - tq * scale, showNoisy ? 2.1 : 3.0, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+function drawLLRCanvas(bins) {
+  const c = document.getElementById("llrCanvas");
+  if (!c) return;
+  const ctx = c.getContext("2d"), W = c.width, H = c.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = "#94a3b8"; ctx.font = "bold 10.5px sans-serif";
+  ctx.fillText("Soft LLR Distribution (0 = uncertain)", 12, 18);
+  const bw = (W - 24) / Math.max(1, bins.length);
+  bins.forEach((v, i) => {
+    const bh = v * (H - 55);
+    const isCenter = (i >= 6 && i <= 9);
+    ctx.fillStyle = isCenter ? "#f43f5e" : "#38bdf8";
+    ctx.fillRect(12 + i * bw, H - 24 - bh, bw - 2, bh);
+  });
+  ctx.strokeStyle = "#475569"; ctx.beginPath(); ctx.moveTo(W/2, 26); ctx.lineTo(W/2, H-22); ctx.stroke();
+  ctx.fillStyle = "#94a3b8"; ctx.font = "9.5px monospace";
+  ctx.fillText("-16 (bit 1)", 10, H - 8); ctx.fillText("+16 (bit 0)", W - 62, H - 8);
+}
+
+// ---- Particle Loop for Pipeline ----
+function startParticleLoop() {
+  const canvas = document.getElementById("animCanvas"), ctx = canvas.getContext("2d");
+  const particles = Array.from({ length: 22 }, (_, i) => ({ t: i / 22, speed: 0.0042 + (i % 3) * 0.0008, lane: (i % 3) - 1 }));
+  function frame() {
+    const box = document.getElementById("pipelineBox");
+    if (box && state.view === "pipeline") {
+      if (canvas.width !== box.clientWidth || canvas.height !== box.clientHeight) {
+        canvas.width = box.clientWidth; canvas.height = box.clientHeight;
+      }
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const nodes = Array.from(document.querySelectorAll(".p-node"));
+      if (nodes.length === 6) {
+        const boxRect = box.getBoundingClientRect();
+        const centers = nodes.map(n => { const r = n.getBoundingClientRect(); return { x: r.left - boxRect.left + r.width/2, y: r.top - boxRect.top + r.height/2 }; });
+        for (let i = 0; i < 5; i++) {
+          const a = centers[i], b = centers[i + 1], isChan = (i === 2 || i === 3);
+          ctx.strokeStyle = i < state.step ? "rgba(16,185,129,0.45)" : isChan ? "rgba(244,63,94,0.35)" : "rgba(99,102,241,0.35)";
+          ctx.lineWidth = (i === state.step || i === state.step - 1) ? 3 : 2;
+          ctx.setLineDash(isChan ? [5, 5] : []);
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        const sysColor = state.sys === "digital" ? "#f59e0b" : state.sys === "jscc_mse" ? "#38bdf8" : "#10b981";
+        const speedMul = state.speedMs === 0 ? 3.0 : 1600 / state.speedMs;
+        for (const p of particles) {
+          p.t = (p.t + p.speed * speedMul) % 1;
+          const segFloat = p.t * 5, seg = Math.min(4, Math.floor(segFloat)), u = segFloat - seg;
+          const a = centers[seg], b = centers[seg + 1];
+          const x = a.x + (b.x - a.x) * u;
+          const jitter = (seg === 2 || seg === 3) ? Math.sin(p.t * 50) * 5 : 0;
+          const y = a.y + (b.y - a.y) * u + p.lane * 7 + jitter;
+          ctx.fillStyle = (seg === 3) ? "#f43f5e" : sysColor;
+          ctx.beginPath(); ctx.arc(x, y, 3.2, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+// ---- Curves & Capacity Bound ----
+function drawActiveCharts() {
+  if (state.curveMode === "snr" && state.sweep) {
+    document.getElementById("psnrChartTitle").textContent = "Pixel Fidelity: PSNR (dB) vs SNR (+ Shannon Capacity)";
+    document.getElementById("semChartTitle").textContent = `${state.sweep.sem_metric} vs SNR (+ Capacity)`;
+    drawLineChart("psnrChart", state.sweep.points, "snr", 0, 20, state.snr_db, [
+      { key: "cap_psnr", label: "Capacity Bound", color: "#a855f7", dash: true },
+      { key: "digital_psnr", label: "Digital MCS", color: "#f59e0b" },
+      { key: "mse_psnr", label: "Syntactic JSCC", color: "#38bdf8" },
+      { key: "sem_psnr", label: "Semantic JSCC", color: "#10b981" },
+    ], "dB");
+    drawLineChart("semChart", state.sweep.points, "snr", 0, 20, state.snr_db, [
+      { key: "cap_sem", label: "Capacity Bound", color: "#a855f7", dash: true },
+      { key: "digital_sem", label: "Digital MCS", color: "#f59e0b" },
+      { key: "mse_sem", label: "Syntactic JSCC", color: "#38bdf8" },
+      { key: "sem_sem", label: "Semantic JSCC", color: "#10b981" },
+    ], "");
+  } else if (state.curveMode === "bw" && state.bwSweep) {
+    document.getElementById("psnrChartTitle").textContent = `PSNR vs Active Channels c (SNR ${state.snr_db} dB)`;
+    document.getElementById("semChartTitle").textContent = `${state.bwSweep.sem_metric} vs Active Channels c`;
+    drawLineChart("psnrChart", state.bwSweep.points, "c", 2, 16, state.c_active, [
+      { key: "cap_psnr", label: "Capacity Bound", color: "#a855f7", dash: true },
+      { key: "digital_psnr", label: "Digital MCS", color: "#f59e0b" },
+      { key: "mse_psnr", label: "Syntactic JSCC", color: "#38bdf8" },
+      { key: "sem_psnr", label: "Semantic JSCC", color: "#10b981" },
+    ], "dB");
+    drawLineChart("semChart", state.bwSweep.points, "c", 2, 16, state.c_active, [
+      { key: "cap_sem", label: "Capacity Bound", color: "#a855f7", dash: true },
+      { key: "digital_sem", label: "Digital MCS", color: "#f59e0b" },
+      { key: "mse_sem", label: "Syntactic JSCC", color: "#38bdf8" },
+      { key: "sem_sem", label: "Semantic JSCC", color: "#10b981" },
+    ], "");
+  }
+}
+
+function drawLineChart(canvasId, pts, xKey, xMin, xMax, curX, series, unit) {
+  const c = document.getElementById(canvasId), wrap = c.parentElement;
+  c.width = wrap.clientWidth; c.height = wrap.clientHeight;
+  const ctx = c.getContext("2d"), W = c.width, H = c.height;
+  const pad = { l: 46, r: 18, t: 30, b: 32 };
+  ctx.clearRect(0, 0, W, H);
+  const vals = pts.flatMap(p => series.map(s => p[s.key]));
+  let ymin = Math.min(...vals), ymax = Math.max(...vals);
+  if (ymax - ymin < 1e-3) { ymin -= 1; ymax += 1; }
+  const margin = (ymax - ymin) * 0.1; ymin -= margin; ymax += margin;
+  const xOf = v => pad.l + ((v - xMin) / (xMax - xMin)) * (W - pad.l - pad.r);
+  const yOf = v => H - pad.b - ((v - ymin) / (ymax - ymin)) * (H - pad.t - pad.b);
+
+  ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1; ctx.fillStyle = "#94a3b8"; ctx.font = "11px sans-serif";
+  for (let i = 0; i <= 4; i++) {
+    const v = ymin + (i / 4) * (ymax - ymin), y = yOf(v);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+    ctx.fillText(v.toFixed(unit ? 1 : 2), 4, y + 4);
+  }
+  pts.forEach((p, idx) => {
+    if (xKey === "snr" && idx % 2 !== 0) return;
+    const x = xOf(p[xKey]);
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, H - pad.b); ctx.stroke();
+    ctx.fillText(xKey === "snr" ? `${p[xKey]}dB` : `c=${p[xKey]}`, x - 12, H - 10);
+  });
+
+  const cx = xOf(curX);
+  ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.setLineDash([4, 4]);
+  ctx.beginPath(); ctx.moveTo(cx, pad.t); ctx.lineTo(cx, H - pad.b); ctx.stroke();
+  ctx.setLineDash([]);
+
+  for (const s of series) {
+    ctx.strokeStyle = s.color; ctx.lineWidth = 2.4;
+    ctx.setLineDash(s.dash ? [6, 4] : []);
+    ctx.beginPath();
+    pts.forEach((p, i) => { const x = xOf(p[xKey]), y = yOf(p[s.key]); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+    ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = s.color;
+    pts.forEach(p => { ctx.beginPath(); ctx.arc(xOf(p[xKey]), yOf(p[s.key]), 3.3, 0, Math.PI * 2); ctx.fill(); });
+  }
+  let lx = pad.l;
+  for (const s of series) {
+    ctx.fillStyle = s.color; ctx.fillRect(lx, 8, 10, 10);
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "11px sans-serif"; ctx.fillText(s.label, lx + 14, 17);
+    lx += 112;
+  }
+}
+
+// ---- Video & Race Engine ----
+function _loadImg(src) { if (!src) return null; const im = new Image(); im.src = src; return im; }
+function preloadVideoAssets() {
+  if (!state.data) return;
+  const isDig = state.sys === "digital";
+  const chapLabels = isDig
+    ? ["1. Pixels → Source Code", "2. Conv. Code (K=7)", "3. Gray QAM Map", "4. Wireless Channel", "5. LLR & Viterbi", "6. Decode & Eval"]
+    : ["1. Pixels (RGB)", "2. Conv1 & Conv2", "3. ResBlocks & Truncate", "4. Power Norm (P=1)", "5. I/Q & Channel", "6. Decoder & Eval"];
+  document.querySelectorAll("#vidChapters .chapter-pill").forEach((b, i) => { if (chapLabels[i]) b.textContent = chapLabels[i]; });
+
+  const jsSem = state.data.jscc_sem, jsMse = state.data.jscc_mse, dig = state.data.digital;
+  const activeJs = isDig ? jsSem : state.data[state.sys];
+  vidState.imgs = {
+    orig: _loadImg(state.data.meta.orig_b64),
+    conv1: _loadImg(activeJs.conv1_b64),
+    conv2: _loadImg(activeJs.conv2_b64),
+    res: _loadImg(activeJs.res_b64),
+    latTx: _loadImg(activeJs.latent_tx_b64),
+    latRx: _loadImg(activeJs.latent_rx_b64),
+    deconv1: _loadImg(activeJs.deconv1_b64),
+    recon: _loadImg(isDig ? dig.recon_b64 : activeJs.recon_b64),
+    err: _loadImg(isDig ? dig.err_b64 : activeJs.err_b64),
+    digRecon: _loadImg(dig.recon_b64),
+    mseRecon: _loadImg(jsMse.recon_b64),
+    semRecon: _loadImg(jsSem.recon_b64),
+  };
+}
+
+function bindVideoControls() {
+  document.getElementById("vidPlayBtn").onclick = () => {
+    vidState.playing = !vidState.playing;
+    document.getElementById("vidPlayBtn").textContent = vidState.playing ? "⏸ Pause" : "▶ Play";
+  };
+  document.getElementById("vidReplayBtn").onclick = () => { vidState.t = 0; vidState.playing = true; document.getElementById("vidPlayBtn").textContent = "⏸ Pause"; };
+  document.getElementById("vidScrub").oninput = (e) => { vidState.t = (Number(e.target.value) / 1000) * VID_DURATION; };
+  document.getElementById("vidSpeedSel").onchange = (e) => { vidState.speed = Number(e.target.value); };
+  document.getElementById("vidErrToggle").onclick = () => {
+    vidState.errScene6 = !vidState.errScene6;
+    document.getElementById("vidErrToggle").classList.toggle("active", vidState.errScene6);
+  };
+  document.querySelectorAll(".chapter-pill").forEach(b => {
+    b.onclick = () => { vidState.t = Number(b.dataset.t); vidState.playing = true; document.getElementById("vidPlayBtn").textContent = "⏸ Pause"; };
+  });
+
+  document.getElementById("racePlayBtn").onclick = () => {
+    raceState.playing = !raceState.playing;
+    document.getElementById("racePlayBtn").textContent = raceState.playing ? "⏸ Pause" : "▶ Play";
+  };
+  document.getElementById("raceReplayBtn").onclick = () => { raceState.t = 0; raceState.playing = true; document.getElementById("racePlayBtn").textContent = "⏸ Pause"; };
+  document.getElementById("raceScrub").oninput = (e) => { raceState.t = (Number(e.target.value) / 1000) * VID_DURATION; };
+}
+
+function easeOut(u) { const c = Math.max(0, Math.min(1, u)); return 1 - Math.pow(1 - c, 3); }
+function clamp01(u) { return Math.max(0, Math.min(1, u)); }
+function drawRoundRect(ctx, x, y, w, h, r, fill, stroke) {
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
+}
+function drawFlowArrow(ctx, x1, y1, x2, y2, color, t) {
+  ctx.strokeStyle = color; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  ctx.fillStyle = color; ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 8 * Math.cos(ang - 0.45), y2 - 8 * Math.sin(ang - 0.45));
+  ctx.lineTo(x2 - 8 * Math.cos(ang + 0.45), y2 - 8 * Math.sin(ang + 0.45));
+  ctx.closePath(); ctx.fill();
+  for (let k = 0; k < 2; k++) {
+    const p = ((t * 1.4 + k * 0.5) % 1);
+    ctx.beginPath(); ctx.arc(x1 + (x2 - x1) * p, y1 + (y2 - y1) * p, 3.2, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff"; ctx.fill();
+  }
+}
+
+function drawAnimationLoops(ts) {
+  if (!vidState.lastTs) vidState.lastTs = ts;
+  const dt = Math.min(0.05, (ts - vidState.lastTs) / 1000);
+  vidState.lastTs = ts;
+
+  if (state.view === "video" && state.data) {
+    if (vidState.playing) { vidState.t += dt * vidState.speed; if (vidState.t >= VID_DURATION) vidState.t = 0; }
+    document.getElementById("vidScrub").value = Math.round((vidState.t / VID_DURATION) * 1000);
+    document.getElementById("vidTimeBadge").textContent = `${vidState.t.toFixed(1)}s / ${VID_DURATION.toFixed(1)}s`;
+    const chapStarts = [0, 3.0, 7.5, 11.0, 14.5, 17.5];
+    let activeChap = 0;
+    for (let i = 0; i < chapStarts.length; i++) if (vidState.t >= chapStarts[i]) activeChap = i;
+    document.querySelectorAll(".chapter-pill").forEach((p, i) => p.classList.toggle("active", i === activeChap));
+    renderVideoCanvas(vidState.t, activeChap);
+  }
+  if (state.view === "race" && state.data) {
+    if (raceState.playing) { raceState.t += dt; if (raceState.t >= VID_DURATION) raceState.t = 0; }
+    document.getElementById("raceScrub").value = Math.round((raceState.t / VID_DURATION) * 1000);
+    document.getElementById("raceTimeBadge").textContent = `${raceState.t.toFixed(1)}s / ${VID_DURATION.toFixed(1)}s`;
+    renderRaceCanvas(raceState.t);
+  }
+  requestAnimationFrame(drawAnimationLoops);
+}
+
+// ---- Single-Method Process Video ----
+function renderVideoCanvas(t, chap) {
+  const c = document.getElementById("videoCanvas"), ctx = c.getContext("2d"), W = c.width, H = c.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = "rgba(30,41,59,0.45)"; ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+  if (state.sys === "digital") { renderDigitalVideoCanvas(ctx, W, H, t, chap); return; }
+
+  const m = state.data.meta, sysKey = state.sys, js = state.data[sysKey], isSem = sysKey === "jscc_sem";
+  const sysColor = isSem ? "#10b981" : "#38bdf8";
+  const sysName = isSem ? "Semantic Deep JSCC (MSE + 0.01·Feat + 0.003·Task)" : `Syntactic Deep JSCC (${js.model_name})`;
+
+  const ribbonLabels = ["1. Pixels (3×H×W)", "2. Conv1 & Conv2", "3. ResBlocks & Trunc", "4. Power Norm (P=1)", "5. I/Q Channel", "6. Deconv & Eval"];
+  const rw = (W - 60) / 6;
+  for (let i = 0; i < 6; i++) {
+    const rx = 30 + i * rw, isAct = i === chap;
+    drawRoundRect(ctx, rx + 3, 14, rw - 6, 30, 7, isAct ? "rgba(99,102,241,0.28)" : "#0f172a", isAct ? "#818cf8" : "#243047");
+    ctx.fillStyle = isAct ? "#fff" : (i < chap ? "#10b981" : "#64748b");
+    ctx.font = isAct ? "bold 11.5px sans-serif" : "11px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(ribbonLabels[i], rx + rw / 2, 33);
+  }
+  ctx.textAlign = "left";
+
+  function caption(title, subtitle) {
+    drawRoundRect(ctx, 28, H - 64, W - 56, 50, 10, "rgba(15,23,42,0.92)", "#243047");
+    ctx.fillStyle = sysColor; ctx.font = "bold 13.5px sans-serif"; ctx.fillText(title, 44, H - 42);
+    ctx.fillStyle = "#cbd5e1"; ctx.font = "12px sans-serif"; ctx.fillText(subtitle, 44, H - 23);
+  }
+
+  if (t < 3.0) {
+    const u = clamp01(t / 3.0), e = easeOut(Math.min(1, u * 1.4));
+    drawRoundRect(ctx, 40, 72, 260, 290, 12, "#111827", "#243047");
+    ctx.fillStyle = "#94a3b8"; ctx.font = "bold 12px sans-serif"; ctx.fillText(`Source Image (${m.W}×${m.H}×3)`, 56, 94);
+    if (vidState.imgs.orig && vidState.imgs.orig.complete) {
+      ctx.imageSmoothingEnabled = m.dataset !== "cifar10";
+      ctx.drawImage(vidState.imgs.orig, 58, 108, 224, 168);
+      ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2; ctx.strokeRect(156, 178, 28, 28);
+      ctx.beginPath(); ctx.moveTo(184, 178); ctx.lineTo(360, 110); ctx.moveTo(184, 206); ctx.lineTo(360, 326);
+      ctx.strokeStyle = "rgba(245,158,11,0.45)"; ctx.stroke();
+    }
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "12px monospace"; ctx.fillText(`n = 3×${m.H}×${m.W} = ${m.n_real.toLocaleString()}`, 56, 305);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "11px sans-serif"; ctx.fillText(`Centering: x_in = x - 0.5 ∈ [-0.5, 0.5]`, 56, 328);
+
+    const patch = m.pixel_patch, cell = 27, gx = 360, gy = 110;
+    drawRoundRect(ctx, gx - 12, gy - 32, 8 * cell + 24, 8 * cell + 52, 12, "#111827", "#f59e0b");
+    ctx.fillStyle = "#fcd34d"; ctx.font = "bold 12px sans-serif"; ctx.fillText("8×8 Magnified RGB Pixels", gx, gy - 12);
+    if (patch) {
+      for (let r = 0; r < 8; r++) for (let col = 0; col < 8; col++) {
+        const [rv, gv, bv] = patch[r][col];
+        ctx.fillStyle = `rgb(${Math.round(rv*255)},${Math.round(gv*255)},${Math.round(bv*255)})`;
+        ctx.fillRect(gx + col * cell, gy + r * cell, cell - 2, cell - 2);
+      }
+    }
+    const splitX = 640 + (1 - e) * 40;
+    [{ name: "R Channel", col: "#ef4444", y: 84 }, { name: "G Channel", col: "#22c55e", y: 184 }, { name: "B Channel", col: "#3b82f6", y: 284 }].forEach((pl, idx) => {
+      ctx.globalAlpha = clamp01((u - idx * 0.15) * 2.5);
+      drawRoundRect(ctx, splitX, pl.y, 380, 82, 10, "#111827", pl.col);
+      ctx.fillStyle = pl.col; ctx.font = "bold 12px sans-serif"; ctx.fillText(pl.name, splitX + 14, pl.y + 22);
+      if (patch) {
+        const vals = patch[3].slice(0, 5).map(px => (px[idx] - 0.5).toFixed(2));
+        ctx.fillStyle = "#e2e8f0"; ctx.font = "11.5px monospace"; ctx.fillText(`[ ${vals.join("  ")}  ... ]`, splitX + 14, pl.y + 48);
+      }
+      ctx.strokeStyle = pl.col; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(gx + 8 * cell + 14, gy + 108); ctx.lineTo(splitX - 6, pl.y + 41); ctx.stroke();
+      ctx.globalAlpha = 1;
+    });
+    caption("Scene 1 · Input Image as RGB Tensor", `Every pixel is normalized to [0, 1], centered by (x - 0.5), and fed as 3 spatial channels into ${sysName}.`);
+    return;
+  }
+
+  if (t < 7.5) {
+    const u = (t - 3.0) / 4.5, gx = 44, gy = 100, cell = 22;
+    drawRoundRect(ctx, gx - 10, gy - 28, 8 * cell + 20, 8 * cell + 115, 12, "#111827", "#243047");
+    ctx.fillStyle = "#cbd5e1"; ctx.font = "bold 11.5px sans-serif"; ctx.fillText("Input (3×H×W)", gx, gy - 10);
+    const patch = m.pixel_patch;
+    for (let r = 0; r < 8; r++) for (let col = 0; col < 8; col++) {
+      const [rv, gv, bv] = patch ? patch[r][col] : [0.2, 0.4, 0.6];
+      ctx.fillStyle = `rgb(${Math.round(rv*255)},${Math.round(gv*255)},${Math.round(bv*255)})`;
+      ctx.fillRect(gx + col * cell, gy + r * cell, cell - 2, cell - 2);
+    }
+    const scanPos = (u * 6) % 4, kx = Math.min(3, (scanPos % 2) * 1.5), ky = Math.floor(scanPos / 2) * 2.5;
+    ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2.5;
+    ctx.strokeRect(gx + kx * cell - 2, gy + ky * cell - 2, 5 * cell, 5 * cell);
+    // Real learned 5x5 Conv1 filter dot-product readout
+    const kern = js.conv1_kernel || [];
+    let dotSum = 0;
+    const kr0 = Math.round(ky), kc0 = Math.round(kx);
+    if (patch && kern.length === 5) {
+      for (let r = 0; r < 5; r++) for (let cl = 0; cl < 5; cl++) {
+        const px = patch[Math.min(7, kr0 + r)][Math.min(7, kc0 + cl)];
+        dotSum += (((px[0] + px[1] + px[2]) / 3) - 0.5) * kern[r][cl];
+      }
+    }
+    ctx.fillStyle = "#fcd34d"; ctx.font = "bold 10.5px monospace";
+    ctx.fillText(`5×5 Filter * Patch`, gx, gy + 8 * cell + 18);
+    ctx.fillStyle = "#e2e8f0";
+    ctx.fillText(`Σ(x·w) = ${dotSum.toFixed(3)}`, gx, gy + 8 * cell + 36);
+    ctx.fillStyle = "#38bdf8";
+    ctx.fillText(`PReLU → ${Math.max(0.2 * dotSum, dotSum).toFixed(3)}`, gx, gy + 8 * cell + 54);
+
+    const c1x = 270, c1y = 84;
+    drawRoundRect(ctx, c1x, c1y, 320, 280, 12, "#111827", "#38bdf8");
+    ctx.fillStyle = "#38bdf8"; ctx.font = "bold 13px sans-serif"; ctx.fillText("Conv1 (5×5, stride 2) + PReLU", c1x + 14, c1y + 24);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "11px monospace"; ctx.fillText(`Shape: ${js.conv1_shape ? js.conv1_shape.join(' × ') : '32 × H/2 × W/2'}`, c1x + 14, c1y + 42);
+    if (vidState.imgs.conv1 && vidState.imgs.conv1.complete) { ctx.imageSmoothingEnabled = false; ctx.drawImage(vidState.imgs.conv1, c1x + 14, c1y + 54, 292, 168); }
+    drawRoundRect(ctx, c1x + 14, c1y + 230, 292, 38, 6, "#0b0f19", "#1e293b");
+    ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(c1x + 26, c1y + 260); ctx.lineTo(c1x + 52, c1y + 252); ctx.lineTo(c1x + 82, c1y + 236); ctx.stroke();
+    ctx.fillStyle = "#cbd5e1"; ctx.font = "11px monospace"; ctx.fillText("PReLU(z) = max(0,z) + a·min(0,z)", c1x + 92, c1y + 253);
+
+    ctx.strokeStyle = "rgba(245,158,11,0.55)"; ctx.lineWidth = 1.8;
+    ctx.beginPath(); ctx.moveTo(gx + (kx + 5) * cell, gy + ky * cell); ctx.lineTo(c1x + 14, c1y + 115);
+    ctx.moveTo(gx + (kx + 5) * cell, gy + (ky + 5) * cell); ctx.lineTo(c1x + 14, c1y + 175); ctx.stroke();
+
+    const c2x = 645, c2y = 84;
+    ctx.globalAlpha = easeOut(clamp01((u - 0.18) * 2.5));
+    drawFlowArrow(ctx, c1x + 322, c1y + 140, c2x - 4, c2y + 140, sysColor, t);
+    drawRoundRect(ctx, c2x, c2y, 388, 280, 12, "#111827", sysColor);
+    ctx.fillStyle = sysColor; ctx.font = "bold 13px sans-serif"; ctx.fillText("Conv2 (5×5, stride 2) + PReLU", c2x + 16, c2y + 24);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "11px monospace"; ctx.fillText(`Shape: ${js.conv2_shape ? js.conv2_shape.join(' × ') : '64 × H/4 × W/4'} (4× downsampled)`, c2x + 16, c2y + 42);
+    if (vidState.imgs.conv2 && vidState.imgs.conv2.complete) { ctx.imageSmoothingEnabled = false; ctx.drawImage(vidState.imgs.conv2, c2x + 16, c2y + 54, 356, 168); }
+    drawRoundRect(ctx, c2x + 16, c2y + 230, 356, 38, 6, "#0b0f19", sysColor);
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "bold 11px sans-serif";
+    ctx.fillText(isSem ? "Semantic Filters: Object contours & class-salient features" : "Syntactic Filters: Local luminance & color gradients", c2x + 26, c2y + 253);
+    ctx.globalAlpha = 1;
+    caption("Scene 2 · Convolutional Feature Extraction (Real Learned Weights)", "Real 5×5 Conv1 weights sweep across pixels with stride 2 twice, compressing spatial size 4× into 64 channels.");
+    return;
+  }
+
+  if (t < 11.0) {
+    const u = (t - 7.5) / 3.5;
+    drawRoundRect(ctx, 48, 76, 440, 295, 12, "#111827", "#6366f1");
+    ctx.fillStyle = "#a5b4fc"; ctx.font = "bold 13px sans-serif"; ctx.fillText("2× Residual Blocks (3×3 Conv + PReLU + Skip)", 66, 102);
+    const pulse = 0.5 + 0.5 * Math.sin(u * Math.PI * 6);
+    ctx.strokeStyle = `rgba(165,180,252,${0.4 + 0.6 * pulse})`; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(76, 145); ctx.quadraticCurveTo(268, 108, 456, 145); ctx.stroke();
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "11px monospace"; ctx.fillText("y = x + Conv(PReLU(Conv(x)))", 160, 134);
+    if (vidState.imgs.res && vidState.imgs.res.complete) { ctx.imageSmoothingEnabled = false; ctx.drawImage(vidState.imgs.res, 72, 165, 392, 188); }
+
+    drawRoundRect(ctx, 530, 76, 502, 295, 12, "#111827", sysColor);
+    ctx.fillStyle = sysColor; ctx.font = "bold 13px sans-serif"; ctx.fillText(`Conv3 (64 → 16 ch) & Truncation (c = ${m.c_active})`, 548, 102);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "11.5px sans-serif"; ctx.fillText(`Transmitting top ${m.c_active} channels (k/n = ${m.ratio_str})`, 548, 122);
+
+    const truncProgress = easeOut(clamp01((u - 0.2) * 2.0)), chPowers = js.channel_powers || Array(16).fill(0.75);
+    const barW = 24, gap = 5, bx0 = 552, by0 = 140, maxH = 110;
+    for (let chIdx = 0; chIdx < 16; chIdx++) {
+      const isAct = chIdx < m.c_active, x = bx0 + chIdx * (barW + gap), bh = Math.max(24, Math.round((chPowers[chIdx] || 0.5) * maxH));
+      ctx.globalAlpha = isAct ? 1.0 : (1.0 - 0.8 * truncProgress);
+      drawRoundRect(ctx, x, by0 + (maxH - bh), barW, bh, 5, isAct ? sysColor : "#334155", isAct ? "#fff" : "#475569");
+      ctx.fillStyle = "#cbd5e1"; ctx.font = "bold 9.5px monospace"; ctx.textAlign = "center"; ctx.fillText(`z${chIdx}`, x + barW / 2, by0 + maxH + 14);
+      ctx.textAlign = "left"; ctx.globalAlpha = 1;
+    }
+    if (m.c_active < 16) {
+      const cutX = bx0 + m.c_active * (barW + gap) - 3;
+      ctx.strokeStyle = "#f43f5e"; ctx.setLineDash([4, 4]); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cutX, by0 - 8); ctx.lineTo(cutX, by0 + maxH + 18); ctx.stroke(); ctx.setLineDash([]);
+    }
+    drawRoundRect(ctx, 548, 274, 468, 86, 8, "#0b0f19", sysColor);
+    ctx.fillStyle = sysColor; ctx.font = "bold 12px sans-serif";
+    if (isSem) {
+      ctx.fillText("Semantic Training Loss (3 Gradients Backpropagated):", 562, 294);
+      ctx.fillStyle = "#e2e8f0"; ctx.font = "11px monospace";
+      ctx.fillText("• L_MSE  = ‖x - x̂‖²               (pixel structure)", 562, 314);
+      ctx.fillText("• L_feat = 0.01 · Σ‖φ_l(x)-φ_l(x̂)‖² (ClsA multi-layer features)", 562, 331);
+      ctx.fillText("• L_task = 0.003 · CE(ClsA(x̂), y)  (semantic class preservation)", 562, 348);
+    } else {
+      ctx.fillText(`Syntactic Training Loss (${js.model_name}):`, 562, 294);
+      ctx.fillStyle = "#e2e8f0"; ctx.font = "11px monospace";
+      ctx.fillText("• L_total = ‖x - x̂‖²  (Pure Pixel MSE — no semantic term)", 562, 318);
+      ctx.fillStyle = "#94a3b8"; ctx.font = "11px sans-serif"; ctx.fillText("Treats all pixels equally regardless of semantic importance.", 562, 342);
+    }
+    caption(isSem ? "Scene 3 · Semantic Feature Refinement & Truncation" : "Scene 3 · Syntactic Feature Refinement & Truncation",
+      isSem ? "Semantic loss packs object identity into top channels; truncation selects c_active channels for k/n." : "Syntactic MSE optimizes pixel fidelity; truncation selects c_active channels for k/n.");
+    return;
+  }
+
+  if (t < 14.5) {
+    const u = (t - 11.0) / 3.5, e = easeOut(clamp01(u * 1.35));
+    const ns = js.norm_stats || { raw_power: 1.85, scale: 0.735, norm_power: 1.0 };
+    const curPow = ns.raw_power + (1.0 - ns.raw_power) * e;
+    drawRoundRect(ctx, 48, 76, 480, 295, 12, "#111827", "#f59e0b");
+    ctx.fillStyle = "#fcd34d"; ctx.font = "bold 14px sans-serif"; ctx.fillText("Power Normalization Chamber (P = 1)", 68, 104);
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "13px monospace";
+    ctx.fillText(`1. Measure energy: E = Σ |z|²`, 68, 142);
+    ctx.fillText(`2. Scale factor:   α = √(k / E) = ${ns.scale}`, 68, 170);
+    ctx.fillText(`3. Normalize:      s = α · z_active`, 68, 198);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "bold 11.5px sans-serif";
+    ctx.fillText(`Average Symbol Power E[|s|²]:  ${curPow.toFixed(3)}  →  1.000`, 68, 248);
+    drawRoundRect(ctx, 68, 264, 430, 28, 8, "#0b0f19", "#334155");
+    const maxP = Math.max(2.2, ns.raw_power * 1.2), fillW = Math.min(426, (curPow / maxP) * 426);
+    drawRoundRect(ctx, 70, 266, fillW, 24, 6, e > 0.85 ? "#10b981" : "#f59e0b", null);
+    const targetX = 70 + (1.0 / maxP) * 426;
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(targetX, 258); ctx.lineTo(targetX, 298); ctx.stroke();
+    ctx.fillStyle = "#fff"; ctx.font = "10.5px monospace"; ctx.fillText("P=1.0", targetX - 16, 314);
+
+    drawRoundRect(ctx, 560, 76, 472, 295, 12, "#111827", sysColor);
+    ctx.fillStyle = sysColor; ctx.font = "bold 13px sans-serif"; ctx.fillText("Live Symbol Scaling onto Unit-Power Circle", 580, 104);
+    const cx = 796, cy = 232, R = 82;
+    ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - 140, cy); ctx.lineTo(cx + 140, cy); ctx.moveTo(cx, cy - 105); ctx.lineTo(cx, cy + 105); ctx.stroke();
+    ctx.strokeStyle = "rgba(255,255,255,0.45)"; ctx.setLineDash([5, 5]); ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    const pts = js.iq_points || [], invScale = 1.0 / Math.max(0.25, ns.scale), mult = invScale + (1.0 - invScale) * e;
+    for (let i = 0; i < Math.min(80, pts.length); i++) {
+      const [ti, tq] = pts[i], x0 = cx + ti * invScale * R * 0.72, y0 = cy - tq * invScale * R * 0.72;
+      const px = cx + ti * mult * R * 0.72, py = cy - tq * mult * R * 0.72;
+      ctx.strokeStyle = "rgba(255,255,255,0.16)"; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(px, py); ctx.stroke();
+      ctx.fillStyle = sysColor; ctx.beginPath(); ctx.arc(px, py, 3.2, 0, Math.PI * 2); ctx.fill();
+    }
+    caption("Scene 4 · Power Normalization", `Every transmitted vector is scaled by α = ${ns.scale} so average symbol power equals 1.0.`);
+    return;
+  }
+
+  if (t < 17.5) {
+    const u = (t - 14.5) / 3.0, e = easeOut(clamp01(u * 1.4));
+    drawRoundRect(ctx, 48, 76, 260, 295, 12, "#111827", sysColor);
+    ctx.fillStyle = sysColor; ctx.font = "bold 13px sans-serif"; ctx.fillText("Complex I/Q Pairing", 66, 104);
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "12px monospace"; ctx.fillText("s = z_even + j·z_odd", 66, 136);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "11.5px sans-serif"; ctx.fillText(`${js.k_symbols.toLocaleString()} complex symbols`, 66, 160);
+    if (vidState.imgs.latTx && vidState.imgs.latTx.complete) { ctx.imageSmoothingEnabled = false; ctx.drawImage(vidState.imgs.latTx, 66, 182, 224, 150); }
+
+    drawRoundRect(ctx, 336, 76, 250, 295, 12, "#111827", "#f43f5e");
+    ctx.fillStyle = "#fda4af"; ctx.font = "bold 13px sans-serif"; ctx.fillText(`${m.channel_kind.toUpperCase()} (${m.inst_snr_db} dB)`, 354, 104);
+    if (m.channel_kind === "rayleigh") {
+      // Animate complex Rayleigh phasor h = h_real + j*h_imag
+      const pcx = 461, pcy = 186, pR = 44;
+      ctx.strokeStyle = "#334155"; ctx.beginPath(); ctx.arc(pcx, pcy, pR, 0, Math.PI * 2); ctx.stroke();
+      const ang = Math.atan2(m.h_imag, m.h_real), mag = Math.sqrt(m.fading_gain);
+      drawFlowArrow(ctx, pcx, pcy, pcx + Math.cos(ang * e) * Math.min(1.5, mag) * pR * 0.8, pcy - Math.sin(ang * e) * Math.min(1.5, mag) * pR * 0.8, "#f59e0b", t);
+      ctx.fillStyle = "#fcd34d"; ctx.font = "10.5px monospace"; ctx.fillText(`h=${m.h_real}+j(${m.h_imag})`, 354, 256);
+      ctx.fillText(`|h|²=${m.fading_gain} (ZF: n/h)`, 354, 276);
+    } else {
+      ctx.strokeStyle = sysColor; ctx.lineWidth = 2.5; ctx.beginPath();
+      for (let x = 0; x <= 210; x += 3) {
+        const y = 200 + Math.sin(x * 0.08 - u * 18) * 26 + (1 - m.snr_db / 25) * 14 * Math.sin(x * 0.7 + u * 25) * e;
+        if (x === 0) ctx.moveTo(356 + x, y); else ctx.lineTo(356 + x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.fillStyle = "#cbd5e1"; ctx.font = "11.5px monospace"; ctx.fillText(`σ² = ${m.sigma2}`, 356, 326);
+
+    drawRoundRect(ctx, 614, 76, 418, 295, 12, "#111827", "#f43f5e");
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "bold 13px sans-serif"; ctx.fillText("Constellation: Tx (clean) → Rx (noisy)", 634, 104);
+    const cx = 823, cy = 232, S = 64;
+    ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx - 150, cy); ctx.lineTo(cx + 150, cy); ctx.moveTo(cx, cy - 105); ctx.lineTo(cx, cy + 105); ctx.stroke();
+    const pts = js.iq_points || [];
+    for (let i = 0; i < Math.min(110, pts.length); i++) {
+      const [ti, tq, ri, rq] = pts[i], txX = cx + ti * S, txY = cy - tq * S;
+      const rxX = cx + (ti + (ri - ti) * e) * S, rxY = cy - (tq + (rq - tq) * e) * S;
+      ctx.strokeStyle = "rgba(244,63,94,0.28)"; ctx.beginPath(); ctx.moveTo(txX, txY); ctx.lineTo(rxX, rxY); ctx.stroke();
+      ctx.fillStyle = sysColor; ctx.beginPath(); ctx.arc(txX, txY, 2.0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(244,63,94,0.85)"; ctx.beginPath(); ctx.arc(rxX, rxY, 2.8, 0, Math.PI * 2); ctx.fill();
+    }
+    caption("Scene 5 · Wireless Channel Propagation", `Symbols traverse ${m.channel_kind.toUpperCase()} (inst. SNR ${m.inst_snr_db} dB, σ²=${m.sigma2}) without hard bit decisions.`);
+    return;
+  }
+
+  const u = (t - 17.5) / 3.5, e = easeOut(clamp01(u * 1.5));
+  drawRoundRect(ctx, 36, 82, 265, 285, 12, "#111827", "#f43f5e");
+  ctx.fillStyle = "#fda4af"; ctx.font = "bold 12px sans-serif"; ctx.fillText("Rx Latent ŷ → Deconv1 (s=2)", 50, 106);
+  if (vidState.imgs.latRx && vidState.imgs.latRx.complete) { ctx.imageSmoothingEnabled = false; ctx.drawImage(vidState.imgs.latRx, 50, 118, 236, 96); }
+  if (vidState.imgs.deconv1 && vidState.imgs.deconv1.complete) { ctx.imageSmoothingEnabled = false; ctx.drawImage(vidState.imgs.deconv1, 50, 232, 236, 96); }
+  ctx.fillStyle = "#94a3b8"; ctx.font = "10.5px monospace"; ctx.fillText("Top: Rx ŷ (H/4) | Bot: Deconv1 (H/2)", 50, 348);
+  drawFlowArrow(ctx, 304, 224, 336, 224, sysColor, t);
+
+  drawRoundRect(ctx, 342, 82, 696, 285, 12, "#111827", sysColor);
+  ctx.fillStyle = sysColor; ctx.font = "bold 13.5px sans-serif"; ctx.fillText(`Reconstructed Output vs Original (${sysName})`, 360, 108);
+  ctx.imageSmoothingEnabled = m.dataset !== "cifar10";
+  if (vidState.imgs.orig && vidState.imgs.orig.complete) ctx.drawImage(vidState.imgs.orig, 360, 124, 205, 154);
+  ctx.fillStyle = "#94a3b8"; ctx.font = "11.5px sans-serif"; ctx.fillText(`Original (${m.orig_label})`, 360, 298);
+  ctx.globalAlpha = e;
+  const targetIm = vidState.errScene6 ? vidState.imgs.err : vidState.imgs.recon;
+  if (targetIm && targetIm.complete) ctx.drawImage(targetIm, 582, 124, 205, 154);
+  ctx.fillStyle = js.label_match ? "#10b981" : "#f43f5e"; ctx.font = "bold 11.5px sans-serif";
+  ctx.fillText(vidState.errScene6 ? "|x - x̂| Error Heatmap" : `Received (${js.pred_label})`, 582, 298);
+
+  const otherJs = state.data[isSem ? "jscc_mse" : "jscc_sem"], digRes = state.data.digital;
+  drawRoundRect(ctx, 360, 312, 428, 42, 7, "#0b0f19", "#243047");
+  ctx.fillStyle = "#cbd5e1"; ctx.font = "11px monospace";
+  ctx.fillText(`vs ${isSem ? 'Syntactic' : 'Semantic'}: PSNR ${otherJs.psnr}dB, Sem ${otherJs.sem_score} | Digital: ${digRes.psnr}dB`, 370, 337);
+
+  const mx = 804;
+  [["PSNR", `${js.psnr} dB`], ["SSIM", `${js.ssim}`], [js.sem_metric, `${js.sem_score}`], ["Label Match", js.label_match ? "✓ Match" : "✗ Mismatch"]].forEach(([k, v], idx) => {
+    const my = 124 + idx * 54;
+    drawRoundRect(ctx, mx, my, 218, 44, 8, "#0f172a", "#243047");
+    ctx.fillStyle = "#94a3b8"; ctx.font = "10px sans-serif"; ctx.fillText(k.toUpperCase(), mx + 12, my + 16);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 13px monospace"; ctx.fillText(v, mx + 12, my + 34);
+  });
+  ctx.globalAlpha = 1;
+  caption("Scene 6 · Neural Decoding & Semantic Evaluation", `Graceful degradation: PSNR ${js.psnr} dB, ${js.sem_metric} ${js.sem_score}, Judge prediction: "${js.pred_label}".`);
+}
+
+function renderDigitalVideoCanvas(ctx, W, H, t, chap) {
+  const m = state.data.meta, dig = state.data.digital, digColor = "#f59e0b";
+  const ribbonLabels = ["1. Source Code", "2. Conv. Code", "3. Gray QAM", "4. Channel", "5. LLR & Viterbi", "6. Decode & Eval"];
+  const rw = (W - 60) / 6;
+  for (let i = 0; i < 6; i++) {
+    const rx = 30 + i * rw, isAct = i === chap;
+    drawRoundRect(ctx, rx + 3, 14, rw - 6, 30, 7, isAct ? "rgba(245,158,11,0.25)" : "#0f172a", isAct ? digColor : "#243047");
+    ctx.fillStyle = isAct ? "#fff" : (i < chap ? "#10b981" : "#64748b");
+    ctx.font = isAct ? "bold 11.5px sans-serif" : "11px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText(ribbonLabels[i], rx + rw / 2, 33);
+  }
+  ctx.textAlign = "left";
+  function caption(title, subtitle) {
+    drawRoundRect(ctx, 28, H - 64, W - 56, 50, 10, "rgba(15,23,42,0.92)", "#243047");
+    ctx.fillStyle = digColor; ctx.font = "bold 13.5px sans-serif"; ctx.fillText(title, 44, H - 42);
+    ctx.fillStyle = "#cbd5e1"; ctx.font = "12px sans-serif"; ctx.fillText(subtitle, 44, H - 23);
+  }
+
+  if (t < 3.0) {
+    const u = clamp01(t / 3.0), e = easeOut(Math.min(1, u * 1.4));
+    drawRoundRect(ctx, 48, 76, 280, 290, 12, "#111827", "#243047");
+    ctx.fillStyle = "#94a3b8"; ctx.font = "bold 12px sans-serif"; ctx.fillText(`Source Image (${m.W}×${m.H})`, 66, 100);
+    if (vidState.imgs.orig && vidState.imgs.orig.complete) { ctx.imageSmoothingEnabled = m.dataset !== "cifar10"; ctx.drawImage(vidState.imgs.orig, 66, 114, 240, 180); }
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "11.5px monospace"; ctx.fillText(`n = ${m.n_real.toLocaleString()} values`, 66, 322);
+    drawFlowArrow(ctx, 334, 220, 398, 220, digColor, t);
+    drawRoundRect(ctx, 404, 76, 628, 290, 12, "#111827", digColor);
+    ctx.fillStyle = "#fcd34d"; ctx.font = "bold 13.5px sans-serif"; ctx.fillText(`Source Encoder: ${dig.source_desc}`, 424, 106);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "12px sans-serif"; ctx.fillText("Shannon separation: source coder compresses pixels into a bit-stream oblivious to SNR.", 424, 130);
+    const rawBits = (dig.sample_info_bits && dig.sample_info_bits.length) ? dig.sample_info_bits.join("") : "1011010011100101011010011011001010110100";
+    const bitsStr = rawBits + rawBits, shift = Math.floor(u * 24);
+    drawRoundRect(ctx, 424, 158, 588, 66, 8, "#0b0f19", "#334155");
+    ctx.fillStyle = digColor; ctx.font = "bold 15px monospace"; ctx.fillText(bitsStr.slice(shift, shift + 40), 440, 196);
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "13px monospace"; ctx.fillText(`Compressed Budget: ${dig.n_info_bits.toLocaleString()} information bits`, 424, 265);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "12px monospace"; ctx.fillText(`Target Channel Budget: ${m.k_symbols.toLocaleString()} symbols (k/n = ${m.ratio_str})`, 424, 292);
+    ctx.globalAlpha = e; ctx.fillStyle = "#10b981"; ctx.font = "bold 12px sans-serif"; ctx.fillText("→ Next: Packetize & encode with Convolutional Code K=7", 424, 330); ctx.globalAlpha = 1;
+    caption("Scene 1 · Separated Source Compression", `Image is compressed via ${dig.source_desc} into ${dig.n_info_bits.toLocaleString()} bits.`);
+    return;
+  }
+
+  if (t < 7.5) {
+    const u = (t - 3.0) / 4.5;
+    drawRoundRect(ctx, 48, 76, 460, 290, 12, "#111827", "#6366f1");
+    ctx.fillStyle = "#a5b4fc"; ctx.font = "bold 13px sans-serif"; ctx.fillText(`Packetization (${dig.n_packets} packet(s) ≤ 1024 bits)`, 66, 104);
+    for (let i = 0; i < Math.min(8, Math.max(1, dig.n_packets)); i++) {
+      const py = 122 + i * 28; drawRoundRect(ctx, 66, py, 390, 22, 5, "#0f172a", "#4f46e5");
+      ctx.fillStyle = "#e2e8f0"; ctx.font = "11px monospace"; ctx.fillText(`Packet #${i + 1} [ ≤1024 info bits + 6 zero tail bits ]`, 78, py + 15);
+    }
+    drawRoundRect(ctx, 536, 76, 496, 290, 12, "#111827", digColor);
+    ctx.fillStyle = "#fcd34d"; ctx.font = "bold 13px sans-serif"; ctx.fillText(`Convolutional Encoder K=7, G=(133, 171) + Puncturing`, 556, 104);
+    for (let k = 0; k < 7; k++) {
+      const bitVal = ((Math.floor(u * 16) + k) % 2);
+      drawRoundRect(ctx, 564 + k * 56, 135, 44, 40, 6, bitVal ? "rgba(245,158,11,0.25)" : "#0f172a", digColor);
+      ctx.fillStyle = "#fff"; ctx.font = "bold 14px monospace"; ctx.textAlign = "center"; ctx.fillText(String(bitVal), 564 + k * 56 + 22, 160);
+    }
+    ctx.textAlign = "left"; ctx.fillStyle = "#94a3b8"; ctx.font = "12px monospace";
+    ctx.fillText(`MCS: ${dig.mcs}`, 556, 225); ctx.fillText(`Info Bits: ${dig.n_info_bits.toLocaleString()}`, 556, 252);
+    ctx.fillText(`Coded Bits: ${dig.n_coded_bits.toLocaleString()} (punctured)`, 556, 279);
+    caption("Scene 2 · Channel Coding (IEEE 802.11a Conv. Code)", `Each ≤1024-bit packet is encoded with K=7 (133,171) and punctured to ${dig.mcs}.`);
+    return;
+  }
+
+  if (t < 11.0) {
+    const u = (t - 7.5) / 3.5;
+    drawRoundRect(ctx, 48, 76, 440, 290, 12, "#111827", digColor);
+    ctx.fillStyle = "#fcd34d"; ctx.font = "bold 13.5px sans-serif"; ctx.fillText(`Gray-Coded QAM Mapper (${dig.mcs})`, 66, 104);
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "12.5px monospace";
+    ctx.fillText(`Coded Bits:  ${dig.n_coded_bits.toLocaleString()}`, 66, 146);
+    ctx.fillText(`QAM Symbols: ${dig.n_symbols.toLocaleString()} complex`, 66, 174);
+    ctx.fillText(`Unit Energy: E[|s|²] = 1.0`, 66, 202);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "12px sans-serif"; ctx.fillText("Gray mapping minimizes bit flips between adjacent symbols.", 66, 246);
+
+    drawRoundRect(ctx, 518, 76, 514, 290, 12, "#111827", "#38bdf8");
+    ctx.fillStyle = "#38bdf8"; ctx.font = "bold 13px sans-serif"; ctx.fillText(`Discrete Constellation & Decision Boundaries (${dig.mcs})`, 538, 104);
+    const cx = 775, cy = 232, S = 76;
+    ctx.strokeStyle = "#1e293b"; ctx.beginPath(); ctx.moveTo(cx - 180, cy); ctx.lineTo(cx + 180, cy); ctx.moveTo(cx, cy - 105); ctx.lineTo(cx, cy + 105); ctx.stroke();
+    const qLevels = dig.qam_levels || [];
+    ctx.strokeStyle = "rgba(56,189,248,0.18)";
+    for (let i = 0; i < qLevels.length - 1; i++) {
+      const mid = 0.5 * (qLevels[i] + qLevels[i + 1]) * S;
+      ctx.beginPath(); ctx.moveTo(cx + mid, cy - 105); ctx.lineTo(cx + mid, cy + 105); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx - 140, cy - mid); ctx.lineTo(cx + 140, cy - mid); ctx.stroke();
+    }
+    const pts = dig.iq_points || [], nShow = Math.floor(easeOut(clamp01(u * 1.4)) * pts.length);
+    ctx.fillStyle = digColor;
+    for (let i = 0; i < nShow; i++) { const [ti, tq] = pts[i]; ctx.beginPath(); ctx.arc(cx + ti * S, cy - tq * S, 4.0, 0, Math.PI * 2); ctx.fill(); }
+    caption("Scene 3 · Gray QAM Modulation", `Coded bits map onto discrete ${dig.mcs} constellation grid points.`);
+    return;
+  }
+
+  if (t < 14.5) {
+    const u = (t - 11.0) / 3.5, e = easeOut(clamp01(u * 1.4));
+    drawRoundRect(ctx, 48, 76, 420, 290, 12, "#111827", "#f43f5e");
+    ctx.fillStyle = "#fda4af"; ctx.font = "bold 13.5px sans-serif"; ctx.fillText(`${m.channel_kind.toUpperCase()} Channel (${m.inst_snr_db} dB)`, 66, 104);
+    ctx.strokeStyle = digColor; ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let x = 0; x <= 370; x += 4) {
+      const y = 215 + Math.sin(x * 0.07 - u * 18) * 28 + (1 - m.snr_db / 25) * 16 * Math.sin(x * 0.7 + u * 25) * e;
+      if (x === 0) ctx.moveTo(72 + x, y); else ctx.lineTo(72 + x, y);
+    }
+    ctx.stroke();
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "12px monospace"; ctx.fillText(`Target SNR: ${m.snr_db} dB  |  σ² = ${m.sigma2}`, 66, 326);
+
+    drawRoundRect(ctx, 496, 76, 536, 290, 12, "#111827", "#f43f5e");
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "bold 13px sans-serif"; ctx.fillText("Constellation Perturbation: Tx Grid → Rx Cloud", 516, 104);
+    const cx = 764, cy = 232, S = 72;
+    ctx.strokeStyle = "#1e293b"; ctx.beginPath(); ctx.moveTo(cx - 180, cy); ctx.lineTo(cx + 180, cy); ctx.moveTo(cx, cy - 105); ctx.lineTo(cx, cy + 105); ctx.stroke();
+    for (const [ti, tq, ri, rq] of (dig.iq_points || [])) {
+      ctx.fillStyle = "rgba(244,63,94,0.72)";
+      ctx.beginPath(); ctx.arc(cx + (ti + (ri - ti) * e) * S, cy - (tq + (rq - tq) * e) * S, 2.8, 0, Math.PI * 2); ctx.fill();
+    }
+    caption("Scene 4 · Wireless Channel Propagation", `At low SNR, noisy QAM points cross decision boundaries and cause LLR uncertainty.`);
+    return;
+  }
+
+  if (t < 17.5) {
+    const u = (t - 14.5) / 3.0;
+    drawRoundRect(ctx, 48, 76, 984, 290, 12, "#111827", dig.cliff_hit ? "#f43f5e" : "#10b981");
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "bold 14px sans-serif"; ctx.fillText("Soft Max-Log LLR Demodulation → Batched Viterbi Trellis Decoding", 72, 108);
+    ctx.strokeStyle = dig.cliff_hit ? "#f43f5e" : "#10b981"; ctx.lineWidth = 3; ctx.beginPath();
+    for (let i = 0; i <= Math.floor(u * 16); i++) { const tx = 80 + i * 56, ty = 152 + Math.sin(i * 1.7) * 20; if (i === 0) ctx.moveTo(tx, ty); else ctx.lineTo(tx, ty); }
+    ctx.stroke();
+
+    const txB = dig.sample_info_bits || [], rxB = dig.sample_rec_bits || [];
+    ctx.font = "bold 12px monospace"; ctx.fillStyle = "#94a3b8"; ctx.fillText("Tx Bits:", 72, 208); ctx.fillText("Rx Bits:", 72, 230);
+    for (let b = 0; b < Math.min(36, txB.length); b++) {
+      const bx = 148 + b * 22;
+      ctx.fillStyle = "#cbd5e1"; ctx.fillText(String(txB[b]), bx, 208);
+      ctx.fillStyle = txB[b] !== rxB[b] ? "#f43f5e" : "#10b981"; ctx.fillText(String(rxB[b]), bx, 230);
+    }
+    ctx.fillStyle = "#e2e8f0"; ctx.font = "13px monospace"; ctx.fillText(`Bit Error Rate (BER): ${(dig.ber * 100).toFixed(3)}% (${dig.bit_errors} / ${dig.n_info_bits} errors)`, 72, 266);
+    if (dig.cliff_hit) {
+      drawRoundRect(ctx, 72, 286, 936, 52, 8, "rgba(244,63,94,0.18)", "#f43f5e");
+      ctx.fillStyle = "#fecdd3"; ctx.font = "bold 14px sans-serif"; ctx.fillText("⚠ CLIFF EFFECT TRIGGERED: Residual bit errors corrupted the compressed stream!", 92, 318);
+    } else {
+      drawRoundRect(ctx, 72, 286, 936, 52, 8, "rgba(16,185,129,0.16)", "#10b981");
+      ctx.fillStyle = "#6ee7b7"; ctx.font = "bold 14px sans-serif"; ctx.fillText("✓ CLEAN VITERBI DECODE: 0 residual bit errors.", 92, 318);
+    }
+    caption("Scene 5 · Soft Demodulation & Viterbi Decoding", dig.cliff_hit ? "Below MCS threshold, Viterbi leaves bit errors—causing catastrophic cliff failure." : "Clean decode, capped by source budget.");
+    return;
+  }
+
+  const u = (t - 17.5) / 3.5, e = easeOut(clamp01(u * 1.5));
+  drawRoundRect(ctx, 48, 82, 984, 285, 12, "#111827", dig.cliff_hit ? "#f43f5e" : digColor);
+  ctx.fillStyle = digColor; ctx.font = "bold 13.5px sans-serif"; ctx.fillText(`Separated Digital Output (${dig.mcs}) vs Original`, 72, 108);
+  ctx.imageSmoothingEnabled = m.dataset !== "cifar10";
+  if (vidState.imgs.orig && vidState.imgs.orig.complete) ctx.drawImage(vidState.imgs.orig, 72, 126, 230, 172);
+  ctx.fillStyle = "#94a3b8"; ctx.font = "11.5px sans-serif"; ctx.fillText(`Original (${m.orig_label})`, 72, 320);
+  ctx.globalAlpha = e;
+  const targetIm = vidState.errScene6 ? vidState.imgs.err : vidState.imgs.recon;
+  if (targetIm && targetIm.complete) ctx.drawImage(targetIm, 330, 126, 230, 172);
+  ctx.fillStyle = dig.label_match ? "#10b981" : "#f43f5e"; ctx.font = "bold 11.5px sans-serif";
+  ctx.fillText(vidState.errScene6 ? "|x - x̂| Error Heatmap" : `Received (${dig.pred_label})`, 330, 320);
+  [["PSNR", `${dig.psnr} dB`], ["SSIM", `${dig.ssim}`], [dig.sem_metric, `${dig.sem_score}`], ["Cliff Effect?", dig.cliff_hit ? "⚠ YES (Failed)" : "✓ No (Clean)"]].forEach(([k, v], idx) => {
+    const my = 126 + idx * 54; drawRoundRect(ctx, 600, my, 400, 44, 8, "#0f172a", "#243047");
+    ctx.fillStyle = "#94a3b8"; ctx.font = "10px sans-serif"; ctx.fillText(k.toUpperCase(), 614, my + 16);
+    ctx.fillStyle = "#fff"; ctx.font = "bold 13px monospace"; ctx.fillText(v, 614, my + 34);
+  });
+  ctx.globalAlpha = 1;
+  caption("Scene 6 · Digital Reconstruction & Cliff Effect", `Result: PSNR ${dig.psnr} dB, ${dig.sem_metric} ${dig.sem_score}.`);
+}
+
+// ---- Synchronized 3-Way Race Canvas ----
+function renderRaceCanvas(t) {
+  const c = document.getElementById("raceCanvas"), ctx = c.getContext("2d"), W = c.width, H = c.height;
+  ctx.clearRect(0, 0, W, H);
+  const d = state.data, m = d.meta, prog = clamp01(t / VID_DURATION);
+
+  const lanes = [
+    { name: "1. Separated Digital (Shannon)", sys: d.digital, color: "#f59e0b", img: vidState.imgs.digRecon, y: 18,
+      stages: ["Source JPEG/DAE", "K=7 Conv Code", `QAM ${d.digital.mcs}`, `${m.channel_kind.toUpperCase()}`, d.digital.cliff_hit ? "⚠ CLIFF FAIL" : "Viterbi OK", "Decode"] },
+    { name: `2. Syntactic Deep JSCC (${d.jscc_mse.model_name})`, sys: d.jscc_mse, color: "#38bdf8", img: vidState.imgs.mseRecon, y: 166,
+      stages: ["RGB Pixels", "Conv1+Conv2", "Power Norm P=1", `${m.channel_kind.toUpperCase()}`, "CNN Decoder", "Pixel Eval"] },
+    { name: "3. Semantic Deep JSCC (Proposed)", sys: d.jscc_sem, color: "#10b981", img: vidState.imgs.semRecon, y: 314,
+      stages: ["RGB Pixels", "Semantic Conv", "Power Norm P=1", `${m.channel_kind.toUpperCase()}`, "Semantic Dec", "Meaning Eval"] },
+  ];
+
+  lanes.forEach((ln) => {
+    const isFail = ln.sys.cliff_hit && prog > 0.68;
+    drawRoundRect(ctx, 22, ln.y, W - 44, 134, 12, "#111827", isFail ? "#f43f5e" : ln.color);
+    ctx.fillStyle = ln.color; ctx.font = "bold 13px sans-serif"; ctx.fillText(ln.name, 38, ln.y + 22);
+    ctx.fillStyle = "#94a3b8"; ctx.font = "11px monospace";
+    ctx.fillText(`PSNR ${ln.sys.psnr} dB · ${ln.sys.sem_metric}: ${ln.sys.sem_score} · Label: ${ln.sys.pred_label} (${ln.sys.label_match ? '✓' : '✗'})`, 340, ln.y + 22);
+
+    // 6 mini stage nodes along the track
+    const trackX0 = 40, trackW = 790, sw = trackW / 6;
+    for (let s = 0; s < 6; s++) {
+      const sx = trackX0 + s * sw, reached = prog >= (s / 6);
+      const nodeFail = (ln.sys.cliff_hit && s >= 4 && reached);
+      drawRoundRect(ctx, sx, ln.y + 42, sw - 12, 46, 8, nodeFail ? "rgba(244,63,94,0.22)" : (reached ? "rgba(255,255,255,0.06)" : "#0b0f19"), nodeFail ? "#f43f5e" : (reached ? ln.color : "#243047"));
+      ctx.fillStyle = nodeFail ? "#fecdd3" : (reached ? "#fff" : "#64748b");
+      ctx.font = "bold 10.5px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(ln.stages[s], sx + (sw - 12) / 2, ln.y + 69);
+    }
+    ctx.textAlign = "left";
+
+    // Racing packet dot along the track
+    const raceProg = ln.sys.cliff_hit ? Math.min(0.72, prog) : prog;
+    const dotX = trackX0 + raceProg * (trackW - 14);
+    ctx.beginPath(); ctx.arc(dotX, ln.y + 108, 7, 0, Math.PI * 2);
+    ctx.fillStyle = isFail ? "#f43f5e" : ln.color; ctx.fill();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+
+    // Result preview thumbnail on the right
+    if (prog > 0.78 && ln.img && ln.img.complete) {
+      ctx.globalAlpha = easeOut((prog - 0.78) / 0.18);
+      ctx.imageSmoothingEnabled = m.dataset !== "cifar10";
+      ctx.drawImage(ln.img, 854, ln.y + 16, 175, 102);
+      ctx.globalAlpha = 1;
+    } else {
+      drawRoundRect(ctx, 854, ln.y + 16, 175, 102, 8, "#0b0f19", "#243047");
+      ctx.fillStyle = "#64748b"; ctx.font = "11px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText(isFail ? "⚠ CLIFF COLLAPSE" : "Transmitting…", 941, ln.y + 70);
+      ctx.textAlign = "left";
+    }
+  });
+}
+
+// ---- Video CR Lab + Training & Results ----
+function fillWrappedText(ctx, text, x, y, maxW, lineH, maxLines = 2) {
+  const words = String(text).split(/\s+/);
+  let line = "", lines = [];
+  for (const w of words) {
+    const cand = line ? `${line} ${w}` : w;
+    if (ctx.measureText(cand).width > maxW && line) {
+      lines.push(line);
+      line = w;
+      if (lines.length >= maxLines) break;
+    } else {
+      line = cand;
+    }
+  }
+  if (line && lines.length < maxLines) lines.push(line);
+  lines.forEach((ln, idx) => ctx.fillText(ln, x, y + idx * lineH));
+  return lines.length;
+}
+
+function bindTrainingAndVcrControls() {
+  document.getElementById("vcrRunBtn").onclick = loadVideoCR;
+  document.getElementById("vcrClipSel").onchange = loadVideoCR;
+  document.getElementById("vcrFracSel").onchange = loadVideoCR;
+  document.getElementById("vcrPlayBtn").onclick = () => {
+    state.vcrPlaying = !state.vcrPlaying;
+    document.getElementById("vcrPlayBtn").textContent = state.vcrPlaying ? "⏸ Pause" : "▶ Play";
+  };
+  document.getElementById("vcrScrub").oninput = (e) => {
+    state.vcrPlaying = false;
+    document.getElementById("vcrPlayBtn").textContent = "▶ Play";
+    state.vcrFrame = Number(e.target.value);
+    renderVideoCRFrame();
+  };
+  setInterval(() => {
+    if (state.view === "vcr" && state.vcrPlaying && state.vcrData) {
+      state.vcrFrame = (state.vcrFrame + 1) % state.vcrData.T;
+      document.getElementById("vcrScrub").value = state.vcrFrame;
+      renderVideoCRFrame();
+    }
+  }, 420);
+
+  document.getElementById("trnPlayBtn").onclick = () => {
+    state.trnPlaying = !state.trnPlaying;
+    document.getElementById("trnPlayBtn").textContent = state.trnPlaying ? "⏸ Pause" : "▶ Animate Epochs";
+    if (state.trnPlaying && state.projectData) {
+      const m = state.projectData.models.find(x => x.name === state.selModel);
+      if (m && state.trnEpochIdx >= m.logs.length) state.trnEpochIdx = 1;
+      drawTrainingVisuals();
+    }
+  };
+  document.getElementById("trnReplayBtn").onclick = () => {
+    state.trnEpochIdx = 1; state.trnPlaying = true;
+    document.getElementById("trnPlayBtn").textContent = "⏸ Pause";
+    drawTrainingVisuals();
+  };
+  setInterval(() => {
+    if (state.view === "training" && state.trnPlaying && state.projectData) {
+      const m = state.projectData.models.find(x => x.name === state.selModel);
+      if (m && state.trnEpochIdx < m.logs.length) {
+        state.trnEpochIdx++;
+        drawTrainingVisuals();
+      } else {
+        state.trnPlaying = false;
+        document.getElementById("trnPlayBtn").textContent = "▶ Animate Epochs";
+      }
+    }
+  }, 240);
+
+  document.querySelectorAll("[data-sumds]").forEach(b => b.onclick = () => {
+    state.sumFilter = b.dataset.sumds;
+    document.querySelectorAll("[data-sumds]").forEach(x => x.classList.toggle("active", x === b));
+    renderSummaryTable();
+  });
+}
+
+async function loadVideoCR() {
+  const clip = document.getElementById("vcrClipSel").value;
+  const frac = Number(document.getElementById("vcrFracSel").value);
+  document.getElementById("loadingPill").classList.add("show");
+  document.getElementById("vcrStatsStrip").innerHTML = `<div class="meta-chip">⏳ Simulating Semantic Video CR on <b>${clip}</b> (SNR=${state.snr_db} dB, c=${state.c_active}, frac=${Math.round(frac * 100)}%)…</div>`;
+  document.getElementById("vcrGrid").innerHTML = `<div class="vcr-card" style="grid-column:1/-1;text-align:center;padding:28px;color:var(--muted);">Encoding & transmitting 12 CIF frames (352×288) through Semantic Deep JSCC…</div>`;
+  try {
+    const res = await fetch("/api/video_sim", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        clip, frac,
+        snr_db: state.snr_db,
+        c_active: state.c_active,
+        seed: state.seed,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error || !Array.isArray(data.frames)) {
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
+    state.vcrData = data;
+    state.vcrFrame = 0;
+    document.getElementById("vcrScrub").max = data.T - 1;
+    document.getElementById("vcrScrub").value = 0;
+    requestAnimationFrame(() => renderVideoCRFrame());
+  } catch (err) {
+    document.getElementById("vcrGrid").innerHTML = `<div class="cliff-alert" style="grid-column:1/-1;">Video CR error: ${err.message}</div>`;
+  } finally {
+    document.getElementById("loadingPill").classList.remove("show");
+  }
+}
+
+function drawVcrChart() {
+  const vd = state.vcrData;
+  const c = document.getElementById("vcrChart");
+  if (!vd || !c || !c.parentElement) return;
+  const wrap = c.parentElement;
+  if (wrap.clientWidth < 20) return;
+  c.width = wrap.clientWidth; c.height = wrap.clientHeight;
+  const ctx = c.getContext("2d"), W = c.width, H = c.height;
+  const pad = { l: 48, r: 16, t: 22, b: 24 };
+  ctx.clearRect(0, 0, W, H);
+  const allP = vd.frames.flatMap(x => [x.psnr_fbf, x.psnr_cr]);
+  const pMin = Math.floor(Math.min(...allP) - 1), pMax = Math.ceil(Math.max(...allP) + 1);
+  const xOf = t => pad.l + (t / Math.max(1, vd.T - 1)) * (W - pad.l - pad.r);
+  const yOf = p => H - pad.b - ((p - pMin) / Math.max(1e-4, pMax - pMin)) * (H - pad.t - pad.b);
+
+  ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1;
+  [0, 0.5, 1].forEach(u => {
+    const yy = pad.t + u * (H - pad.t - pad.b);
+    ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(W - pad.r, yy); ctx.stroke();
+    const val = (pMax - u * (pMax - pMin)).toFixed(1);
+    ctx.fillStyle = "#64748b"; ctx.font = "10px monospace"; ctx.fillText(`${val}`, 6, yy + 3);
+  });
+
+  // Current frame vertical bar
+  const cx = xOf(state.vcrFrame);
+  ctx.strokeStyle = "rgba(99,102,241,0.55)"; ctx.setLineDash([4, 3]);
+  ctx.beginPath(); ctx.moveTo(cx, pad.t); ctx.lineTo(cx, H - pad.b); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Frame-by-frame series
+  ctx.strokeStyle = "#38bdf8"; ctx.lineWidth = 2.2; ctx.beginPath();
+  vd.frames.forEach((fr, i) => {
+    const x = xOf(fr.t), y = yOf(fr.psnr_fbf);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Conditional replenishment series
+  ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2.2; ctx.beginPath();
+  vd.frames.forEach((fr, i) => {
+    const x = xOf(fr.t), y = yOf(fr.psnr_cr);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  vd.frames.forEach(fr => {
+    const x = xOf(fr.t);
+    ctx.fillStyle = fr.t === state.vcrFrame ? "#fff" : "#38bdf8";
+    ctx.beginPath(); ctx.arc(x, yOf(fr.psnr_fbf), fr.t === state.vcrFrame ? 4 : 2.5, 0, 6.28); ctx.fill();
+    ctx.fillStyle = fr.t === state.vcrFrame ? "#fff" : "#10b981";
+    ctx.beginPath(); ctx.arc(x, yOf(fr.psnr_cr), fr.t === state.vcrFrame ? 4 : 2.5, 0, 6.28); ctx.fill();
+    ctx.fillStyle = fr.is_key ? "#fcd34d" : "#64748b"; ctx.font = "10px monospace";
+    ctx.fillText(fr.is_key ? `K${fr.t}` : `${fr.t}`, x - 6, H - 6);
+  });
+
+  ctx.fillStyle = "#38bdf8"; ctx.font = "bold 11px sans-serif";
+  ctx.fillText("● Frame-by-Frame (100% BW)", pad.l, 14);
+  ctx.fillStyle = "#10b981";
+  ctx.fillText(`● Conditional Replenishment (-${vd.bw_saving_pct}% BW)`, pad.l + 185, 14);
+}
+
+function renderVideoCRFrame() {
+  const vd = state.vcrData;
+  if (!vd || !vd.frames || !vd.frames.length) return;
+  const f = vd.frames[state.vcrFrame] || vd.frames[0];
+  document.getElementById("vcrFrameBadge").textContent = `Frame ${f.t} / ${vd.T - 1} ${f.is_key ? '(KEYFRAME)' : ''}`;
+  document.getElementById("vcrStatsStrip").innerHTML = `
+    <div class="meta-chip">Clip <b>${vd.clip}</b> (${vd.W}×${vd.H}) · SNR <b>${vd.snr_db} dB</b></div>
+    <div class="meta-chip">Frame-by-Frame k/n: <b>${vd.fbf_ratio}</b></div>
+    <div class="meta-chip">Conditional Replenishment k/n: <b>${vd.cr_ratio}</b> (<span style="color:var(--sem)">-${vd.bw_saving_pct}% bandwidth</span>)</div>
+    <div class="meta-chip">Side-info Share: <b>${vd.side_share_pct}%</b> · Blocks sent this frame: <b>${f.pct_sent}%</b></div>
+  `;
+  document.getElementById("vcrGrid").innerHTML = `
+    <div class="vcr-card"><h3>Original Frame #${f.t}</h3><img src="${f.orig_b64}" /><div style="font-size:11px;color:var(--muted);">Raw YUV→RGB</div></div>
+    <div class="vcr-card"><h3>Latent Change Heatmap</h3><img src="${f.diff_b64}" style="image-rendering:pixelated;" /><div style="font-size:11px;color:var(--sem);">${f.is_key ? 'Keyframe: 100% blocks sent' : `Green = ${f.pct_sent}% changed 2×2 blocks sent`}</div></div>
+    <div class="vcr-card"><h3>Frame-by-Frame JSCC</h3><img src="${f.fbf_b64}" /><div style="font-size:11px;font-family:monospace;">PSNR: ${f.psnr_fbf} dB</div></div>
+    <div class="vcr-card"><h3>Conditional Replenishment</h3><img src="${f.cr_b64}" /><div style="font-size:11px;font-family:monospace;">PSNR: ${f.psnr_cr} dB (-${vd.bw_saving_pct}% BW)</div></div>
+  `;
+  drawVcrChart();
+}
+
+async function loadProjectData() {
+  document.getElementById("modelRoleDesc").innerHTML = `<span style="color:#a5b4fc;">⏳ Loading training logs and evaluation summary from backend…</span>`;
+  try {
+    const res = await fetch("/api/project_data");
+    const data = await res.json();
+    if (!res.ok || data.error || !Array.isArray(data.models)) {
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
+    state.projectData = data;
+    const pills = document.getElementById("modelPills");
+    pills.innerHTML = state.projectData.models.map(m =>
+      `<button class="m-pill ${m.name === state.selModel ? 'active' : ''}" data-m="${m.name}">${m.name}</button>`
+    ).join("");
+    pills.querySelectorAll(".m-pill").forEach(b => {
+      b.onclick = () => {
+        state.selModel = b.dataset.m;
+        pills.querySelectorAll(".m-pill").forEach(x => x.classList.toggle("active", x === b));
+        const mod = state.projectData.models.find(x => x.name === state.selModel);
+        state.trnEpochIdx = mod ? mod.logs.length : 1;
+        drawTrainingVisuals();
+      };
+    });
+    requestAnimationFrame(() => drawTrainingVisuals());
+    renderSummaryTable();
+  } catch (err) {
+    document.getElementById("modelRoleDesc").innerHTML = `<div class="cliff-alert">Failed to load training &amp; summary data: ${err.message}</div>`;
+  }
+}
+
+function drawTrainingVisuals() {
+  if (!state.projectData) return;
+  const m = state.projectData.models.find(x => x.name === state.selModel);
+  if (!m) return;
+  const maxEp = m.logs.length;
+  const curEp = Math.min(maxEp, Math.max(1, state.trnEpochIdx));
+  document.getElementById("modelRoleDesc").innerHTML = `<b>${m.name}</b> · <b>${m.metric_label}: ${m.val_metric}</b> · ${m.params.toLocaleString()} params · ${m.epochs} epochs · ${m.train_s}s on ${m.device}<br><span style="color:var(--muted);">${m.role}</span>`;
+  document.getElementById("trnEpochBadge").textContent = `Epoch ${curEp} / ${maxEp}`;
+
+  // Draw Train Loss & Val Metric curve up to curEp
+  const c = document.getElementById("trainChart"), wrap = c.parentElement;
+  if (wrap.clientWidth >= 20 && wrap.clientHeight >= 20) {
+    c.width = wrap.clientWidth; c.height = wrap.clientHeight;
+    const ctx = c.getContext("2d"), W = c.width, H = c.height, pad = { l: 50, r: 52, t: 32, b: 28 };
+    ctx.clearRect(0, 0, W, H);
+    if (m.logs.length) {
+      const logs = m.logs.slice(0, curEp);
+      const lMin = Math.min(...m.logs.map(x => x.loss)), lMax = Math.max(...m.logs.map(x => x.loss));
+      const vMin = Math.min(...m.logs.map(x => x.val_metric)), vMax = Math.max(...m.logs.map(x => x.val_metric));
+      const xOf = ep => pad.l + ((ep - 1) / Math.max(1, maxEp - 1)) * (W - pad.l - pad.r);
+      const yL = v => H - pad.b - ((v - lMin) / Math.max(1e-6, lMax - lMin)) * (H - pad.t - pad.b);
+      const yV = v => H - pad.b - ((v - vMin) / Math.max(1e-6, vMax - vMin)) * (H - pad.t - pad.b);
+
+      // Grid & Axis ticks
+      ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1;
+      [0, 0.5, 1].forEach(u => {
+        const yy = pad.t + u * (H - pad.t - pad.b);
+        ctx.beginPath(); ctx.moveTo(pad.l, yy); ctx.lineTo(W - pad.r, yy); ctx.stroke();
+        ctx.fillStyle = "#fda4af"; ctx.font = "10px monospace";
+        ctx.fillText((lMax - u * (lMax - lMin)).toFixed(3), 4, yy + 3);
+        ctx.fillStyle = "#6ee7b7";
+        ctx.fillText((vMax - u * (vMax - vMin)).toFixed(2), W - pad.r + 4, yy + 3);
+      });
+      ctx.fillStyle = "#64748b"; ctx.font = "10px monospace";
+      ctx.fillText("Ep 1", pad.l, H - 8);
+      ctx.fillText(`Ep ${Math.ceil(maxEp / 2)}`, xOf(Math.ceil(maxEp / 2)) - 14, H - 8);
+      ctx.fillText(`Ep ${maxEp}`, W - pad.r - 28, H - 8);
+
+      // Playhead line
+      const px = xOf(curEp);
+      ctx.strokeStyle = "rgba(99,102,241,0.5)"; ctx.setLineDash([4, 3]);
+      ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, H - pad.b); ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Loss curve
+      ctx.strokeStyle = "#f43f5e"; ctx.lineWidth = 2.5; ctx.beginPath();
+      logs.forEach((p, i) => { const x = xOf(p.epoch), y = yL(p.loss); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+      ctx.stroke();
+      // Val metric curve
+      ctx.strokeStyle = "#10b981"; ctx.lineWidth = 2.5; ctx.beginPath();
+      logs.forEach((p, i) => { const x = xOf(p.epoch), y = yV(p.val_metric); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+      ctx.stroke();
+
+      const last = logs[logs.length - 1];
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(xOf(last.epoch), yL(last.loss), 3.5, 0, 6.28); ctx.fill();
+      ctx.beginPath(); ctx.arc(xOf(last.epoch), yV(last.val_metric), 3.5, 0, 6.28); ctx.fill();
+
+      ctx.fillStyle = "#fda4af"; ctx.font = "bold 11px monospace";
+      ctx.fillText(`● Loss: ${last.loss}`, pad.l, 15);
+      ctx.fillStyle = "#6ee7b7";
+      ctx.fillText(`● ${m.metric_label}: ${last.val_metric}`, Math.max(pad.l + 125, W * 0.48), 15);
+    }
+  }
+
+  // Draw 4-Stage Training Pipeline Animation with wrapped text
+  const ac = document.getElementById("trainArchCanvas"), aw = ac.parentElement;
+  if (aw.clientWidth >= 20 && aw.clientHeight >= 20) {
+    ac.width = aw.clientWidth; ac.height = aw.clientHeight;
+    const actx = ac.getContext("2d"), AW = ac.width, AH = ac.height;
+    actx.clearRect(0, 0, AW, AH);
+    const stages = [
+      { title: "Stage 1 · Train CIFAR-10 Judges (clsA, clsB)", desc: "clsA ResNetSmall (85.7%) & clsB VGGSmall (88.3% independent judge)", col: "#a855f7", match: ["clsA", "clsB"] },
+      { title: "Stage 2 · Syntactic & Digital Baselines", desc: "4-bit DAE + Syntactic JSCC (MSE loss, U[0,20] dB & fixed 0/10/20 dB)", col: "#38bdf8", match: ["dae", "jscc_mse", "jscc_mse_snr0", "jscc_mse_snr10", "jscc_mse_snr20"] },
+      { title: "Stage 3 · Semantic Deep JSCC (Frozen clsA)", desc: "Loss = MSE + 0.01·Feat(clsA) + 0.003·CE(clsA)", col: "#10b981", match: ["jscc_sem"] },
+      { title: "Stage 4 · Task-Oriented Stride-8 JSCC", desc: "End-to-end CE loss → transmits latent features only (no image decoded)", col: "#f59e0b", match: ["task"] },
+    ];
+    const sh = (AH - 20) / 4;
+    stages.forEach((st, i) => {
+      const sy = 8 + i * sh, active = st.match.includes(m.name);
+      drawRoundRect(actx, 10, sy, AW - 20, sh - 8, 9, active ? "rgba(99,102,241,0.22)" : "#0f172a", active ? st.col : "#243047");
+      actx.fillStyle = st.col; actx.font = "bold 12px sans-serif";
+      fillWrappedText(actx, st.title, 22, sy + 20, AW - 44, 15, 1);
+      actx.fillStyle = active ? "#f8fafc" : "#94a3b8"; actx.font = "11px sans-serif";
+      fillWrappedText(actx, st.desc, 22, sy + 39, AW - 44, 14, 2);
+      if (i < stages.length - 1) {
+        drawFlowArrow(actx, AW / 2, sy + sh - 8, AW / 2, sy + sh, active ? st.col : "#334155", Date.now() / 1000);
+      }
+    });
+  }
+}
+
+function renderSummaryTable() {
+  if (!state.projectData) return;
+  const rows = state.projectData.summary.filter(r => state.sumFilter === "all" || r.dataset === state.sumFilter);
+  const head = `<thead><tr><th>Dataset</th><th>Scheme</th><th>SNR</th><th>PSNR</th><th>SSIM</th><th>CIFAR Acc</th><th>Kodak/Vid Sem Cos</th><th>Top-1 Agree</th><th>Best MCS</th></tr></thead>`;
+  const body = rows.map(r => `<tr>
+    <td>${r.dataset}</td><td>${r.scheme}</td><td>${r.snr} dB</td>
+    <td>${r.psnr ?? '—'}</td><td>${r.ssim ?? '—'}</td>
+    <td>${r.acc !== null ? r.acc + '%' : '—'}</td>
+    <td>${r.sem_cos ?? '—'}</td>
+    <td>${r.top1_agree !== null ? r.top1_agree + '%' : '—'}</td>
+    <td>${r.mcs || '—'}</td>
+  </tr>`).join("");
+  document.getElementById("summaryTable").innerHTML = `${head}<tbody>${body}</tbody>`;
+}
+
+init();
+</script>
+</body>
+</html>

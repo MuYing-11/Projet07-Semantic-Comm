@@ -1,0 +1,26 @@
+# Données : 391 Mo, régénérables par scripts/download_data.py
+# (cifar10.npz 177 Mo et train.parquet 115 Mo dépassent la limite de 100 Mo de GitHub)
+data/
+
+# Sauvegarde CPU des modèles : doublon de results/models/
+results/models_cpu_backup/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Fichiers de travail
+*.bak
+*.tmp
+.ipynb_checkpoints/
+
+# Fichiers de verrouillage Office (créés quand un .pptx/.docx est ouvert)
+~$*
+
+# Système
+Thumbs.db
+desktop.ini
+.DS_Store

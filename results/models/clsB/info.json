@@ -1,0 +1,9 @@
+{
+ "name": "clsB",
+ "kind": "cls",
+ "arch": "B",
+ "epochs": 15,
+ "params": 308394,
+ "train_s": 3387.6180498600006,
+ "val_metric": 0.8830000162124634
+}

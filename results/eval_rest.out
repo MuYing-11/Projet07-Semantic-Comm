@@ -1,0 +1,36 @@
+learned models on cuda
+wrote results\eval\cifar_capacity.csv 42 rows
+digital QPSK 1/2 0.08333333333333333 awgn
+digital QPSK 1/2 0.16666666666666666 awgn
+digital QPSK 3/4 0.08333333333333333 awgn
+digital QPSK 3/4 0.16666666666666666 awgn
+digital 16QAM 1/2 0.08333333333333333 awgn
+digital 16QAM 1/2 0.16666666666666666 awgn
+digital 16QAM 3/4 0.08333333333333333 awgn
+digital 16QAM 3/4 0.16666666666666666 awgn
+digital 64QAM 2/3 0.08333333333333333 awgn
+digital 64QAM 2/3 0.16666666666666666 awgn
+digital 64QAM 3/4 0.08333333333333333 awgn
+digital 64QAM 3/4 0.16666666666666666 awgn
+digital QPSK 1/2 0.08333333333333333 rayleigh
+digital QPSK 3/4 0.08333333333333333 rayleigh
+digital 16QAM 1/2 0.08333333333333333 rayleigh
+digital 16QAM 3/4 0.08333333333333333 rayleigh
+digital 64QAM 2/3 0.08333333333333333 rayleigh
+digital 64QAM 3/4 0.08333333333333333 rayleigh
+wrote results\eval\cifar_digital.csv 318 rows
+jscc_mse done
+jscc_sem done
+wrote results\eval\cifar_analog.csv 406 rows
+evaluation finished in 31.2 min
+C:\Users\LeMonde\AppData\Roaming\Python\Python312\site-packages\triton\windows_utils.py:405: UserWarning: Failed to find CUDA.
+  warnings.warn("Failed to find CUDA.")
+video jscc_mse akiyo
+video jscc_mse foreman
+video jscc_mse bus
+video jscc_sem akiyo
+video jscc_sem foreman
+video jscc_sem bus
+wrote results\eval\video_jscc.csv 144 rows
+wrote results\eval\video_frames.csv 180 rows
+evaluation finished in 6.4 min

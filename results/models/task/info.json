@@ -1,0 +1,13 @@
+{
+ "name": "task",
+ "kind": "task",
+ "snr": [
+  0,
+  20
+ ],
+ "epochs": 20,
+ "params": 474266,
+ "train_s": 370.32067823410034,
+ "val_metric": 0.7574999928474426,
+ "device": "cuda"
+}

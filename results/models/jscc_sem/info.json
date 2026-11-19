@@ -1,0 +1,14 @@
+{
+ "name": "jscc_sem",
+ "kind": "jscc",
+ "loss": "sem",
+ "snr": [
+  0,
+  20
+ ],
+ "epochs": 25,
+ "params": 421715,
+ "train_s": 1345.9608545303345,
+ "val_metric": 25.500102996826172,
+ "device": "cuda"
+}

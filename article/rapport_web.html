@@ -1,0 +1,1191 @@
+<title>Communication Sémantique Apprise</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout : colonne de lecture unique (~72ch), figures et tableaux en pleine largeur */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --surface2:#eef1f5;
+  --fg:#15181e; --muted:#5a6472; --line:#dce1e8;
+  --sem:#0f766e; --syn:#64748b; --dig:#b23a3a;
+  --sans:"IBM Plex Sans","Noto Sans Arabic",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1218; --surface:#161b23; --surface2:#1c222c;
+  --fg:#e6ebf2; --muted:#94a1b2; --line:#263040;
+  --sem:#5eead4; --syn:#9aa7b8; --dig:#f29393; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f1218; --surface:#161b23; --surface2:#1c222c;
+  --fg:#e6ebf2; --muted:#94a1b2; --line:#263040;
+  --sem:#5eead4; --syn:#9aa7b8; --dig:#f29393; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0;margin:0;font-size:16px}
+.wrap{max-width:1040px;margin:0 auto}
+.col{max-width:72ch}
+h1{font-size:clamp(1.9rem,4.4vw,2.9rem);line-height:1.12;letter-spacing:-.02em;font-weight:700;text-wrap:balance;margin:0 0 .6rem}
+h2{font-size:clamp(1.25rem,2.6vw,1.6rem);letter-spacing:-.01em;font-weight:600;text-wrap:balance;margin:0}
+h3{font-size:1.02rem;font-weight:600;margin:0 0 .3rem}
+p{margin:0 0 .9rem}
+a{color:var(--sem)}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .5rem}
+header.top{padding-block:2rem 1.5rem;border-bottom:1px solid var(--line)}
+.lede{font-size:1.12rem;color:var(--muted);max-width:68ch}
+.meta{display:flex;flex-wrap:wrap;gap:.5rem 1.2rem;font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-top:1.2rem}
+section{padding-block:2.5rem;border-bottom:1px solid var(--line)}
+.sec-head{display:flex;gap:1rem;align-items:baseline;flex-wrap:wrap;margin-bottom:1.1rem}
+.sec-num{font-family:var(--mono);font-size:.8rem;color:var(--muted);flex:none}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:1.4rem 0}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem}
+.kpi .v{font-family:var(--mono);font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpi .k{font-size:.78rem;color:var(--muted);margin-top:.35rem;line-height:1.35}
+.kpi.sem .v{color:var(--sem)} .kpi.dig .v{color:var(--dig)}
+figure{margin:1.6rem 0}
+figure img{display:block;width:100%;max-width:100%;height:auto;border:1px solid var(--line);border-radius:4px;background:#fff}
+figcaption{font-size:.84rem;color:var(--muted);margin-top:.55rem;max-width:74ch}
+.svgbox{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.8rem;overflow-x:auto;direction:ltr}
+.svgbox svg{display:block;min-width:620px;width:100%;height:auto}
+.tbl{overflow-x:auto;margin:1.2rem 0;border:1px solid var(--line);border-radius:4px;background:var(--surface);direction:ltr}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:.88rem}
+th,td{text-align:right;padding:.5rem .7rem;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal}
+thead th{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface2)}
+tbody tr:last-child td{border-bottom:none}
+td.num{font-family:var(--mono)}
+.best{color:var(--sem);font-weight:600}
+.bad{color:var(--dig)}
+.note{background:var(--surface2);border-left:2px solid var(--muted);padding:.8rem 1rem;margin:1.3rem 0;font-size:.92rem}
+.note b{font-weight:600}
+code,kbd{font-family:var(--mono);font-size:.88em;background:var(--surface2);padding:.1em .35em;border-radius:3px}
+pre{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:.9rem 1rem;overflow-x:auto;font-family:var(--mono);font-size:.82rem;line-height:1.5;margin:1.1rem 0;direction:ltr;text-align:left}
+pre code{background:none;padding:0}
+ul,ol{margin:0 0 1rem;padding-left:1.3rem}
+li{margin-bottom:.35rem}
+.toc{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:1rem 1.2rem;margin:1.6rem 0}
+.toc ol{margin:0;padding-left:1.2rem;font-size:.92rem;columns:2;column-gap:2rem}
+@media(max-width:560px){.toc ol{columns:1}}
+.toc a{text-decoration:none;color:var(--fg)}
+.toc a:hover{color:var(--sem);text-decoration:underline}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:.8rem;color:var(--muted);font-family:var(--mono);margin:.4rem 0 1rem}
+.legend span{display:flex;align-items:center;gap:.35rem}
+.swatch{width:11px;height:11px;border-radius:2px;flex:none}
+footer{padding-block:2.2rem 3rem;color:var(--muted);font-size:.85rem}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.2rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:1rem 1.1rem;min-width:0}
+.card h3{margin-bottom:.4rem}
+.card p{font-size:.9rem;color:var(--muted);margin:0}
+.tag{display:inline-block;font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:.15rem .45rem;border-radius:3px;border:1px solid var(--line);color:var(--muted)}
+:focus-visible{outline:2px solid var(--sem);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* sélecteur de langue */
+.langbar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding-block:1rem .2rem;direction:ltr}
+.langbar .lbl{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--surface)}
+.seg button{appearance:none;border:0;background:transparent;color:var(--muted);font-family:var(--sans);font-size:.85rem;
+  font-weight:500;padding:.42rem .8rem;cursor:pointer;border-right:1px solid var(--line);line-height:1.2}
+.seg button:last-child{border-right:0}
+.seg button:hover{color:var(--fg);background:var(--surface2)}
+.seg button[aria-pressed="true"]{background:var(--sem);color:var(--bg);font-weight:600}
+.langnote{font-size:.78rem;color:var(--muted);max-width:60ch;margin:.35rem 0 0}
+[dir="rtl"] .sec-head,[dir="rtl"] .legend,[dir="rtl"] .meta{flex-direction:row-reverse}
+[dir="rtl"] ul,[dir="rtl"] ol{padding-left:0;padding-right:1.3rem}
+[dir="rtl"] .note{border-left:0;border-right:2px solid var(--muted)}
+[dir="rtl"] .toc ol{padding-left:0;padding-right:1.2rem}
+</style>
+
+<div class="langbar">
+  <span class="lbl" data-i18n="lang.label">Langue</span>
+  <span class="seg" role="group" aria-label="Langue du rapport">
+    <button type="button" id="lang-fr" data-lang="fr" aria-pressed="true">Français</button>
+    <button type="button" id="lang-en" data-lang="en" aria-pressed="false">English</button>
+    <button type="button" id="lang-tn" data-lang="tn" aria-pressed="false" lang="ar">تونسي</button>
+  </span>
+  <p class="langnote" id="langnote" data-i18n="lang.note">Les étiquettes des schémas restent en notation technique
+  d'origine ; les termes techniques sont donnés en anglais entre parenthèses dans la version tunisienne.</p>
+</div>
+
+<div class="wrap" id="doc" dir="ltr" lang="fr">
+
+<header class="top">
+  <p class="eyebrow" data-i18n="h.eyebrow">Projet 07 · Futurs réseaux mobiles · INSAT 2026–2027</p>
+  <h1 data-i18n="h.title">Communication sémantique apprise pour la transmission d'images et de vidéos</h1>
+  <p class="lede" data-i18n="h.lede">Trois systèmes transmettent la même image sur le même canal simulé : une chaîne
+  séparée de Shannon, un JSCC syntaxique entraîné sur le MSE, et un JSCC sémantique entraîné pour préserver le sens.
+  Le sens est jugé par des modèles qui n'ont jamais servi à l'entraînement.</p>
+  <div class="meta">
+    <span data-i18n="h.m1">9 modèles entraînés</span><span data-i18n="h.m2">CIFAR-10 · Kodak · 3 clips CIF</span>
+    <span data-i18n="h.m3">AWGN + Rayleigh par blocs</span><span data-i18n="h.m4">SNR 0–20 dB</span>
+    <span data-i18n="h.m5">PyTorch · CPU + GTX 1650</span>
+  </div>
+</header>
+
+<div class="toc col">
+  <p class="eyebrow" data-i18n="toc.label">Sommaire</p>
+  <ol>
+    <li><a href="#probleme" data-i18n="toc.1">Le problème : Shannon contre Weaver</a></li>
+    <li><a href="#systemes" data-i18n="toc.2">Les trois systèmes comparés</a></li>
+    <li><a href="#archi" data-i18n="toc.3">Architecture du JSCC</a></li>
+    <li><a href="#perte" data-i18n="toc.4">La perte sémantique</a></li>
+    <li><a href="#protocole" data-i18n="toc.5">Protocole expérimental</a></li>
+    <li><a href="#cifar" data-i18n="toc.6">Résultat central : sens contre pixels</a></li>
+    <li><a href="#falaise" data-i18n="toc.7">L'effet de falaise, mesuré</a></li>
+    <li><a href="#bande" data-i18n="toc.8">Bande passante et écart SNR</a></li>
+    <li><a href="#rayleigh" data-i18n="toc.9">Canal de Rayleigh</a></li>
+    <li><a href="#tache" data-i18n="toc.10">Communication orientée tâche</a></li>
+    <li><a href="#kodak" data-i18n="toc.11">Généralisation à Kodak</a></li>
+    <li><a href="#video" data-i18n="toc.12">Vidéo et redondance temporelle</a></li>
+    <li><a href="#limites" data-i18n="toc.13">Limites et honnêteté des résultats</a></li>
+    <li><a href="#repro" data-i18n="toc.14">Reproduire les résultats</a></li>
+  </ol>
+</div>
+
+<section id="resume">
+  <div class="sec-head"><span class="sec-num">00</span><h2 data-i18n="s0.h">Le résultat en quatre chiffres</h2></div>
+  <div class="col"><p data-i18n="s0.p1">Au point de fonctionnement principal <code>k/n = 1/12</code> sur canal AWGN,
+  à 0 dB de SNR, c'est-à-dire là où le bruit est aussi puissant que le signal :</p></div>
+  <div class="kpis">
+    <div class="kpi sem"><div class="v">+14,4 pts</div><div class="k" data-i18n="s0.k1">de précision sémantique du JSCC sémantique sur le JSCC syntaxique (56,4 % contre 42,0 %)</div></div>
+    <div class="kpi"><div class="v">−0,39 dB</div><div class="k" data-i18n="s0.k2">le prix payé en PSNR pour ce gain de sens</div></div>
+    <div class="kpi dig"><div class="v">10,4 %</div><div class="k" data-i18n="s0.k3">précision de la chaîne séparée classique : le hasard pur sur 10 classes</div></div>
+    <div class="kpi sem"><div class="v">3,1 ×</div><div class="k" data-i18n="s0.k4">de bande passante économisée sur une scène statique par le réapprovisionnement conditionnel</div></div>
+  </div>
+  <div class="col"><p data-i18n="s0.p2">Autrement dit : à bruit fort, la chaîne séparée transmet des bits qui ne veulent
+  plus rien dire, le JSCC syntaxique transmet une image floue reconnaissable environ une fois sur deux, et le JSCC
+  sémantique transmet une image légèrement moins fidèle au pixel mais correctement interprétée dans 56 % des cas.</p></div>
+</section>
+
+<section id="probleme">
+  <div class="sec-head"><span class="sec-num">01</span><h2 data-i18n="s1.h">Le problème : Shannon contre Weaver</h2></div>
+  <div class="col">
+    <p data-i18n="s1.p1">La théorie de Shannon fixe un seul objectif au système de communication : reproduire la
+    séquence de symboles émise, bit par bit, indépendamment de ce qu'elle signifie. Weaver distinguait pourtant dès
+    l'origine trois niveaux de problèmes — technique, sémantique et pragmatique — dont seul le premier est traité
+    par les systèmes déployés aujourd'hui.</p>
+    <p data-i18n="s1.p2">Un système actuel empile un codec de compression (JPEG, H.264) et un codage canal
+    indépendant. Cet empilement a deux conséquences mesurables, et ce sont elles que ce projet quantifie : il
+    dépense de la bande passante à reproduire fidèlement des détails qui n'apportent rien à la compréhension du
+    contenu, et il s'effondre brutalement dès qu'un seuil de SNR est franchi, parce qu'un flux comprimé devient
+    illisible dès que quelques bits sont faux.</p>
+  </div>
+  <div class="svgbox" role="img" aria-label="Les trois niveaux de Weaver et le niveau traité par chaque système">
+  <svg viewBox="0 0 860 212" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+    <g font-size="12.5">
+      <rect x="8" y="14" width="268" height="86" rx="4" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="22" y="38" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--muted)">LEVEL A — TECHNICAL</text>
+      <text x="22" y="60" fill="var(--fg)">« Are the symbols received</text>
+      <text x="22" y="77" fill="var(--fg)">exactly ? »</text>
+      <text x="22" y="94" font-size="11" fill="var(--syn)">BER, PSNR, SSIM</text>
+
+      <rect x="296" y="14" width="268" height="86" rx="4" fill="var(--surface2)" stroke="var(--sem)" stroke-width="1.6"/>
+      <text x="310" y="38" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--sem)">LEVEL B — SEMANTIC</text>
+      <text x="310" y="60" fill="var(--fg)">« Do they convey the</text>
+      <text x="310" y="77" fill="var(--fg)">intended meaning ? »</text>
+      <text x="310" y="94" font-size="11" fill="var(--sem)">judge accuracy, feature similarity</text>
+
+      <rect x="584" y="14" width="268" height="86" rx="4" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="598" y="38" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--muted)">LEVEL C — PRAGMATIC</text>
+      <text x="598" y="60" fill="var(--fg)">« Does the meaning cause</text>
+      <text x="598" y="77" fill="var(--fg)">the intended effect ? »</text>
+      <text x="598" y="94" font-size="11" fill="var(--muted)">out of scope here</text>
+
+      <line x1="142" y1="112" x2="142" y2="138" stroke="var(--line)" stroke-width="1.4"/>
+      <line x1="430" y1="112" x2="430" y2="138" stroke="var(--sem)" stroke-width="1.6"/>
+      <line x1="718" y1="112" x2="718" y2="138" stroke="var(--line)" stroke-width="1.4" stroke-dasharray="3 3"/>
+
+      <rect x="8" y="140" width="268" height="58" rx="4" fill="none" stroke="var(--line)" stroke-dasharray="4 3"/>
+      <text x="22" y="163" fill="var(--fg)">Separated · syntactic JSCC</text>
+      <text x="22" y="183" font-size="11" fill="var(--muted)">optimise signal fidelity</text>
+
+      <rect x="296" y="140" width="268" height="58" rx="4" fill="none" stroke="var(--sem)" stroke-dasharray="4 3"/>
+      <text x="310" y="163" fill="var(--fg)">Semantic JSCC · task-oriented</text>
+      <text x="310" y="183" font-size="11" fill="var(--sem)">optimise meaning preservation</text>
+
+      <rect x="584" y="140" width="268" height="58" rx="4" fill="none" stroke="var(--line)" stroke-dasharray="4 3"/>
+      <text x="598" y="163" fill="var(--muted)">receiver action</text>
+      <text x="598" y="183" font-size="11" fill="var(--muted)">not evaluated</text>
+    </g>
+  </svg>
+  </div>
+  <figcaption data-i18n="s1.cap">Les trois niveaux de Weaver. Ce projet mesure le niveau A (PSNR, SSIM) et le
+  niveau B (précision d'un classifieur juge, similarité de traits ResNet-18) sur exactement les mêmes
+  transmissions, ce qui permet de séparer ce qui est fidèle de ce qui est compris.</figcaption>
+</section>
+
+<section id="systemes">
+  <div class="sec-head"><span class="sec-num">02</span><h2 data-i18n="s2.h">Les trois systèmes comparés</h2></div>
+  <div class="col"><p data-i18n="s2.p1">Les trois chaînes transmettent la même image dans le même budget de symboles
+  complexes et sur le même canal simulé. Seule la façon de transformer l'image en symboles change.</p></div>
+  <div class="legend">
+    <span><span class="swatch" style="background:var(--dig)"></span><span data-i18n="s2.l1">chaîne séparée (Shannon)</span></span>
+    <span><span class="swatch" style="background:var(--syn)"></span><span data-i18n="s2.l2">JSCC syntaxique</span></span>
+    <span><span class="swatch" style="background:var(--sem)"></span><span data-i18n="s2.l3">JSCC sémantique</span></span>
+  </div>
+  <div class="svgbox" role="img" aria-label="Schéma comparatif des trois chaînes de transmission">
+  <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/>
+      </marker>
+      <marker id="ars" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="var(--sem)"/>
+      </marker>
+    </defs>
+    <g font-size="11.5">
+      <text x="8" y="22" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--dig)">1 · SEPARATED CHAIN</text>
+      <rect x="8" y="32" width="96" height="40" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="56" y="50" text-anchor="middle" fill="var(--fg)">image</text>
+      <text x="56" y="64" text-anchor="middle" font-size="10" fill="var(--muted)">3·H·W</text>
+      <line x1="106" y1="52" x2="128" y2="52" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="130" y="32" width="104" height="40" rx="3" fill="var(--surface)" stroke="var(--dig)"/>
+      <text x="182" y="50" text-anchor="middle" fill="var(--fg)">JPEG / AE 4-bit</text>
+      <text x="182" y="64" text-anchor="middle" font-size="10" fill="var(--muted)">source coding</text>
+      <line x1="236" y1="52" x2="258" y2="52" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="260" y="32" width="104" height="40" rx="3" fill="var(--surface)" stroke="var(--dig)"/>
+      <text x="312" y="50" text-anchor="middle" fill="var(--fg)">conv. K=7</text>
+      <text x="312" y="64" text-anchor="middle" font-size="10" fill="var(--muted)">1/2 · 2/3 · 3/4</text>
+      <line x1="366" y1="52" x2="388" y2="52" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="390" y="32" width="96" height="40" rx="3" fill="var(--surface)" stroke="var(--dig)"/>
+      <text x="438" y="50" text-anchor="middle" fill="var(--fg)">Gray QAM</text>
+      <text x="438" y="64" text-anchor="middle" font-size="10" fill="var(--muted)">QPSK→64QAM</text>
+      <line x1="488" y1="52" x2="510" y2="52" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="512" y="32" width="80" height="40" rx="3" fill="none" stroke="var(--muted)" stroke-dasharray="4 3"/>
+      <text x="552" y="56" text-anchor="middle" fill="var(--muted)">channel</text>
+      <line x1="594" y1="52" x2="616" y2="52" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="618" y="32" width="104" height="40" rx="3" fill="var(--surface)" stroke="var(--dig)"/>
+      <text x="670" y="50" text-anchor="middle" fill="var(--fg)">Viterbi + deQAM</text>
+      <text x="670" y="64" text-anchor="middle" font-size="10" fill="var(--muted)">max-log LLR</text>
+      <line x1="724" y1="52" x2="746" y2="52" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="748" y="32" width="124" height="40" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="810" y="50" text-anchor="middle" fill="var(--fg)">image or grey</text>
+      <text x="810" y="64" text-anchor="middle" font-size="10" fill="var(--dig)">all or nothing</text>
+
+      <text x="8" y="130" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--syn)">2 · SYNTACTIC JSCC</text>
+      <rect x="8" y="140" width="96" height="40" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="56" y="164" text-anchor="middle" fill="var(--fg)">image</text>
+      <line x1="106" y1="160" x2="128" y2="160" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="130" y="140" width="148" height="40" rx="3" fill="var(--surface)" stroke="var(--syn)"/>
+      <text x="204" y="158" text-anchor="middle" fill="var(--fg)">CNN encoder</text>
+      <text x="204" y="172" text-anchor="middle" font-size="10" fill="var(--muted)">z : 16 × H/4 × W/4</text>
+      <line x1="280" y1="160" x2="302" y2="160" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="304" y="140" width="112" height="40" rx="3" fill="var(--surface)" stroke="var(--syn)"/>
+      <text x="360" y="158" text-anchor="middle" fill="var(--fg)">power norm.</text>
+      <text x="360" y="172" text-anchor="middle" font-size="10" fill="var(--muted)">P = 1 / symbol</text>
+      <line x1="418" y1="160" x2="440" y2="160" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="442" y="140" width="110" height="40" rx="3" fill="none" stroke="var(--muted)" stroke-dasharray="4 3"/>
+      <text x="497" y="158" text-anchor="middle" fill="var(--muted)">channel layer</text>
+      <text x="497" y="172" text-anchor="middle" font-size="10" fill="var(--muted)">differentiable</text>
+      <line x1="554" y1="160" x2="576" y2="160" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="578" y="140" width="144" height="40" rx="3" fill="var(--surface)" stroke="var(--syn)"/>
+      <text x="650" y="164" text-anchor="middle" fill="var(--fg)">CNN decoder</text>
+      <line x1="724" y1="160" x2="746" y2="160" stroke="var(--muted)" marker-end="url(#ar)"/>
+      <rect x="748" y="140" width="124" height="40" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="810" y="158" text-anchor="middle" fill="var(--fg)">blurred image</text>
+      <text x="810" y="172" text-anchor="middle" font-size="10" fill="var(--syn)">graceful decay</text>
+      <text x="130" y="200" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--syn)">loss = MSE(x̂, x)</text>
+
+      <text x="8" y="240" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--sem)">3 · SEMANTIC JSCC</text>
+      <rect x="8" y="250" width="96" height="40" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="56" y="274" text-anchor="middle" fill="var(--fg)">image</text>
+      <line x1="106" y1="270" x2="128" y2="270" stroke="var(--sem)" marker-end="url(#ars)"/>
+      <rect x="130" y="250" width="148" height="40" rx="3" fill="var(--surface)" stroke="var(--sem)" stroke-width="1.5"/>
+      <text x="204" y="274" text-anchor="middle" fill="var(--fg)">CNN encoder</text>
+      <line x1="280" y1="270" x2="302" y2="270" stroke="var(--sem)" marker-end="url(#ars)"/>
+      <rect x="304" y="250" width="112" height="40" rx="3" fill="var(--surface)" stroke="var(--sem)" stroke-width="1.5"/>
+      <text x="360" y="274" text-anchor="middle" fill="var(--fg)">power norm.</text>
+      <line x1="418" y1="270" x2="440" y2="270" stroke="var(--sem)" marker-end="url(#ars)"/>
+      <rect x="442" y="250" width="110" height="40" rx="3" fill="none" stroke="var(--sem)" stroke-dasharray="4 3"/>
+      <text x="497" y="274" text-anchor="middle" fill="var(--sem)">channel layer</text>
+      <line x1="554" y1="270" x2="576" y2="270" stroke="var(--sem)" marker-end="url(#ars)"/>
+      <rect x="578" y="250" width="144" height="40" rx="3" fill="var(--surface)" stroke="var(--sem)" stroke-width="1.5"/>
+      <text x="650" y="274" text-anchor="middle" fill="var(--fg)">CNN decoder</text>
+      <line x1="724" y1="270" x2="746" y2="270" stroke="var(--sem)" marker-end="url(#ars)"/>
+      <rect x="748" y="250" width="124" height="40" rx="3" fill="var(--surface2)" stroke="var(--sem)"/>
+      <text x="810" y="268" text-anchor="middle" fill="var(--fg)">image understood</text>
+      <text x="810" y="282" text-anchor="middle" font-size="10" fill="var(--sem)">meaning preserved</text>
+      <text x="130" y="310" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--sem)">loss = MSE + 0.01 · feature + 0.003 · CE</text>
+    </g>
+  </svg>
+  </div>
+  <figcaption data-i18n="s2.cap">Les deux systèmes appris partagent exactement la même architecture et le même
+  budget de symboles : ils ne diffèrent que par la fonction de perte. C'est ce qui rend la comparaison
+  interprétable — tout écart mesuré vient de l'objectif d'entraînement, et non de la capacité du réseau.</figcaption>
+</section>
+
+<section id="archi">
+  <div class="sec-head"><span class="sec-num">03</span><h2 data-i18n="s3.h">Architecture du JSCC</h2></div>
+  <div class="col">
+    <p data-i18n="s3.p1">L'encodeur est entièrement convolutif : deux convolutions de pas 2 ramènent l'image au
+    quart de sa résolution, deux blocs résiduels raffinent la représentation, et une dernière convolution produit
+    16 canaux latents. Les valeurs réelles sont appariées en symboles complexes, normalisées à une puissance
+    moyenne de 1 par symbole, puis traversent la couche de canal. Le décodeur est le miroir de l'encodeur.</p>
+    <p data-i18n="s3.p2">Deux propriétés de ce choix comptent pour la suite. D'abord, le réseau étant
+    <em>entièrement convolutif</em>, un modèle entraîné sur des images CIFAR-10 de 32×32 s'applique sans
+    réentraînement à une image Kodak de 768×512 ou à une trame vidéo CIF de 352×288. Ensuite, la transmission est
+    <em>agile en bande</em> : en ne transmettant que les <code>c</code> premiers canaux latents, on obtient le
+    rapport <code>k/n = c/96</code>, soit 1/48 à 1/6 selon le budget disponible, avec un seul et même modèle.</p>
+  </div>
+  <div class="svgbox" role="img" aria-label="Détail de l'encodeur, de la couche de canal et du décodeur">
+  <svg viewBox="0 0 880 270" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+    <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker></defs>
+    <g font-size="11.5">
+      <text x="8" y="20" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--muted)">TRANSMITTER</text>
+      <rect x="8" y="30" width="72" height="54" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="44" y="52" text-anchor="middle" fill="var(--fg)">x</text>
+      <text x="44" y="68" text-anchor="middle" font-size="9.5" fill="var(--muted)">3×H×W</text>
+      <line x1="82" y1="57" x2="102" y2="57" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="104" y="30" width="78" height="54" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="143" y="48" text-anchor="middle" font-size="10.5" fill="var(--fg)">conv 5×5</text>
+      <text x="143" y="62" text-anchor="middle" font-size="10.5" fill="var(--fg)">stride 2</text>
+      <text x="143" y="76" text-anchor="middle" font-size="9.5" fill="var(--muted)">32 ch.</text>
+      <line x1="184" y1="57" x2="204" y2="57" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="206" y="30" width="78" height="54" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="245" y="48" text-anchor="middle" font-size="10.5" fill="var(--fg)">conv 5×5</text>
+      <text x="245" y="62" text-anchor="middle" font-size="10.5" fill="var(--fg)">stride 2</text>
+      <text x="245" y="76" text-anchor="middle" font-size="9.5" fill="var(--muted)">64 ch.</text>
+      <line x1="286" y1="57" x2="306" y2="57" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="308" y="30" width="86" height="54" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="351" y="52" text-anchor="middle" font-size="10.5" fill="var(--fg)">2 × ResBlock</text>
+      <text x="351" y="68" text-anchor="middle" font-size="9.5" fill="var(--muted)">PReLU</text>
+      <line x1="396" y1="57" x2="416" y2="57" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="418" y="30" width="84" height="54" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="460" y="48" text-anchor="middle" font-size="10.5" fill="var(--fg)">conv 3×3</text>
+      <text x="460" y="64" text-anchor="middle" font-size="9.5" fill="var(--muted)">z : 16×H/4×W/4</text>
+
+      <line x1="504" y1="57" x2="524" y2="57" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="526" y="24" width="110" height="66" rx="3" fill="var(--surface)" stroke="var(--sem)" stroke-width="1.6"/>
+      <text x="581" y="44" text-anchor="middle" font-size="10.5" fill="var(--fg)">truncate to c</text>
+      <text x="581" y="60" text-anchor="middle" font-size="10.5" fill="var(--fg)">+ power norm.</text>
+      <text x="581" y="77" text-anchor="middle" font-size="9.5" fill="var(--sem)">k/n = c/96</text>
+
+      <line x1="638" y1="57" x2="658" y2="57" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="660" y="18" width="212" height="80" rx="3" fill="none" stroke="var(--muted)" stroke-dasharray="5 3"/>
+      <text x="766" y="38" text-anchor="middle" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">CHANNEL LAYER (differentiable)</text>
+      <text x="674" y="59" font-size="10.5" fill="var(--fg)">AWGN : y = x + n,  n ~ N(0, σ²)</text>
+      <text x="674" y="76" font-size="10.5" fill="var(--fg)">Rayleigh : y = hx + n, ZF equalisation</text>
+      <text x="674" y="91" font-size="9.5" fill="var(--muted)">the gradient flows through the noise</text>
+
+      <line x1="766" y1="100" x2="766" y2="126" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <text x="8" y="150" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--muted)">RECEIVER</text>
+      <rect x="660" y="128" width="212" height="46" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="766" y="148" text-anchor="middle" font-size="10.5" fill="var(--fg)">untransmitted channels zeroed</text>
+      <text x="766" y="164" text-anchor="middle" font-size="9.5" fill="var(--muted)">ŷ : 16×H/4×W/4</text>
+      <line x1="658" y1="151" x2="638" y2="151" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="520" y="128" width="116" height="46" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="578" y="148" text-anchor="middle" font-size="10.5" fill="var(--fg)">conv + 2 ResBlock</text>
+      <text x="578" y="164" text-anchor="middle" font-size="9.5" fill="var(--muted)">64 ch.</text>
+      <line x1="518" y1="151" x2="498" y2="151" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="392" y="128" width="104" height="46" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="444" y="148" text-anchor="middle" font-size="10.5" fill="var(--fg)">deconv ×2</text>
+      <text x="444" y="164" text-anchor="middle" font-size="9.5" fill="var(--muted)">stride 2, stride 2</text>
+      <line x1="390" y1="151" x2="370" y2="151" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="282" y="128" width="86" height="46" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="325" y="148" text-anchor="middle" font-size="10.5" fill="var(--fg)">sigmoid</text>
+      <text x="325" y="164" text-anchor="middle" font-size="9.5" fill="var(--muted)">[0, 1]</text>
+      <line x1="280" y1="151" x2="260" y2="151" stroke="var(--muted)" marker-end="url(#ar2)"/>
+      <rect x="188" y="128" width="70" height="46" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="223" y="148" text-anchor="middle" fill="var(--fg)">x̂</text>
+      <text x="223" y="164" text-anchor="middle" font-size="9.5" fill="var(--muted)">3×H×W</text>
+
+      <rect x="8" y="196" width="864" height="62" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="24" y="216" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">BANDWIDTH AGILITY — ONE MODEL, FIVE RATES</text>
+      <text x="24" y="237" font-size="11" fill="var(--fg)">c = 2 → k/n = 1/48   ·   c = 4 → 1/24   ·   c = 8 → 1/12 (main point)   ·   c = 12 → 1/8   ·   c = 16 → 1/6</text>
+      <text x="24" y="252" font-size="10" fill="var(--muted)">421,715 parameters, trained with c drawn at random per batch and SNR ~ U[0, 20] dB</text>
+    </g>
+  </svg>
+  </div>
+  <figcaption data-i18n="s3.cap">Le détail de l'émetteur, de la couche de canal et du récepteur. La couche de canal
+  est une opération dérivable : le gradient de la perte traverse le bruit, ce qui permet au réseau d'apprendre un
+  code adapté au canal plutôt qu'un code source suivi d'un code canal.</figcaption>
+</section>
+
+<section id="perte">
+  <div class="sec-head"><span class="sec-num">04</span><h2 data-i18n="s4.h">La perte sémantique</h2></div>
+  <div class="col">
+    <p data-i18n="s4.p1">C'est le seul point où les deux systèmes appris diffèrent. Le JSCC syntaxique minimise
+    l'erreur quadratique moyenne entre l'image reçue et l'image émise. Le JSCC sémantique ajoute deux termes
+    calculés en faisant traverser l'image reçue par un classifieur CIFAR-10 <strong>gelé</strong>
+    (le classifieur A) :</p>
+    <ul>
+      <li data-i18n="s4.li1">un <strong>terme de traits</strong> : les cartes d'activation internes de l'image reçue
+      doivent ressembler à celles de l'image émise, chaque couche étant normalisée par son énergie propre ;</li>
+      <li data-i18n="s4.li2">un <strong>terme de tâche</strong> : l'entropie croisée entre la classe prédite sur
+      l'image reçue et la vraie étiquette.</li>
+    </ul>
+    <p data-i18n="s4.p2">Les poids retenus sont 0,01 pour les traits et 0,003 pour la tâche. Ils sont
+    volontairement faibles : l'objectif est d'infléchir la reconstruction, pas de la remplacer par une
+    classification.</p>
+  </div>
+  <div class="svgbox" role="img" aria-label="Schéma de la perte sémantique à trois termes">
+  <svg viewBox="0 0 860 258" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+    <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+      <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--sem)"/></marker></defs>
+    <g font-size="11.5">
+      <rect x="8" y="46" width="88" height="44" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="52" y="66" text-anchor="middle" fill="var(--fg)">x sent</text>
+      <text x="52" y="81" text-anchor="middle" font-size="9.5" fill="var(--muted)">+ label y</text>
+
+      <rect x="8" y="122" width="88" height="44" rx="3" fill="var(--surface2)" stroke="var(--sem)"/>
+      <text x="52" y="142" text-anchor="middle" fill="var(--fg)">x̂ received</text>
+      <text x="52" y="157" text-anchor="middle" font-size="9.5" fill="var(--muted)">after channel</text>
+
+      <path d="M100 68 L150 68 L150 96 L194 96" fill="none" stroke="var(--muted)" marker-end="url(#ar3)"/>
+      <path d="M100 144 L150 144 L150 116 L194 116" fill="none" stroke="var(--muted)" marker-end="url(#ar3)"/>
+      <rect x="198" y="88" width="104" height="36" rx="3" fill="var(--surface)" stroke="var(--syn)"/>
+      <text x="250" y="111" text-anchor="middle" fill="var(--fg)">pixel MSE</text>
+
+      <rect x="198" y="150" width="104" height="82" rx="3" fill="var(--surface)" stroke="var(--sem)" stroke-width="1.6"/>
+      <text x="250" y="174" text-anchor="middle" font-size="10.5" fill="var(--fg)">classifier A</text>
+      <text x="250" y="191" text-anchor="middle" font-size="10.5" fill="var(--sem)">FROZEN</text>
+      <text x="250" y="210" text-anchor="middle" font-size="9.5" fill="var(--muted)">85.7 % · 298 k</text>
+      <text x="250" y="224" text-anchor="middle" font-size="9.5" fill="var(--muted)">params</text>
+      <path d="M100 152 L150 170 L194 182" fill="none" stroke="var(--sem)" marker-end="url(#ar4)"/>
+      <path d="M100 86 L140 86 L140 214 L194 214" fill="none" stroke="var(--muted)" stroke-dasharray="3 3" marker-end="url(#ar3)"/>
+
+      <line x1="304" y1="176" x2="328" y2="176" stroke="var(--sem)" marker-end="url(#ar4)"/>
+      <rect x="332" y="156" width="150" height="40" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="407" y="173" text-anchor="middle" font-size="10.5" fill="var(--fg)">feature distance</text>
+      <text x="407" y="189" text-anchor="middle" font-size="9.5" fill="var(--muted)">normalised inner maps</text>
+
+      <line x1="304" y1="216" x2="328" y2="216" stroke="var(--sem)" marker-end="url(#ar4)"/>
+      <rect x="332" y="204" width="150" height="40" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="407" y="221" text-anchor="middle" font-size="10.5" fill="var(--fg)">cross-entropy</text>
+      <text x="407" y="237" text-anchor="middle" font-size="9.5" fill="var(--muted)">predicted class vs y</text>
+
+      <line x1="304" y1="106" x2="558" y2="106" stroke="var(--muted)" marker-end="url(#ar3)"/>
+      <text x="420" y="100" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--muted)">× 1</text>
+      <path d="M484 170 L540 170 L540 118 L558 114" fill="none" stroke="var(--sem)" marker-end="url(#ar4)"/>
+      <text x="494" y="164" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--sem)">× 0.01</text>
+      <path d="M484 222 L548 222 L548 126 L558 122" fill="none" stroke="var(--sem)" marker-end="url(#ar4)"/>
+      <text x="494" y="246" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--sem)">× 0.003</text>
+
+      <rect x="562" y="90" width="118" height="46" rx="3" fill="var(--surface)" stroke="var(--sem)" stroke-width="1.6"/>
+      <text x="621" y="110" text-anchor="middle" fill="var(--fg)">total loss</text>
+      <text x="621" y="126" text-anchor="middle" font-size="9.5" fill="var(--muted)">backpropagated</text>
+
+      <path d="M621 138 L621 158 L96 158 L96 148" fill="none" stroke="var(--sem)" stroke-width="1.3" stroke-dasharray="4 3"/>
+      <text x="300" y="134" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--sem)">gradient to encoder and decoder</text>
+
+      <rect x="700" y="42" width="152" height="196" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="716" y="64" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--muted)">KEY POINT</text>
+      <text x="716" y="88" font-size="10.5" fill="var(--fg)">Classifier A is used</text>
+      <text x="716" y="103" font-size="10.5" fill="var(--fg)">for training.</text>
+      <text x="716" y="127" font-size="10.5" fill="var(--fg)">Classifier B, a different</text>
+      <text x="716" y="142" font-size="10.5" fill="var(--fg)">architecture, is used to</text>
+      <text x="716" y="157" font-size="10.5" fill="var(--fg)">judge — and</text>
+      <text x="716" y="172" font-size="10.5" fill="var(--sem)">never to train.</text>
+      <text x="716" y="198" font-size="10" fill="var(--muted)">Without that split, the</text>
+      <text x="716" y="212" font-size="10" fill="var(--muted)">measured gain would</text>
+      <text x="716" y="226" font-size="10" fill="var(--muted)">be an artefact.</text>
+    </g>
+  </svg>
+  </div>
+  <figcaption data-i18n="s4.cap">La perte sémantique. Le classifieur A est gelé : ses poids ne bougent pas, il sert
+  uniquement de mesure de ressemblance sémantique. Tous les résultats de sens rapportés ensuite sont mesurés avec
+  le classifieur B (VGG, 88,3 %), qui n'intervient jamais dans une fonction de perte.</figcaption>
+</section>
+
+<section id="protocole">
+  <div class="sec-head"><span class="sec-num">05</span><h2 data-i18n="s5.h">Protocole expérimental</h2></div>
+  <div class="two">
+    <div class="card"><h3 data-i18n="s5.c1h">Données</h3><p data-i18n="s5.c1p">CIFAR-10 pour l'entraînement
+    (50 000 images) et l'évaluation (5 000 images de test). Kodak (24 images 768×512) et trois clips CIF Xiph de
+    30 trames — akiyo (statique), foreman (mouvement modéré), bus (panoramique rapide) — jamais vus à
+    l'entraînement.</p></div>
+    <div class="card"><h3 data-i18n="s5.c2h">Juges du sens</h3><p data-i18n="s5.c2p">Classifieur B (VGG,
+    architecture différente de A) sur CIFAR-10. Sur Kodak et vidéo, un ResNet-18 ImageNet : similarité cosinus des
+    traits et accord de l'étiquette top-1. Aucun des deux n'a servi à l'entraînement.</p></div>
+    <div class="card"><h3 data-i18n="s5.c3h">Canal</h3><p data-i18n="s5.c3p">AWGN de 0 à 20 dB (pas de 1 dB sur
+    CIFAR-10, 2 dB sur Kodak et vidéo) et Rayleigh par blocs avec CSI parfaite et égalisation ZF. Simulation
+    uniquement, aucune liaison radio réelle.</p></div>
+    <div class="card"><h3 data-i18n="s5.c4h">Référence numérique</h3><p data-i18n="s5.c4p">Simulée bit à bit :
+    paquets de 1024 bits d'information, code convolutif K=7 (133,171) poinçonné, QAM Gray, LLR max-log, Viterbi.
+    Six combinaisons modulation/codage, plus une courbe « meilleur MCS » qui connaît le SNR.</p></div>
+  </div>
+  <div class="note col" data-i18n="s5.note"><b>Pourquoi simuler la chaîne numérique bit à bit.</b> Il aurait été
+  plus rapide de modéliser son effondrement par une formule. En codant, modulant et décodant réellement chaque
+  paquet, l'effet de falaise observé plus bas est une conséquence mesurée du système, et non une hypothèse
+  introduite pour favoriser l'approche apprise.</div>
+  <figure>
+    <img src="figures/learning_curves.png" alt="Courbes d'apprentissage des neuf modèles">
+    <figcaption data-i18n="s5.cap">Courbes d'apprentissage des neuf modèles. Quatre ont été entraînés sur CPU
+    (environ 5,8 h au total), les cinq autres sur GPU GTX 1650 en 24 minutes. L'indexation des lots,
+    l'augmentation et les germes aléatoires sont restés sur CPU afin que l'ordre des données soit identique entre
+    les deux séries, ce qui préserve la comparabilité entre le JSCC syntaxique et le JSCC sémantique.</figcaption>
+  </figure>
+</section>
+
+<section id="cifar">
+  <div class="sec-head"><span class="sec-num">06</span><h2 data-i18n="s6.h">Résultat central : le sens contre les pixels</h2></div>
+  <div class="col"><p data-i18n="s6.p1">Au point <code>k/n = 1/12</code> sur canal AWGN. La précision est celle du
+  classifieur juge B, qui n'a jamais servi à l'entraînement ; la référence sans canal est de 88,4 %.</p></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th data-i18n="th.snr">SNR</th><th data-i18n="s6.th2">PSNR synt.</th><th data-i18n="s6.th3">PSNR sém.</th>
+      <th data-i18n="s6.th4">Précision synt.</th><th data-i18n="s6.th5">Précision sém.</th><th data-i18n="s6.th6">Écart de sens</th></tr></thead>
+      <tbody>
+        <tr><td>0 dB</td><td class="num">20,08 dB</td><td class="num">19,68 dB</td><td class="num">42,0 %</td><td class="num best">56,4 %</td><td class="num best">+14,4 pts</td></tr>
+        <tr><td>2 dB</td><td class="num">21,54 dB</td><td class="num">21,10 dB</td><td class="num">48,7 %</td><td class="num best">64,8 %</td><td class="num best">+16,2 pts</td></tr>
+        <tr><td>5 dB</td><td class="num">23,57 dB</td><td class="num">23,09 dB</td><td class="num">59,3 %</td><td class="num best">72,6 %</td><td class="num best">+13,3 pts</td></tr>
+        <tr><td>10 dB</td><td class="num">25,99 dB</td><td class="num">25,48 dB</td><td class="num">67,6 %</td><td class="num best">78,2 %</td><td class="num best">+10,6 pts</td></tr>
+        <tr><td>15 dB</td><td class="num">27,24 dB</td><td class="num">26,68 dB</td><td class="num">70,0 %</td><td class="num best">80,0 %</td><td class="num best">+10,0 pts</td></tr>
+        <tr><td>20 dB</td><td class="num">27,72 dB</td><td class="num">27,15 dB</td><td class="num">70,6 %</td><td class="num best">80,2 %</td><td class="num best">+9,6 pts</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p data-i18n="s6.p2">La lecture est sans ambiguïté. Le JSCC sémantique est <strong>systématiquement moins bon
+    en PSNR</strong>, de 0,39 à 0,57 dB, et <strong>systématiquement meilleur en sens</strong>, de 9,6 à 16,2 points
+    de précision. L'écart de sens est d'autant plus grand que le canal est mauvais : c'est exactement le
+    comportement attendu d'un système qui dépense son budget de symboles sur ce qui porte l'information utile
+    plutôt que sur la fidélité uniforme des pixels.</p>
+    <p data-i18n="s6.p3">Ce tableau est à lui seul la démonstration que le PSNR est une mauvaise mesure pour juger
+    une communication sémantique : si l'on ne regardait que lui, on conclurait que le système sémantique est le
+    moins bon des deux.</p>
+  </div>
+  <figure>
+    <img src="figures/cifar_snr.png" alt="Qualité et sens en fonction du SNR sur CIFAR-10">
+    <figcaption data-i18n="s6.cap1">CIFAR-10, <code>k/n = 1/12</code>, AWGN. À gauche la fidélité pixel, à droite le
+    sens. Les courbes fines montrent chaque MCS fixe de la chaîne séparée : chacune s'effondre à son propre seuil.</figcaption>
+  </figure>
+  <figure>
+    <img src="figures/visual.png" alt="Comparaison visuelle sur une image Kodak à plusieurs SNR">
+    <figcaption data-i18n="s6.cap2">Comparaison visuelle sur une image Kodak. À 2 dB, la chaîne séparée rend une
+    image inutilisable alors que les deux systèmes appris restent interprétables.</figcaption>
+  </figure>
+</section>
+
+<section id="falaise">
+  <div class="sec-head"><span class="sec-num">07</span><h2 data-i18n="s7.h">L'effet de falaise, mesuré</h2></div>
+  <div class="col"><p data-i18n="s7.p1">Comparaison au même débit <code>k/n = 1/12</code> entre le JSCC sémantique
+  et la chaîne séparée dans sa version la plus favorable — une courbe « génie » qui connaît le SNR et choisit à
+  chaque point le meilleur des six MCS.</p></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th data-i18n="th.snr">SNR</th><th data-i18n="s7.th2">PSNR séparée</th><th data-i18n="s7.th3">PSNR sémantique</th>
+      <th data-i18n="s7.th4">Précision séparée</th><th data-i18n="s7.th5">Précision sémantique</th></tr></thead>
+      <tbody>
+        <tr><td>0 dB</td><td class="num bad">12,63 dB</td><td class="num best">19,68 dB</td><td class="num bad">10,4 %</td><td class="num best">56,4 %</td></tr>
+        <tr><td>2 dB</td><td class="num bad">12,63 dB</td><td class="num best">21,10 dB</td><td class="num bad">10,7 %</td><td class="num best">64,8 %</td></tr>
+        <tr><td>4 dB</td><td class="num">17,74 dB</td><td class="num best">22,47 dB</td><td class="num bad">13,6 %</td><td class="num best">71,7 %</td></tr>
+        <tr><td>6 dB</td><td class="num">19,60 dB</td><td class="num best">23,66 dB</td><td class="num bad">15,2 %</td><td class="num best">74,8 %</td></tr>
+        <tr><td>10 dB</td><td class="num">19,65 dB</td><td class="num best">25,48 dB</td><td class="num">18,0 %</td><td class="num best">78,2 %</td></tr>
+        <tr><td>14 dB</td><td class="num">23,35 dB</td><td class="num best">26,52 dB</td><td class="num">27,8 %</td><td class="num best">79,4 %</td></tr>
+        <tr><td>20 dB</td><td class="num">25,71 dB</td><td class="num best">27,15 dB</td><td class="num">40,5 %</td><td class="num best">80,2 %</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p data-i18n="s7.p2">À 0 et 2 dB, la chaîne séparée est à <strong>10,4 % de précision, soit le hasard pur</strong>
+    sur dix classes : les paquets ne passent plus, le décodeur refuse le flux, et l'image devient un rectangle gris.
+    Le sens n'est pas dégradé, il a disparu. C'est l'effet de falaise, et il est ici une mesure, pas une
+    illustration.</p>
+    <p data-i18n="s7.p3">Un point mérite d'être souligné pour la soutenance : même à 20 dB, c'est-à-dire dans
+    d'excellentes conditions, la chaîne séparée ne récupère que 40,5 % de précision à ce débit très contraint de
+    1/12. Le budget de symboles est tout simplement trop faible pour que JPEG ou l'auto-encodeur quantifié
+    produisent un flux décodable de bonne qualité. Les systèmes appris, eux, dégradent progressivement et restent
+    exploitables sur toute la plage.</p>
+  </div>
+</section>
+
+<section id="bande">
+  <div class="sec-head"><span class="sec-num">08</span><h2 data-i18n="s8.h">Bande passante et écart SNR entraînement/test</h2></div>
+  <div class="col"><p data-i18n="s8.p1">Un modèle entraîné à un SNR fixe est excellent à ce SNR et fragile ailleurs.
+  C'est l'argument qui justifie l'entraînement sur <code>SNR ~ U[0, 20] dB</code> retenu pour les modèles
+  principaux.</p></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th data-i18n="s8.th1">Testé à</th><th data-i18n="s8.th2">Entraîné à 0 dB</th><th data-i18n="s8.th3">Entraîné à 10 dB</th>
+      <th data-i18n="s8.th4">Entraîné à 20 dB</th><th data-i18n="s8.th5">Entraîné sur 0–20 dB</th></tr></thead>
+      <tbody>
+        <tr><td>0 dB</td><td class="num best">21,49 dB</td><td class="num">19,04 dB</td><td class="num bad">17,42 dB</td><td class="num">20,08 dB</td></tr>
+        <tr><td>5 dB</td><td class="num">23,03 dB</td><td class="num">23,34 dB</td><td class="num">21,88 dB</td><td class="num best">23,57 dB</td></tr>
+        <tr><td>10 dB</td><td class="num">23,51 dB</td><td class="num best">26,40 dB</td><td class="num">25,58 dB</td><td class="num">25,99 dB</td></tr>
+        <tr><td>15 dB</td><td class="num bad">23,66 dB</td><td class="num best">28,05 dB</td><td class="num">28,02 dB</td><td class="num">27,24 dB</td></tr>
+        <tr><td>20 dB</td><td class="num bad">23,70 dB</td><td class="num">28,75 dB</td><td class="num best">29,24 dB</td><td class="num">27,72 dB</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p data-i18n="s8.p2">Les deux pathologies sont visibles. Le modèle entraîné à 20 dB perd 4,07 dB par rapport au
+    meilleur quand il est testé à 0 dB : il n'a jamais appris à travailler dans le bruit. Le modèle entraîné à 0 dB
+    <strong>sature à 23,70 dB</strong> et ne profite plus d'un canal qui s'améliore : il a appris à ignorer les
+    détails fins, définitivement. Le modèle entraîné sur la plage complète perd au plus 1,5 dB face au spécialiste
+    de chaque point, et ne s'effondre nulle part — c'est le bon compromis pour un système réel, dont le SNR
+    instantané n'est pas connu à la conception.</p>
+  </div>
+  <figure><img src="figures/snr_mismatch.png" alt="Écart entre SNR d'entraînement et SNR de test">
+  <figcaption data-i18n="s8.cap1">Écart SNR entraînement/test. La saturation du modèle entraîné à 0 dB et
+  l'effondrement de celui entraîné à 20 dB sont deux faces du même problème.</figcaption></figure>
+  <figure><img src="figures/cifar_bandwidth.png" alt="Qualité en fonction du rapport de bande passante">
+  <figcaption data-i18n="s8.cap2">Compromis débit/qualité. Un seul modèle couvre les cinq rapports
+  <code>k/n</code> de 1/48 à 1/6, sans réentraînement, grâce à la troncature des canaux latents.</figcaption></figure>
+</section>
+
+<section id="rayleigh">
+  <div class="sec-head"><span class="sec-num">09</span><h2 data-i18n="s9.h">Canal à évanouissement de Rayleigh</h2><span class="tag" data-i18n="tag.ext">extension</span></div>
+  <div class="col"><p data-i18n="s9.p1">Évanouissement par blocs, un gain <code>h</code> complexe gaussien par
+  image, CSI parfaite et égalisation par forçage à zéro. Le canal est bien plus hostile : un évanouissement
+  profond détruit l'image entière.</p></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th data-i18n="th.snr">SNR</th><th data-i18n="s9.th2">Précision syntaxique</th>
+      <th data-i18n="s9.th3">Précision sémantique</th><th data-i18n="s9.th4">Précision orientée tâche</th></tr></thead>
+      <tbody>
+        <tr><td>0 dB</td><td class="num">35,5 %</td><td class="num">46,6 %</td><td class="num best">60,0 %</td></tr>
+        <tr><td>4 dB</td><td class="num">46,3 %</td><td class="num">60,0 %</td><td class="num best">67,5 %</td></tr>
+        <tr><td>10 dB</td><td class="num">60,3 %</td><td class="num">72,4 %</td><td class="num best">72,7 %</td></tr>
+        <tr><td>14 dB</td><td class="num">66,0 %</td><td class="num best">75,8 %</td><td class="num">73,6 %</td></tr>
+        <tr><td>20 dB</td><td class="num">69,3 %</td><td class="num best">79,3 %</td><td class="num">74,7 %</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col"><p data-i18n="s9.p2">L'avantage sémantique se maintient sur un canal avec évanouissement :
+  +11,1 points à 0 dB, +12,1 points à 10 dB. Le modèle orienté tâche domine à bruit fort, puis plafonne vers 74 %
+  car il est limité par sa propre capacité de classification, non par le canal.</p></div>
+  <figure><img src="figures/rayleigh.png" alt="Comparaison AWGN et Rayleigh">
+  <figcaption data-i18n="s9.cap">AWGN contre Rayleigh par blocs. L'écart entre les deux canaux donne le coût de
+  l'évanouissement pour chaque système.</figcaption></figure>
+</section>
+
+<section id="tache">
+  <div class="sec-head"><span class="sec-num">10</span><h2 data-i18n="s10.h">Communication orientée tâche</h2><span class="tag" data-i18n="tag.ext">extension</span></div>
+  <div class="col">
+    <p data-i18n="s10.p1">Dernière étape logique du raisonnement sémantique : si le récepteur ne veut que la classe
+    de l'image, pourquoi transmettre une image ? L'encodeur orienté tâche descend à un pas de 8 et envoie
+    directement une représentation vers une tête de classification — aucune reconstruction n'est produite.</p>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th data-i18n="th.system">Système</th><th>k/n</th><th data-i18n="s10.th3">Précision à 0 dB</th>
+      <th data-i18n="s10.th4">Précision à 10 dB</th><th data-i18n="s10.th5">Précision à 20 dB</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n="s10.r1">JSCC sémantique (reconstruction)</td><td class="num">1/12 · 0,0833</td><td class="num">56,4 %</td><td class="num best">78,2 %</td><td class="num best">80,2 %</td></tr>
+        <tr><td data-i18n="s10.r2">Orienté tâche</td><td class="num">0,0417</td><td class="num best">74,2 %</td><td class="num">76,9 %</td><td class="num">77,3 %</td></tr>
+        <tr><td data-i18n="s10.r2">Orienté tâche</td><td class="num">0,0104</td><td class="num best">69,9 %</td><td class="num">75,6 %</td><td class="num">75,8 %</td></tr>
+        <tr><td data-i18n="s10.r2">Orienté tâche</td><td class="num">0,0026</td><td class="num best">57,4 %</td><td class="num">70,5 %</td><td class="num">70,9 %</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p data-i18n="s10.p2">Le résultat est frappant à bruit fort. À 0 dB, le système orienté tâche atteint
+    <strong>74,2 % de précision avec deux fois moins de bande passante</strong> que le système sémantique complet,
+    qui plafonne à 56,4 % — soit 17,8 points de plus pour la moitié du débit. Mieux : avec <strong>32 fois moins de
+    bande</strong> (<code>k/n = 0,0026</code>, soit 8 symboles complexes par image), il fait encore 57,4 %,
+    c'est-à-dire mieux que la reconstruction sémantique complète.</p>
+    <p data-i18n="s10.p3">La contrepartie doit être énoncée clairement : ce système ne rend aucune image. Il n'est
+    utilisable que si l'on sait d'avance ce que le récepteur veut en faire, et il plafonne à 77 % parce que sa
+    propre tête de classification devient le facteur limitant. C'est un échange de généralité contre de
+    l'efficacité.</p>
+  </div>
+  <figure><img src="figures/task_oriented.png" alt="Précision du système orienté tâche selon la bande passante">
+  <figcaption data-i18n="s10.cap">Système orienté tâche. Les courbes sont presque plates en SNR : transmettre
+  seulement ce dont la tâche a besoin rend la transmission remarquablement robuste au bruit.</figcaption></figure>
+</section>
+
+<section id="kodak">
+  <div class="sec-head"><span class="sec-num">11</span><h2 data-i18n="s11.h">Généralisation à des images naturelles</h2></div>
+  <div class="col"><p data-i18n="s11.p1">Les modèles n'ont vu que des images CIFAR-10 de 32×32. Étant entièrement
+  convolutifs, ils sont appliqués tels quels aux 24 images Kodak en 768×512. Le sens est jugé par un ResNet-18
+  ImageNet.</p></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th data-i18n="th.system">Système</th><th data-i18n="th.snr">SNR</th><th>PSNR</th><th>SSIM</th>
+      <th data-i18n="s11.th5">Cosinus sémantique</th><th data-i18n="s11.th6">Accord top-1</th></tr></thead>
+      <tbody>
+        <tr><td data-i18n="row.syn">JSCC syntaxique</td><td>10 dB</td><td class="num">27,11 dB</td><td class="num">0,821</td><td class="num">0,958</td><td class="num">70,8 %</td></tr>
+        <tr><td data-i18n="row.sem">JSCC sémantique</td><td>10 dB</td><td class="num best">27,34 dB</td><td class="num best">0,830</td><td class="num">0,949</td><td class="num best">75,0 %</td></tr>
+        <tr><td data-i18n="row.jpeg">JPEG + MCS optimal</td><td>10 dB</td><td class="num bad">19,08 dB</td><td class="num">0,620</td><td class="num bad">0,744</td><td class="num bad">25,0 %</td></tr>
+        <tr><td data-i18n="row.bound">JPEG, borne de capacité</td><td>10 dB</td><td class="num">29,76 dB</td><td class="num">0,861</td><td class="num">0,975</td><td class="num">83,3 %</td></tr>
+        <tr><td data-i18n="row.jpeg">JPEG + MCS optimal</td><td>0 dB</td><td class="num bad">12,82 dB</td><td class="num">0,442</td><td class="num bad">0,359</td><td class="num bad">0,0 %</td></tr>
+        <tr><td data-i18n="row.sem">JSCC sémantique</td><td>0 dB</td><td class="num">22,73 dB</td><td class="num">0,591</td><td class="num">0,797</td><td class="num">20,8 %</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="col">
+    <p data-i18n="s11.p2">Sur Kodak, le système sémantique conserve son avantage de sens là où il compte — accord
+    top-1 de 75,0 % contre 70,8 % à 10 dB — et devient même légèrement meilleur en PSNR et SSIM, ce qui n'était pas
+    le cas sur CIFAR-10. La chaîne JPEG réelle s'effondre totalement : <strong>0 % d'accord top-1 à 0 dB</strong>,
+    le ResNet-18 ne reconnaît plus rien de l'image reçue.</p>
+  </div>
+  <div class="note col" data-i18n="s11.note"><b>Un résultat qui ne va pas dans notre sens, et qu'il faut
+  présenter.</b> La borne de capacité JPEG — une référence théorique qui suppose une transmission sans erreur au
+  débit de Shannon <code>k·log2(1+SNR)</code> — dépasse les systèmes appris sur Kodak : 29,76 dB contre 27,34 dB à
+  10 dB, et même 26,70 dB contre 22,73 dB à 0 dB. L'explication est que nos modèles sont entraînés sur des
+  vignettes 32×32 et n'ont jamais vu la statistique des grandes images naturelles, alors que JPEG y est excellent
+  et que la borne ignore tout coût de codage canal. Cette borne n'est pas un système réalisable — le JPEG
+  réellement transmis, lui, s'effondre — mais elle indique honnêtement la marge qui resterait à gagner en
+  entraînant directement sur des images haute résolution.</div>
+  <figure><img src="figures/kodak_snr.png" alt="Résultats sur les images Kodak">
+  <figcaption data-i18n="s11.cap">Kodak, 768×512. L'écart entre la courbe JPEG réelle et sa borne de capacité
+  mesure le prix de l'empilement source/canal dans un système réalisable.</figcaption></figure>
+</section>
+
+<section id="video">
+  <div class="sec-head"><span class="sec-num">12</span><h2 data-i18n="s12.h">Vidéo et redondance sémantique temporelle</h2><span class="tag" data-i18n="tag.ext">extension</span></div>
+  <div class="col">
+    <p data-i18n="s12.p1">Le socle transmet la vidéo trame par trame avec le modèle image. L'extension exploite la
+    redondance temporelle par <strong>réapprovisionnement conditionnel latent</strong> : la première trame de chaque
+    groupe de 10 est envoyée entièrement, puis seule la fraction <code>f</code> des blocs latents 2×2 dont le
+    contenu sémantique a le plus changé est retransmise. Le récepteur conserve son latent précédent et n'écrase que
+    les blocs reçus.</p>
+    <p data-i18n="s12.p2">La carte des blocs est une information de signalisation, comptée honnêtement à son coût
+    d'entropie binaire <code>N·H(f)</code> bits : elle représente de 5 à 13 % des symboles selon le réglage, et elle
+    est incluse dans tous les rapports <code>k/n</code> annoncés ci-dessous.</p>
+  </div>
+  <div class="svgbox" role="img" aria-label="Schéma du réapprovisionnement conditionnel latent et résultats par clip">
+  <svg viewBox="0 0 860 236" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Sans, sans-serif">
+    <g font-size="11.5">
+      <text x="8" y="20" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--muted)">GROUP OF PICTURES (GOP = 10)</text>
+      <rect x="8" y="32" width="104" height="72" rx="3" fill="var(--surface)" stroke="var(--sem)" stroke-width="1.8"/>
+      <text x="60" y="52" text-anchor="middle" font-size="10.5" fill="var(--sem)">t = 0 · KEY</text>
+      <g stroke="var(--sem)" fill="var(--sem)" fill-opacity="0.45">
+        <rect x="20" y="60" width="18" height="18"/><rect x="40" y="60" width="18" height="18"/>
+        <rect x="60" y="60" width="18" height="18"/><rect x="80" y="60" width="18" height="18"/>
+        <rect x="20" y="80" width="18" height="18"/><rect x="40" y="80" width="18" height="18"/>
+        <rect x="60" y="80" width="18" height="18"/><rect x="80" y="80" width="18" height="18"/>
+      </g>
+
+      <text x="124" y="74" font-size="15" fill="var(--muted)">→</text>
+
+      <rect x="146" y="32" width="104" height="72" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+      <text x="198" y="52" text-anchor="middle" font-size="10.5" fill="var(--fg)">t = 1</text>
+      <g stroke="var(--line)" fill="none">
+        <rect x="158" y="60" width="18" height="18"/><rect x="178" y="60" width="18" height="18"/>
+        <rect x="198" y="60" width="18" height="18"/><rect x="218" y="60" width="18" height="18"/>
+        <rect x="158" y="80" width="18" height="18"/><rect x="178" y="80" width="18" height="18"/>
+        <rect x="198" y="80" width="18" height="18"/><rect x="218" y="80" width="18" height="18"/>
+      </g>
+      <g stroke="var(--sem)" fill="var(--sem)" fill-opacity="0.45">
+        <rect x="178" y="60" width="18" height="18"/><rect x="218" y="80" width="18" height="18"/>
+      </g>
+
+      <text x="262" y="74" font-size="15" fill="var(--muted)">→</text>
+
+      <rect x="284" y="32" width="104" height="72" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+      <text x="336" y="52" text-anchor="middle" font-size="10.5" fill="var(--fg)">t = 2</text>
+      <g stroke="var(--line)" fill="none">
+        <rect x="296" y="60" width="18" height="18"/><rect x="316" y="60" width="18" height="18"/>
+        <rect x="336" y="60" width="18" height="18"/><rect x="356" y="60" width="18" height="18"/>
+        <rect x="296" y="80" width="18" height="18"/><rect x="316" y="80" width="18" height="18"/>
+        <rect x="336" y="80" width="18" height="18"/><rect x="356" y="80" width="18" height="18"/>
+      </g>
+      <g stroke="var(--sem)" fill="var(--sem)" fill-opacity="0.45">
+        <rect x="336" y="60" width="18" height="18"/><rect x="296" y="80" width="18" height="18"/>
+      </g>
+      <text x="336" y="118" text-anchor="middle" font-size="9.5" fill="var(--muted)">… up to t = 9</text>
+      <text x="60" y="118" text-anchor="middle" font-size="9.5" fill="var(--muted)">all blocks</text>
+      <text x="198" y="118" text-anchor="middle" font-size="9.5" fill="var(--sem)">f · N changed blocks</text>
+
+      <rect x="420" y="24" width="202" height="92" rx="3" fill="var(--surface2)" stroke="var(--line)"/>
+      <text x="436" y="46" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--muted)">RECEIVER</text>
+      <text x="436" y="68" font-size="10.5" fill="var(--fg)">keeps the previous latent,</text>
+      <text x="436" y="85" font-size="10.5" fill="var(--fg)">overwrites received blocks,</text>
+      <text x="436" y="102" font-size="10.5" fill="var(--fg)">decodes the full frame</text>
+
+      <rect x="634" y="24" width="218" height="92" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="650" y="46" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--sem)">SIDE INFORMATION COUNTED</text>
+      <text x="650" y="68" font-size="10.5" fill="var(--fg)">block map : N·H(f) bits</text>
+      <text x="650" y="85" font-size="10.5" fill="var(--fg)">5 to 13 % of the symbols</text>
+      <text x="650" y="102" font-size="9.5" fill="var(--muted)">included in every k/n</text>
+
+      <rect x="8" y="140" width="276" height="88" rx="3" fill="var(--surface)" stroke="var(--sem)"/>
+      <text x="24" y="162" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--sem)">AKIYO · STATIC SCENE</text>
+      <text x="24" y="184" font-size="11" fill="var(--fg)">26.24 dB at k/n = 0.0134</text>
+      <text x="24" y="202" font-size="11" fill="var(--fg)">vs 26.03 dB at 0.0417</text>
+      <text x="24" y="220" font-size="11" fill="var(--sem)">→ 3.1 × less bandwidth</text>
+
+      <rect x="296" y="140" width="276" height="88" rx="3" fill="var(--surface)" stroke="var(--line)"/>
+      <text x="312" y="162" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--muted)">FOREMAN · MODERATE MOTION</text>
+      <text x="312" y="184" font-size="11" fill="var(--fg)">27.07 dB at k/n = 0.0429</text>
+      <text x="312" y="202" font-size="11" fill="var(--fg)">vs 26.73 dB at 0.0417</text>
+      <text x="312" y="220" font-size="11" fill="var(--muted)">→ neutral gain</text>
+
+      <rect x="584" y="140" width="268" height="88" rx="3" fill="var(--surface)" stroke="var(--dig)"/>
+      <text x="600" y="162" font-size="10.5" font-family="IBM Plex Mono, monospace" fill="var(--dig)">BUS · FAST PAN</text>
+      <text x="600" y="184" font-size="11" fill="var(--fg)">21.58 dB at k/n = 0.0429</text>
+      <text x="600" y="202" font-size="11" fill="var(--fg)">vs 22.76 dB at 0.0417</text>
+      <text x="600" y="220" font-size="11" fill="var(--dig)">→ 1.2 dB worse</text>
+    </g>
+  </svg>
+  </div>
+  <figcaption data-i18n="s12.cap1">Le réapprovisionnement conditionnel et son résultat sur les trois clips. Le gain
+  n'est pas uniforme : il est proportionnel à la redondance temporelle réellement présente dans la scène.</figcaption>
+  <div class="col">
+    <p data-i18n="s12.p3">C'est le résultat le plus nuancé du projet, et le plus instructif. Sur
+    <strong>akiyo</strong>, une présentatrice sur fond fixe, le réapprovisionnement atteint 26,24 dB avec 3,1 fois
+    moins de bande que la transmission trame par trame à qualité équivalente, et avec un <em>meilleur</em> cosinus
+    sémantique (0,919 contre 0,881). Sur <strong>foreman</strong>, le gain disparaît. Sur <strong>bus</strong>, un
+    panoramique rapide où presque tous les blocs changent à chaque trame, la méthode est
+    <strong>contre-productive</strong> : 1,2 dB de moins que la transmission trame par trame, parce qu'on paie la
+    signalisation sans économiser de symboles.</p>
+    <p data-i18n="s12.p4">La conclusion à défendre n'est donc pas « le réapprovisionnement conditionnel améliore la
+    vidéo », mais « il convertit la redondance temporelle en bande passante économisée, et un système réel devrait
+    choisir son mode selon le mouvement mesuré dans la scène ». Un sélecteur par groupe d'images, fondé sur
+    l'énergie de changement latent déjà calculée à l'émetteur, est l'extension naturelle de ce travail.</p>
+  </div>
+  <figure><img src="figures/video_rate.png" alt="Compromis débit-qualité en vidéo">
+  <figcaption data-i18n="s12.cap2">Compromis débit/qualité sur les trois clips, à 10 dB. L'écart entre les courbes
+  trame par trame et réapprovisionnement se referme à mesure que le mouvement augmente.</figcaption></figure>
+  <figure><img src="figures/video_snr.png" alt="Qualité vidéo en fonction du SNR">
+  <figcaption data-i18n="s12.cap3">Qualité et sens en vidéo en fonction du SNR, pour les trois systèmes.</figcaption></figure>
+</section>
+
+<section id="limites">
+  <div class="sec-head"><span class="sec-num">13</span><h2 data-i18n="s13.h">Limites et honnêteté des résultats</h2></div>
+  <div class="col">
+    <p data-i18n="s13.p1">Ce qu'il faut pouvoir énoncer soi-même avant qu'un jury ne le demande :</p>
+    <ul>
+      <li data-i18n="s13.li1"><strong>Tout est simulé.</strong> AWGN et Rayleigh par blocs avec CSI parfaite ;
+      aucune liaison radio, aucune synchronisation, aucune estimation de canal imparfaite.</li>
+      <li data-i18n="s13.li2"><strong>Les modèles sont entraînés sur CIFAR-10 uniquement</strong>, en 32×32. Kodak
+      et la vidéo sont des tests de généralisation, et c'est la raison pour laquelle la borne de capacité JPEG les
+      dépasse sur Kodak.</li>
+      <li data-i18n="s13.li3"><strong>La borne de capacité n'est pas un système.</strong> Elle suppose un codage
+      canal parfait au débit de Shannon ; elle majore ce qu'une chaîne séparée pourrait faire, pas ce qu'elle
+      fait.</li>
+      <li data-i18n="s13.li4"><strong>Les clips sont des séquences CIF de 30 trames</strong>, substituts aux clips
+      UVG du cahier des charges, dont les fichiers 1080p bruts pèsent plusieurs gigaoctets chacun.</li>
+      <li data-i18n="s13.li5"><strong>Un seul germe aléatoire par modèle.</strong> Les écarts de 9 à 16 points de
+      précision sont bien au-delà du bruit d'entraînement, mais les écarts inférieurs à 0,5 dB de PSNR ne doivent
+      pas être sur-interprétés.</li>
+      <li data-i18n="s13.li6"><strong>Accord top-1 sur Kodak : 24 images.</strong> Un pas de quantification vaut
+      4,2 points ; les petits écarts sur cette métrique ne sont pas significatifs.</li>
+      <li data-i18n="s13.li7"><strong>Deux matériels.</strong> Quatre modèles ont été entraînés sur CPU et cinq sur
+      GPU. L'ordre des données et les germes ont été maintenus identiques, mais les sommes en virgule flottante ne
+      sont pas bit-à-bit identiques entre les deux.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="repro">
+  <div class="sec-head"><span class="sec-num">14</span><h2 data-i18n="s14.h">Reproduire les résultats</h2></div>
+<pre><code>python scripts/download_data.py              # CIFAR-10, Kodak, 3 Xiph clips, ResNet-18 weights
+python scripts/run_all.py --workers 2        # trains the 9 models (GPU detected automatically)
+python scripts/evaluate.py cifar --workers 6 # learned curves (GPU) + digital chain (6 CPU procs)
+python scripts/evaluate.py kodak --part learned
+python scripts/evaluate.py video --part learned
+python scripts/make_figures.py               # figures/ and results/tables/
+python scripts/demo.py                       # visual comparison</code></pre>
+  <div class="col"><p data-i18n="s14.p1">Le GPU est détecté automatiquement et <code>SEMCOM_DEVICE=cpu</code> force
+  le CPU. Un point de reprise est écrit à chaque époque : une interruption coûte au plus une époque.</p></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th data-i18n="s14.th1">Modèle</th><th data-i18n="s14.th2">Rôle</th><th data-i18n="s14.th3">Époques</th>
+      <th data-i18n="s14.th4">Validation</th><th data-i18n="s14.th5">Durée</th></tr></thead>
+      <tbody>
+        <tr><td>clsA</td><td data-i18n="s14.r1">classifieur de la perte sémantique (gelé)</td><td class="num">10</td><td class="num">85,70 %</td><td class="num">38 min</td></tr>
+        <tr><td>clsB</td><td data-i18n="s14.r2">juge indépendant du sens</td><td class="num">15</td><td class="num">88,30 %</td><td class="num">57 min</td></tr>
+        <tr><td>dae</td><td data-i18n="s14.r3">codeur source de la chaîne séparée</td><td class="num">25</td><td class="num">28,66 dB</td><td class="num">119 min</td></tr>
+        <tr><td>jscc_mse</td><td data-i18n="s14.r4">JSCC syntaxique</td><td class="num">25</td><td class="num">26,02 dB</td><td class="num">135 min</td></tr>
+        <tr><td>jscc_sem</td><td data-i18n="s14.r5">JSCC sémantique</td><td class="num">25</td><td class="num">25,50 dB</td><td class="num">22 min</td></tr>
+        <tr><td>jscc_mse_snr0</td><td data-i18n="s14.r6">étude d'écart SNR</td><td class="num">15</td><td class="num">21,50 dB</td><td class="num">5 min</td></tr>
+        <tr><td>jscc_mse_snr10</td><td data-i18n="s14.r6">étude d'écart SNR</td><td class="num">15</td><td class="num">26,42 dB</td><td class="num">6 min</td></tr>
+        <tr><td>jscc_mse_snr20</td><td data-i18n="s14.r6">étude d'écart SNR</td><td class="num">15</td><td class="num">29,26 dB</td><td class="num">6 min</td></tr>
+        <tr><td>task</td><td data-i18n="s14.r7">transmission orientée tâche</td><td class="num">20</td><td class="num">75,75 %</td><td class="num">6 min</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <figure><img src="figures/architecture.png" alt="Schéma d'architecture généré par le projet">
+  <figcaption data-i18n="s14.cap">Schéma d'architecture généré par <code>make_figures.py</code> à partir du code
+  lui-même.</figcaption></figure>
+</section>
+
+<footer>
+  <p data-i18n="foot.p">Projet 07 — Communication sémantique apprise pour la transmission d'images et de vidéos.
+  Tous les chiffres de ce rapport proviennent de <code>results/eval/*.csv</code>, produits par les commandes
+  ci-dessus sur un canal simulé. Références : Qin <em>et al.</em>, <em>Semantic Communications: Principles and
+  Challenges</em> ; Xie <em>et al.</em>, DeepSC, IEEE TSP 2021 ; Zhang <em>et al.</em>, IEEE JSAC 2022 ;
+  Bourtsoulatze <em>et al.</em>, deep JSCC ; DVST ; VQ-DeepSC ; jeux de données Kodak et Xiph.</p>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var T = {
+    en: {
+      "lang.label": "Language",
+      "lang.note": "Diagram labels stay in their original technical notation.",
+      "h.eyebrow": "Project 07 · Future mobile networks · INSAT 2026–2027",
+      "h.title": "Learned semantic communication for image and video transmission",
+      "h.lede": "Three systems send the same image over the same simulated channel: a separated Shannon chain, a syntactic JSCC trained on MSE, and a semantic JSCC trained to preserve meaning. Meaning is judged by models that were never used for training.",
+      "h.m1": "9 models trained", "h.m2": "CIFAR-10 · Kodak · 3 CIF clips",
+      "h.m3": "AWGN + block Rayleigh", "h.m4": "SNR 0–20 dB", "h.m5": "PyTorch · CPU + GTX 1650",
+      "toc.label": "Contents",
+      "toc.1": "The problem: Shannon versus Weaver", "toc.2": "The three systems compared",
+      "toc.3": "JSCC architecture", "toc.4": "The semantic loss", "toc.5": "Experimental protocol",
+      "toc.6": "Core result: meaning versus pixels", "toc.7": "The cliff effect, measured",
+      "toc.8": "Bandwidth and SNR mismatch", "toc.9": "Rayleigh channel",
+      "toc.10": "Task-oriented communication", "toc.11": "Generalisation to Kodak",
+      "toc.12": "Video and temporal redundancy", "toc.13": "Limits and honesty about the results",
+      "toc.14": "Reproducing the results",
+      "s0.h": "The result in four numbers",
+      "s0.p1": "At the main operating point <code>k/n = 1/12</code> on an AWGN channel, at 0 dB SNR — that is, where the noise is as strong as the signal:",
+      "s0.k1": "of semantic accuracy for the semantic JSCC over the syntactic JSCC (56.4 % against 42.0 %)",
+      "s0.k2": "the price paid in PSNR for that gain in meaning",
+      "s0.k3": "accuracy of the classical separated chain: pure chance over 10 classes",
+      "s0.k4": "bandwidth saved on a static scene by conditional replenishment",
+      "s0.p2": "In other words: under strong noise the separated chain sends bits that no longer mean anything, the syntactic JSCC sends a blurred image recognisable about half the time, and the semantic JSCC sends an image slightly less faithful pixel-wise but correctly interpreted in 56 % of cases.",
+      "s1.h": "The problem: Shannon versus Weaver",
+      "s1.p1": "Shannon's theory gives a communication system a single objective: reproduce the transmitted symbol sequence, bit by bit, regardless of what it means. Yet Weaver distinguished three levels of problem from the outset — technical, semantic and pragmatic — and only the first is addressed by the systems deployed today.",
+      "s1.p2": "A current system stacks a compression codec (JPEG, H.264) and an independent channel code. That stacking has two measurable consequences, and they are what this project quantifies: it spends bandwidth faithfully reproducing details that contribute nothing to understanding the content, and it collapses abruptly once an SNR threshold is crossed, because a compressed stream becomes unreadable as soon as a few bits are wrong.",
+      "s1.cap": "Weaver's three levels. This project measures level A (PSNR, SSIM) and level B (judge classifier accuracy, ResNet-18 feature similarity) on exactly the same transmissions, which separates what is faithful from what is understood.",
+      "s2.h": "The three systems compared",
+      "s2.p1": "The three chains send the same image within the same budget of complex symbols and over the same simulated channel. Only the way the image is turned into symbols changes.",
+      "s2.l1": "separated chain (Shannon)", "s2.l2": "syntactic JSCC", "s2.l3": "semantic JSCC",
+      "s2.cap": "The two learned systems share exactly the same architecture and the same symbol budget: they differ only in the loss function. That is what makes the comparison interpretable — any measured gap comes from the training objective, not from network capacity.",
+      "s3.h": "JSCC architecture",
+      "s3.p1": "The encoder is fully convolutional: two stride-2 convolutions bring the image down to a quarter of its resolution, two residual blocks refine the representation, and a final convolution produces 16 latent channels. The real values are paired into complex symbols, normalised to an average power of 1 per symbol, then pass through the channel layer. The decoder mirrors the encoder.",
+      "s3.p2": "Two properties of this choice matter later. First, because the network is <em>fully convolutional</em>, a model trained on 32×32 CIFAR-10 images applies without retraining to a 768×512 Kodak image or a 352×288 CIF video frame. Second, transmission is <em>bandwidth-agile</em>: sending only the first <code>c</code> latent channels gives the ratio <code>k/n = c/96</code>, that is 1/48 to 1/6 depending on the budget available, with one single model.",
+      "s3.cap": "The detail of the transmitter, the channel layer and the receiver. The channel layer is a differentiable operation: the gradient of the loss flows through the noise, which lets the network learn a code matched to the channel rather than a source code followed by a channel code.",
+      "s4.h": "The semantic loss",
+      "s4.p1": "This is the only point where the two learned systems differ. The syntactic JSCC minimises the mean squared error between the received and the transmitted image. The semantic JSCC adds two terms computed by passing the received image through a <strong>frozen</strong> CIFAR-10 classifier (classifier A):",
+      "s4.li1": "a <strong>feature term</strong>: the internal activation maps of the received image must resemble those of the transmitted image, each layer normalised by its own energy;",
+      "s4.li2": "a <strong>task term</strong>: the cross-entropy between the class predicted on the received image and the true label.",
+      "s4.p2": "The weights chosen are 0.01 for the features and 0.003 for the task. They are deliberately small: the goal is to bend the reconstruction, not to replace it with a classification.",
+      "s4.cap": "The semantic loss. Classifier A is frozen: its weights do not move, it serves only as a measure of semantic resemblance. Every meaning result reported afterwards is measured with classifier B (VGG, 88.3 %), which never appears in a loss function.",
+      "s5.h": "Experimental protocol",
+      "s5.c1h": "Data",
+      "s5.c1p": "CIFAR-10 for training (50,000 images) and evaluation (5,000 test images). Kodak (24 images at 768×512) and three 30-frame Xiph CIF clips — akiyo (static), foreman (moderate motion), bus (fast pan) — never seen during training.",
+      "s5.c2h": "Judges of meaning",
+      "s5.c2p": "Classifier B (VGG, a different architecture from A) on CIFAR-10. On Kodak and video, an ImageNet ResNet-18: feature cosine similarity and top-1 label agreement. Neither was used for training.",
+      "s5.c3h": "Channel",
+      "s5.c3p": "AWGN from 0 to 20 dB (1 dB steps on CIFAR-10, 2 dB on Kodak and video) and block Rayleigh with perfect CSI and ZF equalisation. Simulation only, no real radio link.",
+      "s5.c4h": "Digital reference",
+      "s5.c4p": "Simulated bit by bit: packets of 1024 information bits, punctured K=7 (133,171) convolutional code, Gray QAM, max-log LLRs, Viterbi. Six modulation/coding combinations, plus a \"best MCS\" curve that knows the SNR.",
+      "s5.note": "<b>Why simulate the digital chain bit by bit.</b> It would have been quicker to model its collapse with a formula. By really coding, modulating and decoding every packet, the cliff effect seen below is a measured consequence of the system, not an assumption introduced to favour the learned approach.",
+      "s5.cap": "Learning curves of the nine models. Four were trained on CPU (about 5.8 h in total), the other five on a GTX 1650 GPU in 24 minutes. Batch indexing, augmentation and the random seeds stayed on CPU so that the data order is identical across both runs, which preserves comparability between the syntactic and the semantic JSCC.",
+      "s6.h": "Core result: meaning versus pixels",
+      "s6.p1": "At <code>k/n = 1/12</code> on an AWGN channel. Accuracy is that of judge classifier B, which was never used for training; the no-channel reference is 88.4 %.",
+      "s6.th2": "PSNR synt.", "s6.th3": "PSNR sem.", "s6.th4": "Accuracy synt.", "s6.th5": "Accuracy sem.", "s6.th6": "Meaning gap",
+      "s6.p2": "The reading is unambiguous. The semantic JSCC is <strong>systematically worse in PSNR</strong>, by 0.39 to 0.57 dB, and <strong>systematically better in meaning</strong>, by 9.6 to 16.2 accuracy points. The meaning gap grows as the channel gets worse: exactly the behaviour expected of a system that spends its symbol budget on what carries the useful information rather than on uniform pixel fidelity.",
+      "s6.p3": "This table alone shows that PSNR is a poor measure for judging a semantic communication: looking at it only, one would conclude that the semantic system is the worse of the two.",
+      "s6.cap1": "CIFAR-10, <code>k/n = 1/12</code>, AWGN. Pixel fidelity on the left, meaning on the right. The thin curves show each fixed MCS of the separated chain: each collapses at its own threshold.",
+      "s6.cap2": "Visual comparison on a Kodak image. At 2 dB the separated chain returns an unusable image while both learned systems stay interpretable.",
+      "s7.h": "The cliff effect, measured",
+      "s7.p1": "Comparison at the same rate <code>k/n = 1/12</code> between the semantic JSCC and the separated chain in its most favourable form — a \"genie\" curve that knows the SNR and picks the best of the six MCS at every point.",
+      "s7.th2": "PSNR separated", "s7.th3": "PSNR semantic", "s7.th4": "Accuracy separated", "s7.th5": "Accuracy semantic",
+      "s7.p2": "At 0 and 2 dB the separated chain sits at <strong>10.4 % accuracy, pure chance</strong> over ten classes: packets no longer get through, the decoder rejects the stream, and the image becomes a grey rectangle. Meaning is not degraded, it has vanished. That is the cliff effect, and here it is a measurement, not an illustration.",
+      "s7.p3": "One point is worth stressing for the defence: even at 20 dB, that is in excellent conditions, the separated chain only recovers 40.5 % accuracy at this very constrained rate of 1/12. The symbol budget is simply too small for JPEG or the quantised auto-encoder to produce a good decodable stream. The learned systems, by contrast, degrade gradually and stay usable across the whole range.",
+      "s8.h": "Bandwidth and train/test SNR mismatch",
+      "s8.p1": "A model trained at a fixed SNR is excellent at that SNR and fragile elsewhere. That is the argument justifying training over <code>SNR ~ U[0, 20] dB</code> for the main models.",
+      "s8.th1": "Tested at", "s8.th2": "Trained at 0 dB", "s8.th3": "Trained at 10 dB", "s8.th4": "Trained at 20 dB", "s8.th5": "Trained on 0–20 dB",
+      "s8.p2": "Both pathologies are visible. The model trained at 20 dB loses 4.07 dB against the best when tested at 0 dB: it never learned to work in noise. The model trained at 0 dB <strong>saturates at 23.70 dB</strong> and no longer benefits from an improving channel: it learned to ignore fine detail, permanently. The model trained over the full range loses at most 1.5 dB against the specialist at each point and collapses nowhere — the right compromise for a real system, whose instantaneous SNR is unknown at design time.",
+      "s8.cap1": "Train/test SNR mismatch. The saturation of the model trained at 0 dB and the collapse of the one trained at 20 dB are two faces of the same problem.",
+      "s8.cap2": "Rate/quality trade-off. A single model covers all five <code>k/n</code> ratios from 1/48 to 1/6, without retraining, through latent channel truncation.",
+      "s9.h": "Rayleigh fading channel",
+      "s9.p1": "Block fading, one complex Gaussian gain <code>h</code> per image, perfect CSI and zero-forcing equalisation. The channel is far more hostile: a deep fade destroys the whole image.",
+      "s9.th2": "Accuracy syntactic", "s9.th3": "Accuracy semantic", "s9.th4": "Accuracy task-oriented",
+      "s9.p2": "The semantic advantage holds on a fading channel: +11.1 points at 0 dB, +12.1 points at 10 dB. The task-oriented model dominates under strong noise, then plateaus near 74 % because it is limited by its own classification capacity, not by the channel.",
+      "s9.cap": "AWGN against block Rayleigh. The gap between the two channels gives the cost of fading for each system.",
+      "s10.h": "Task-oriented communication",
+      "s10.p1": "The logical final step of semantic reasoning: if the receiver only wants the class of the image, why transmit an image at all? The task-oriented encoder goes down to stride 8 and sends a representation straight to a classification head — no reconstruction is produced.",
+      "s10.th3": "Accuracy at 0 dB", "s10.th4": "Accuracy at 10 dB", "s10.th5": "Accuracy at 20 dB",
+      "s10.r1": "Semantic JSCC (reconstruction)", "s10.r2": "Task-oriented",
+      "s10.p2": "The result is striking under strong noise. At 0 dB the task-oriented system reaches <strong>74.2 % accuracy with half the bandwidth</strong> of the full semantic system, which tops out at 56.4 % — 17.8 points more for half the rate. Better still: with <strong>32 times less bandwidth</strong> (<code>k/n = 0.0026</code>, that is 8 complex symbols per image) it still manages 57.4 %, better than full semantic reconstruction.",
+      "s10.p3": "The counterpart must be stated plainly: this system returns no image. It is usable only if one knows in advance what the receiver wants to do, and it plateaus at 77 % because its own classification head becomes the limiting factor. It trades generality for efficiency.",
+      "s10.cap": "Task-oriented system. The curves are almost flat in SNR: sending only what the task needs makes transmission remarkably robust to noise.",
+      "s11.h": "Generalisation to natural images",
+      "s11.p1": "The models have only seen 32×32 CIFAR-10 images. Being fully convolutional, they are applied as they are to the 24 Kodak images at 768×512. Meaning is judged by an ImageNet ResNet-18.",
+      "s11.th5": "Semantic cosine", "s11.th6": "Top-1 agreement",
+      "s11.p2": "On Kodak the semantic system keeps its meaning advantage where it counts — 75.0 % top-1 agreement against 70.8 % at 10 dB — and even becomes slightly better in PSNR and SSIM, which was not the case on CIFAR-10. The real JPEG chain collapses completely: <strong>0 % top-1 agreement at 0 dB</strong>, the ResNet-18 recognises nothing of the received image.",
+      "s11.note": "<b>A result that does not go our way, and that must be presented.</b> The JPEG capacity bound — a theoretical reference assuming error-free transmission at the Shannon rate <code>k·log2(1+SNR)</code> — beats the learned systems on Kodak: 29.76 dB against 27.34 dB at 10 dB, and even 26.70 dB against 22.73 dB at 0 dB. The explanation is that our models are trained on 32×32 thumbnails and have never seen the statistics of large natural images, whereas JPEG excels at them and the bound ignores all channel coding cost. This bound is not a realisable system — the JPEG actually transmitted does collapse — but it honestly indicates the margin that would remain to be gained by training directly on high-resolution images.",
+      "s11.cap": "Kodak, 768×512. The gap between the real JPEG curve and its capacity bound measures the price of source/channel stacking in a realisable system.",
+      "s12.h": "Video and temporal semantic redundancy",
+      "s12.p1": "The mandatory core sends video frame by frame with the image model. The extension exploits temporal redundancy through <strong>latent conditional replenishment</strong>: the first frame of every group of 10 is sent in full, then only the fraction <code>f</code> of 2×2 latent blocks whose semantic content changed most is retransmitted. The receiver keeps its previous latent and overwrites only the blocks it receives.",
+      "s12.p2": "The block map is side information, counted honestly at its binary entropy cost of <code>N·H(f)</code> bits: it accounts for 5 to 13 % of the symbols depending on the setting, and it is included in every <code>k/n</code> figure quoted below.",
+      "s12.cap1": "Conditional replenishment and its result on the three clips. The gain is not uniform: it is proportional to the temporal redundancy actually present in the scene.",
+      "s12.p3": "This is the most nuanced result of the project, and the most instructive. On <strong>akiyo</strong>, a presenter against a fixed background, replenishment reaches 26.24 dB with 3.1 times less bandwidth than frame-by-frame transmission at equivalent quality, and with a <em>better</em> semantic cosine (0.919 against 0.881). On <strong>foreman</strong> the gain disappears. On <strong>bus</strong>, a fast pan where almost every block changes at each frame, the method is <strong>counter-productive</strong>: 1.2 dB worse than frame-by-frame, because the side information is paid for without saving symbols.",
+      "s12.p4": "The conclusion to defend is therefore not \"conditional replenishment improves video\" but \"it converts temporal redundancy into saved bandwidth, and a real system should choose its mode according to the motion measured in the scene\". A per-GOP selector, based on the latent change energy already computed at the transmitter, is the natural extension of this work.",
+      "s12.cap2": "Rate/quality trade-off on the three clips, at 10 dB. The gap between the frame-by-frame and replenishment curves closes as motion increases.",
+      "s12.cap3": "Video quality and meaning against SNR, for the three systems.",
+      "s13.h": "Limits and honesty about the results",
+      "s13.p1": "What one should be able to state oneself before a jury asks:",
+      "s13.li1": "<strong>Everything is simulated.</strong> AWGN and block Rayleigh with perfect CSI; no radio link, no synchronisation, no imperfect channel estimation.",
+      "s13.li2": "<strong>The models are trained on CIFAR-10 only</strong>, at 32×32. Kodak and video are generalisation tests, and that is why the JPEG capacity bound beats them on Kodak.",
+      "s13.li3": "<strong>The capacity bound is not a system.</strong> It assumes perfect channel coding at the Shannon rate; it upper-bounds what a separated chain could do, not what it does.",
+      "s13.li4": "<strong>The clips are 30-frame CIF sequences</strong>, standing in for the UVG clips of the brief, whose raw 1080p files weigh several gigabytes each.",
+      "s13.li5": "<strong>One random seed per model.</strong> The 9 to 16 point accuracy gaps are well beyond training noise, but gaps below 0.5 dB of PSNR should not be over-interpreted.",
+      "s13.li6": "<strong>Top-1 agreement on Kodak: 24 images.</strong> One quantisation step is worth 4.2 points; small gaps on that metric are not significant.",
+      "s13.li7": "<strong>Two pieces of hardware.</strong> Four models were trained on CPU and five on GPU. Data order and seeds were kept identical, but floating-point sums are not bit-identical between the two.",
+      "s14.h": "Reproducing the results",
+      "s14.p1": "The GPU is detected automatically and <code>SEMCOM_DEVICE=cpu</code> forces the CPU. A checkpoint is written every epoch: an interruption costs at most one epoch.",
+      "s14.th1": "Model", "s14.th2": "Role", "s14.th3": "Epochs", "s14.th4": "Validation", "s14.th5": "Time",
+      "s14.r1": "classifier of the semantic loss (frozen)", "s14.r2": "independent judge of meaning",
+      "s14.r3": "source coder of the separated chain", "s14.r4": "syntactic JSCC", "s14.r5": "semantic JSCC",
+      "s14.r6": "SNR mismatch study", "s14.r7": "task-oriented transmission",
+      "s14.cap": "Architecture diagram generated by <code>make_figures.py</code> from the code itself.",
+      "th.snr": "SNR", "th.system": "System",
+      "row.syn": "Syntactic JSCC", "row.sem": "Semantic JSCC", "row.jpeg": "JPEG + best MCS", "row.bound": "JPEG, capacity bound",
+      "tag.ext": "extension",
+      "foot.p": "Project 07 — Learned semantic communication for image and video transmission. Every number in this report comes from <code>results/eval/*.csv</code>, produced by the commands above on a simulated channel. References: Qin <em>et al.</em>, <em>Semantic Communications: Principles and Challenges</em>; Xie <em>et al.</em>, DeepSC, IEEE TSP 2021; Zhang <em>et al.</em>, IEEE JSAC 2022; Bourtsoulatze <em>et al.</em>, deep JSCC; DVST; VQ-DeepSC; Kodak and Xiph datasets."
+    },
+    tn: {
+      "lang.label": "اللغة",
+      "lang.note": "الكلمات التقنية موجودة بالإنجليزية بين قوسين. أسامي الرسومات (diagrams) باقين بالنوتاسيون التقني الأصلي.",
+      "h.eyebrow": "مشروع 07 · الشبكات الجوالة المستقبلية (future mobile networks) · INSAT 2026–2027",
+      "h.title": "اتصال دلالي متعلّم (learned semantic communication) لإرسال التصاور والفيديو",
+      "h.lede": "ثلاث سيستمات (systems) يبعثو نفس التصويرة على نفس القناة المحاكية (simulated channel): سلسلة منفصلة متاع شانون (separated Shannon chain)، و JSCC سانتاكسي (syntactic) متدرّب على الـ MSE، و JSCC دلالي (semantic) متدرّب باش يحافظ على المعنى. المعنى يتحكم فيه مودايل (models) عمرهم ما تستعملو في التدريب.",
+      "h.m1": "9 مودايل متدرّبين", "h.m2": "CIFAR-10 · Kodak · 3 كليبات CIF",
+      "h.m3": "AWGN + رايلي بالبلوكات (block Rayleigh)", "h.m4": "SNR من 0 لـ 20 dB", "h.m5": "PyTorch · CPU + GTX 1650",
+      "toc.label": "الفهرس",
+      "toc.1": "المشكلة: شانون مقابل ويفر (Weaver)", "toc.2": "الثلاثة سيستمات مقارنين",
+      "toc.3": "أركيتكتير الـ JSCC", "toc.4": "الدالة الدلالية (semantic loss)", "toc.5": "البروتوكول التجريبي",
+      "toc.6": "النتيجة الأساسية: المعنى مقابل البيكسلات", "toc.7": "تأثير الهاوية (cliff effect) مقيس",
+      "toc.8": "عرض النطاق (bandwidth) و فرق الـ SNR", "toc.9": "قناة رايلي (Rayleigh)",
+      "toc.10": "اتصال موجّه للمهمة (task-oriented)", "toc.11": "التعميم على Kodak",
+      "toc.12": "الفيديو و التكرار الزمني (temporal redundancy)", "toc.13": "الحدود و الصدق في النتائج",
+      "toc.14": "كيفاش تعاود النتائج",
+      "s0.h": "النتيجة في أربعة أرقام",
+      "s0.p1": "في نقطة العمل الأساسية <code>k/n = 1/12</code> على قناة AWGN، في 0 dB متاع SNR، يعني وين الضجيج (noise) قوي قد الإشارة (signal):",
+      "s0.k1": "زيادة في الدقة الدلالية (semantic accuracy) متاع الـ JSCC الدلالي على السانتاكسي (56,4 % مقابل 42,0 %)",
+      "s0.k2": "الثمن الملوص في الـ PSNR مقابل هذا الربح في المعنى",
+      "s0.k3": "دقة السلسلة المنفصلة الكلاسيكية: الحظ الخالص على 10 كلاسات (classes)",
+      "s0.k4": "ربح في عرض النطاق على سيناريو ثابت بفضل التجديد الشرطي (conditional replenishment)",
+      "s0.p2": "بكلام آخر: كي الضجيج يقوى، السلسلة المنفصلة تبعث بيتات (bits) ما عندهمش معنى، الـ JSCC السانتاكسي يبعث تصويرة مشوّشة تتعرّف تقريبا مرة من زوز، و الـ JSCC الدلالي يبعث تصويرة أقل وفاء في البيكسل أما متفهّمة بالصحيح في 56 % من الحالات.",
+      "s1.h": "المشكلة: شانون مقابل ويفر (Weaver)",
+      "s1.p1": "نظرية شانون تعطي للسيستم متاع الاتصال هدف وحيد: يعاود الإشارة المبعوثة بيت بيت، بلا ما يهتم بالمعنى. أما ويفر (Weaver) فرّق من البداية بين ثلاثة مستويات: تقني (technical) و دلالي (semantic) و براغماتي (pragmatic) — و كان الأول برك هو اللي محلول في السيستمات اللي مستعملين اليوم.",
+      "s1.p2": "السيستم الحالي يركّب كودك متاع الضغط (compression codec) كيما JPEG ولا H.264 فوق كودينڨ قناة (channel coding) مستقل. هذا التركيب عندو زوز نتائج تتقاس، و هوما اللي هذا المشروع يقيسهم: يخسّر عرض النطاق في تفاصيل ما تزيدش شيء في فهم المحتوى، و يطيح بالزربة كي يفوت حد معيّن متاع SNR، خاطر الستريم المضغوط يولّي ما يتقراش كان غلطو شويّة بيتات.",
+      "s1.cap": "الثلاثة مستويات متاع ويفر. هذا المشروع يقيس المستوى A (PSNR, SSIM) و المستوى B (دقة مصنّف حَكَم، و تشابه الملامح (feature similarity) بـ ResNet-18) على نفس الإرسالات بالضبط، و هكذا نفرّقو بين اللي وفي و اللي متفهّم.",
+      "s2.h": "الثلاثة سيستمات مقارنين",
+      "s2.p1": "الثلاثة سلاسل يبعثو نفس التصويرة بنفس الميزانية متاع الرموز المركّبة (complex symbols) و على نفس القناة المحاكية. الوحيد اللي يتبدّل هو الطريقة اللي بيها التصويرة تولّي رموز.",
+      "s2.l1": "سلسلة منفصلة (separated chain)", "s2.l2": "JSCC سانتاكسي", "s2.l3": "JSCC دلالي",
+      "s2.cap": "الزوز سيستمات المتعلّمين عندهم نفس الأركيتكتير بالضبط و نفس ميزانية الرموز: يتفرّقو كان في دالة الخسارة (loss function). هذا هو اللي يخلّي المقارنة مفهومة — أي فرق مقيس جاي من هدف التدريب، ماهوش من قدرة الشبكة.",
+      "s3.h": "أركيتكتير الـ JSCC",
+      "s3.p1": "الإنكودر (encoder) كامل كونفولوسيونال: زوز كونفولوسيون بخطوة 2 ينزّلو التصويرة لربع الدقة، زوز بلوكات ريزيديال (residual blocks) ينقّيو التمثيل، و كونفولوسيون أخرانية تطلّع 16 قناة لاتنتية (latent channels). القيم الحقيقية تتزاوج في رموز مركّبة، تتنورملايزي لقدرة متوسطة 1 لكل رمز، و من بعد تعدّي من طبقة القناة (channel layer). الديكودر (decoder) هو المراية متاع الإنكودر.",
+      "s3.p2": "زوز خصائص متاع هذا الخيار يهمّو بعد. الأول، خاطر الشبكة <em>كاملة كونفولوسيونال</em>، مودال متدرّب على تصاور CIFAR-10 متاع 32×32 يتطبّق بلا إعادة تدريب على تصويرة Kodak متاع 768×512 ولا على ترام فيديو CIF متاع 352×288. الثاني، الإرسال <em>مرن في النطاق</em> (bandwidth-agile): كي نبعثو كان أول <code>c</code> قنوات لاتنتية، نلقاو النسبة <code>k/n = c/96</code>، يعني من 1/48 لـ 1/6 على حساب الميزانية، بمودال واحد برك.",
+      "s3.cap": "التفاصيل متاع الباعث (transmitter) و طبقة القناة و المستقبل (receiver). طبقة القناة عملية قابلة للتفاضل (differentiable): الڨرادیان (gradient) متاع الخسارة يعدّي من الضجيج، و هذا اللي يخلّي الشبكة تتعلّم كود متلائم مع القناة بدل كود مصدر ثم كود قناة.",
+      "s4.h": "الدالة الدلالية (semantic loss)",
+      "s4.p1": "هذي هي النقطة الوحيدة اللي بيها يتفرّقو الزوز سيستمات المتعلّمين. الـ JSCC السانتاكسي ينقّص الخطأ التربيعي المتوسط (MSE) بين التصويرة المستقبلة و المبعوثة. الـ JSCC الدلالي يزيد زوز حدود محسوبين بتمرير التصويرة المستقبلة من مصنّف CIFAR-10 <strong>مجمّد (frozen)</strong> — المصنّف A:",
+      "s4.li1": "حد متاع <strong>الملامح (feature term)</strong>: خرائط التنشيط الداخلية متاع التصويرة المستقبلة لازم تشبه لمتاع المبعوثة، و كل طبقة متنورملايزية بالطاقة متاعها;",
+      "s4.li2": "حد متاع <strong>المهمة (task term)</strong>: الإنتروبيا المتقاطعة (cross-entropy) بين الكلاس المتوقّع على التصويرة المستقبلة و الإتيكيت الحقيقية.",
+      "s4.p2": "الأوزان المختارة هي 0,01 للملامح و 0,003 للمهمة. ضعاف بقصد: الهدف نحنيو الريكونستريكسيون (reconstruction)، ماهوش نبدّلوها بتصنيف.",
+      "s4.cap": "الدالة الدلالية. المصنّف A مجمّد: الأوزان متاعو ما يتحرّكوش، يخدم كان كمقياس للتشابه الدلالي. كل نتائج المعنى اللي جايين بعد مقيسين بالمصنّف B (VGG، 88,3 %)، اللي عمرو ما دخل في دالة خسارة.",
+      "s5.h": "البروتوكول التجريبي",
+      "s5.c1h": "المعطيات (data)",
+      "s5.c1p": "CIFAR-10 للتدريب (50 000 تصويرة) و للتقييم (5 000 تصويرة تست). Kodak (24 تصويرة 768×512) و ثلاثة كليبات Xiph CIF متاع 30 ترام — akiyo (ثابت)، foreman (حركة متوسطة)، bus (مرور سريع) — عمرهم ما تشافو في التدريب.",
+      "s5.c2h": "حُكّام المعنى",
+      "s5.c2p": "المصنّف B (VGG، أركيتكتير مختلف على A) على CIFAR-10. على Kodak و الفيديو، ResNet-18 متاع ImageNet: تشابه الكوسينوس (cosine similarity) متاع الملامح و توافق الإتيكيت top-1. حتى واحد منهم ما تستعمل في التدريب.",
+      "s5.c3h": "القناة (channel)",
+      "s5.c3p": "AWGN من 0 لـ 20 dB (خطوة 1 dB على CIFAR-10، و 2 dB على Kodak و الفيديو) و رايلي بالبلوكات مع CSI مثالية و تعديل ZF. محاكاة برك، ماكانش ربط راديو حقيقي.",
+      "s5.c4h": "المرجع الرقمي (digital reference)",
+      "s5.c4p": "محاكي بيت بيت: باكيات متاع 1024 بيت معلومة، كود كونفولوسيونال K=7 (133,171) مثقّب (punctured)، QAM ڨراي، LLR max-log، فيتربي (Viterbi). ستة تركيبات موديلاسيون/كودينڨ، زايد كورب «أفضل MCS» اللي يعرف الـ SNR.",
+      "s5.note": "<b>علاش نحاكيو السلسلة الرقمية بيت بيت.</b> كان أسرع لو نمودليو الانهيار متاعها بمعادلة. أما كي نكوديو و نموديليو و نديكوديو بالحق كل باكي، تأثير الهاوية اللي باين تحت يولّي نتيجة مقيسة متاع السيستم، ماهوش افتراض محطوط باش يخدم في مصلحة الطريقة المتعلّمة.",
+      "s5.cap": "كوربات التعلّم متاع التسعة مودايل. أربعة تدرّبو على CPU (تقريبا 5,8 سوايع في الكل)، و الخمسة الأخرين على GPU GTX 1650 في 24 دقيقة. ترتيب الباتشات (batch indexing) و الأوڨمنتاسيون و البذور العشوائية (seeds) بقاو على CPU باش ترتيب المعطيات يبقى كيف كيف بين الزوز، و هكذا المقارنة بين الـ JSCC السانتاكسي و الدلالي تبقى صحيحة.",
+      "s6.h": "النتيجة الأساسية: المعنى مقابل البيكسلات",
+      "s6.p1": "في <code>k/n = 1/12</code> على قناة AWGN. الدقة هي متاع المصنّف الحَكَم B، اللي عمرو ما تستعمل في التدريب؛ المرجع بلا قناة هو 88,4 %.",
+      "s6.th2": "PSNR سانتاكسي", "s6.th3": "PSNR دلالي", "s6.th4": "دقة سانتاكسي", "s6.th5": "دقة دلالي", "s6.th6": "فرق المعنى",
+      "s6.p2": "القراية واضحة. الـ JSCC الدلالي <strong>دايما أقل في الـ PSNR</strong>، بـ 0,39 لـ 0,57 dB، و <strong>دايما أحسن في المعنى</strong>، بـ 9,6 لـ 16,2 نقطة دقة. فرق المعنى يكبر كل ما القناة تخيب: و هذا بالضبط السلوك المستنّى من سيستم يخلّص ميزانية الرموز متاعو على اللي يحمل المعلومة المفيدة بدل الوفاء المتساوي متاع البيكسلات.",
+      "s6.p3": "هذا الجدول وحدو يورّي إلي الـ PSNR مقياس خايب باش نحكمو على اتصال دلالي: لو كان نشوفو كان فيه، نقولو إلي السيستم الدلالي هو الأخيب.",
+      "s6.cap1": "CIFAR-10، <code>k/n = 1/12</code>، AWGN. على اليسار الوفاء في البيكسل، على اليمين المعنى. الكوربات الرقاق يورّيو كل MCS ثابت متاع السلسلة المنفصلة: كل واحد يطيح في الحد متاعو.",
+      "s6.cap2": "مقارنة بصرية على تصويرة Kodak. في 2 dB السلسلة المنفصلة تعطي تصويرة ما تنفعش، أما الزوز سيستمات المتعلّمين يبقاو مفهومين.",
+      "s7.h": "تأثير الهاوية (cliff effect) مقيس",
+      "s7.p1": "مقارنة بنفس الديبي <code>k/n = 1/12</code> بين الـ JSCC الدلالي و السلسلة المنفصلة في أحسن حالة متاعها — كورب «جيني» (genie) اللي يعرف الـ SNR و يختار في كل نقطة أحسن واحد من الستة MCS.",
+      "s7.th2": "PSNR منفصلة", "s7.th3": "PSNR دلالي", "s7.th4": "دقة منفصلة", "s7.th5": "دقة دلالي",
+      "s7.p2": "في 0 و 2 dB، السلسلة المنفصلة في <strong>10,4 % دقة، يعني الحظ الخالص</strong> على عشرة كلاسات: الباكيات ما تعدّيش، الديكودر يرفض الستريم، و التصويرة تولّي مستطيل رمادي. المعنى ما تدهورش، ضاع كامل. هذا هو تأثير الهاوية، و هنا هو قياس، ماهوش توضيح.",
+      "s7.p3": "فمّا نقطة تستحق التأكيد في السوتنانس: حتى في 20 dB، يعني في ظروف ممتازة، السلسلة المنفصلة ما ترجّعش كان 40,5 % دقة في هذا الديبي المضيّق برشة متاع 1/12. ميزانية الرموز صغيرة ياسر على JPEG ولا الأوتو-إنكودر المكمّم باش يطلّعو ستريم يتديكودا بجودة مليحة. أما السيستمات المتعلّمين يتدهورو بالشوية و يبقاو صالحين على المجال الكل.",
+      "s8.h": "عرض النطاق و فرق الـ SNR بين التدريب و التست",
+      "s8.p1": "المودال المتدرّب على SNR ثابت يكون ممتاز في ذاك الـ SNR و ضعيف في البقية. و هذي هي الحجة اللي تبرّر التدريب على <code>SNR ~ U[0, 20] dB</code> المختار للمودايل الأساسيين.",
+      "s8.th1": "متستّي في", "s8.th2": "متدرّب في 0 dB", "s8.th3": "متدرّب في 10 dB", "s8.th4": "متدرّب في 20 dB", "s8.th5": "متدرّب على 0–20 dB",
+      "s8.p2": "الزوز مشاكل بانين. المودال المتدرّب في 20 dB يخسر 4,07 dB قدّ الأحسن كي يتستّى في 0 dB: عمرو ما تعلّم يخدم في الضجيج. و المودال المتدرّب في 0 dB <strong>يشبع في 23,70 dB</strong> و ما يستفادش كي القناة تتحسّن: تعلّم يهمل التفاصيل الرقيقة، للأبد. أما المودال المتدرّب على المجال الكامل يخسر على الأكثر 1,5 dB قدّ المتخصّص في كل نقطة، و ما يطيحش في بلاصة — و هذا هو الحل الوسط الصحيح لسيستم حقيقي، اللي الـ SNR الآني متاعو ما يتعرفش وقت التصميم.",
+      "s8.cap1": "فرق الـ SNR تدريب/تست. الشبع متاع المودال المتدرّب في 0 dB و الانهيار متاع اللي تدرّب في 20 dB زوز أوجه لنفس المشكلة.",
+      "s8.cap2": "التوازن ديبي/جودة. مودال واحد يغطّي الخمسة نسب <code>k/n</code> من 1/48 لـ 1/6، بلا إعادة تدريب، بفضل تقطيع القنوات اللاتنتية.",
+      "s9.h": "قناة التلاشي متاع رايلي (Rayleigh fading)",
+      "s9.p1": "تلاشي بالبلوكات، ربح <code>h</code> ڨوسي مركّب لكل تصويرة، CSI مثالية و تعديل بالتصفير القسري (zero-forcing). القناة أعدى برشة: تلاشي عميق يفسّد التصويرة الكل.",
+      "s9.th2": "دقة سانتاكسي", "s9.th3": "دقة دلالي", "s9.th4": "دقة موجّه للمهمة",
+      "s9.p2": "الميزة الدلالية تبقى موجودة على قناة بتلاشي: +11,1 نقطة في 0 dB، و +12,1 نقطة في 10 dB. المودال الموجّه للمهمة يسيطر كي الضجيج قوي، من بعد يشبع قريب 74 % خاطر محدود بقدرة التصنيف متاعو، ماهوش بالقناة.",
+      "s9.cap": "AWGN مقابل رايلي بالبلوكات. الفرق بين الزوز قنوات يعطي ثمن التلاشي لكل سيستم.",
+      "s10.h": "اتصال موجّه للمهمة (task-oriented)",
+      "s10.p1": "آخر خطوة منطقية في التفكير الدلالي: كان المستقبل يحب كان الكلاس متاع التصويرة، علاش نبعثو تصويرة؟ الإنكودر الموجّه للمهمة ينزل لخطوة 8 و يبعث التمثيل مباشرة لرأس تصنيف (classification head) — ماكانش ريكونستريكسيون.",
+      "s10.th3": "دقة في 0 dB", "s10.th4": "دقة في 10 dB", "s10.th5": "دقة في 20 dB",
+      "s10.r1": "JSCC دلالي (ريكونستريكسيون)", "s10.r2": "موجّه للمهمة",
+      "s10.p2": "النتيجة مذهلة كي الضجيج قوي. في 0 dB، السيستم الموجّه للمهمة يوصل لـ <strong>74,2 % دقة بنص عرض النطاق</strong> متاع السيستم الدلالي الكامل اللي يوقف في 56,4 % — يعني 17,8 نقطة أكثر بنص الديبي. و أحسن من هكا: بـ <strong>32 مرة أقل نطاق</strong> (<code>k/n = 0,0026</code>، يعني 8 رموز مركّبة للتصويرة)، مازال يعمل 57,4 %، يعني أحسن من الريكونستريكسيون الدلالية الكاملة.",
+      "s10.p3": "المقابل لازم يتقال بوضوح: هذا السيستم ما يرجّعش تصويرة. ما ينفعش كان كي نعرفو مسبقا شنوة باش يعمل بيها المستقبل، و يشبع في 77 % خاطر رأس التصنيف متاعو ولّى هو العامل المحدود. يعني مبادلة بين العمومية و الفعالية.",
+      "s10.cap": "السيستم الموجّه للمهمة. الكوربات تقريبا مسطّحة في الـ SNR: كي نبعثو كان اللي تحتاجو المهمة، الإرسال يولّي متين برشة قدّ الضجيج.",
+      "s11.h": "التعميم على تصاور طبيعية",
+      "s11.p1": "المودايل شافو كان تصاور CIFAR-10 متاع 32×32. و خاطرهم كاملين كونفولوسيونال، يتطبّقو كيما هوما على 24 تصويرة Kodak في 768×512. المعنى يتحكم فيه ResNet-18 متاع ImageNet.",
+      "s11.th5": "كوسينوس دلالي", "s11.th6": "توافق top-1",
+      "s11.p2": "على Kodak، السيستم الدلالي يحافظ على ميزة المعنى وين تهمّ — توافق top-1 متاع 75,0 % مقابل 70,8 % في 10 dB — و حتى ولّى أحسن شويّة في الـ PSNR و الـ SSIM، و هذا ما صارش على CIFAR-10. أما سلسلة JPEG الحقيقية تنهار كامل: <strong>0 % توافق top-1 في 0 dB</strong>، الـ ResNet-18 ما يعرفش حتى شيء في التصويرة المستقبلة.",
+      "s11.note": "<b>نتيجة ماهيش في مصلحتنا، و لازم تتقدّم.</b> حد القدرة متاع JPEG (capacity bound) — مرجع نظري يفترض إرسال بلا أخطاء في ديبي شانون <code>k·log2(1+SNR)</code> — يفوق السيستمات المتعلّمين على Kodak: 29,76 dB مقابل 27,34 dB في 10 dB، و حتى 26,70 dB مقابل 22,73 dB في 0 dB. التفسير إلي المودايل متاعنا متدرّبين على تصاور صغار 32×32 و عمرهم ما شافو إحصائيات التصاور الطبيعية الكبيرة، في حين إلي JPEG ممتاز فيهم و الحد يهمل تماما تكلفة كودينڨ القناة. هذا الحد ماهوش سيستم قابل للتحقيق — JPEG الحقيقي كي يتبعث يطيح — أما يورّي بصدق الهامش اللي مازال يتربح لو كان ندرّبو ديراكت على تصاور عالية الدقة.",
+      "s11.cap": "Kodak، 768×512. الفرق بين كورب JPEG الحقيقي و حد القدرة متاعو يقيس ثمن تركيب المصدر/القناة في سيستم قابل للتحقيق.",
+      "s12.h": "الفيديو و التكرار الدلالي الزمني",
+      "s12.p1": "الأساس يبعث الفيديو ترام ترام بمودال التصويرة. أما الامتداد يستغل التكرار الزمني بـ <strong>التجديد الشرطي اللاتنتي (latent conditional replenishment)</strong>: أول ترام في كل مجموعة متاع 10 يتبعث كامل، و من بعد يتبعث كان الجزء <code>f</code> متاع البلوكات اللاتنتية 2×2 اللي المحتوى الدلالي متاعها تبدّل أكثر. المستقبل يحافظ على اللاتنت القديم متاعو و يبدّل كان البلوكات اللي وصلوه.",
+      "s12.p2": "خريطة البلوكات (block map) هي معلومة جانبية (side information)، محسوبة بصدق بالتكلفة متاع الإنتروبيا الثنائية <code>N·H(f)</code> بيت: تمثّل من 5 لـ 13 % من الرموز على حساب الإعداد، و هي داخلة في كل نسب <code>k/n</code> المعلنين تحت.",
+      "s12.cap1": "التجديد الشرطي و النتيجة متاعو على الثلاثة كليبات. الربح ماهوش موحّد: هو متناسب مع التكرار الزمني اللي موجود بالحق في السيناريو.",
+      "s12.p3": "هذي أكثر نتيجة فيها تفاصيل في المشروع، و أكثر واحدة تعلّم. على <strong>akiyo</strong>، مذيعة قدّام خلفية ثابتة، التجديد يوصل 26,24 dB بـ 3,1 مرة أقل نطاق من الإرسال ترام ترام بنفس الجودة، و بكوسينوس دلالي <em>أحسن</em> (0,919 مقابل 0,881). على <strong>foreman</strong>، الربح يضيع. و على <strong>bus</strong>، مرور سريع وين تقريبا كل البلوكات يتبدّلو في كل ترام، الطريقة <strong>تضر</strong>: 1,2 dB أقل من الإرسال ترام ترام، خاطر نخلّصو في المعلومة الجانبية بلا ما نوفّرو رموز.",
+      "s12.p4": "يعني الاستنتاج اللي ندافعو عليه ماهوش «التجديد الشرطي يحسّن الفيديو»، أما «يحوّل التكرار الزمني لعرض نطاق موفّر، و السيستم الحقيقي لازم يختار المود متاعو على حساب الحركة المقيسة في السيناريو». فمّا امتداد طبيعي لهذا العمل: مُنتقي لكل مجموعة صور (GOP) مبني على طاقة التبدّل اللاتنتي اللي الباعث يحسبها أصلا.",
+      "s12.cap2": "التوازن ديبي/جودة على الثلاثة كليبات، في 10 dB. الفرق بين كورب ترام ترام و كورب التجديد يضيّق كل ما الحركة تزيد.",
+      "s12.cap3": "الجودة و المعنى في الفيديو على حساب الـ SNR، للثلاثة سيستمات.",
+      "s13.h": "الحدود و الصدق في النتائج",
+      "s13.p1": "اللي لازم تنجّم تقولو وحدك قبل ما الجوري (jury) يسألك عليه:",
+      "s13.li1": "<strong>الكل محاكي.</strong> AWGN و رايلي بالبلوكات مع CSI مثالية؛ ماكانش ربط راديو، ماكانش سنكرونيزاسيون، ماكانش تقدير قناة ناقص.",
+      "s13.li2": "<strong>المودايل متدرّبين على CIFAR-10 برك</strong>، في 32×32. Kodak و الفيديو هوما تستات متاع تعميم، و هذا هو السبب اللي بيه حد القدرة متاع JPEG يفوقهم على Kodak.",
+      "s13.li3": "<strong>حد القدرة ماهوش سيستم.</strong> يفترض كودينڨ قناة مثالي في ديبي شانون؛ يعطي حد أعلى لاللي تنجّم تعملو سلسلة منفصلة، ماهوش اللي تعملو بالحق.",
+      "s13.li4": "<strong>الكليبات هوما تسلسلات CIF متاع 30 ترام</strong>، بديل لكليبات UVG اللي في الكراس، خاطر الفيشيات متاعهم 1080p خام يوزنو بالڨيڨات.",
+      "s13.li5": "<strong>بذرة عشوائية وحدة لكل مودال.</strong> الفروق متاع 9 لـ 16 نقطة دقة أكبر برشة من ضجيج التدريب، أما الفروق اللي أقل من 0,5 dB متاع PSNR ما يلزمش نكبّروها.",
+      "s13.li6": "<strong>توافق top-1 على Kodak: 24 تصويرة.</strong> خطوة وحدة متاع تكميم تقابل 4,2 نقطة؛ الفروق الصغار في هذا المقياس ماهومش ذات دلالة.",
+      "s13.li7": "<strong>زوز هاردوير.</strong> أربعة مودايل تدرّبو على CPU و خمسة على GPU. ترتيب المعطيات و البذور تحافظو كيف كيف، أما جمع الفاصلة العائمة (floating-point) ماهوش متطابق بيت ببيت بين الزوز.",
+      "s14.h": "كيفاش تعاود النتائج",
+      "s14.p1": "الـ GPU يتلقى أوتوماتيك، و <code>SEMCOM_DEVICE=cpu</code> يفرض الـ CPU. فمّا نقطة استئناف (checkpoint) تتكتب في كل إيبوك: الانقطاع يخسّر على الأكثر إيبوك وحدة.",
+      "s14.th1": "المودال", "s14.th2": "الدور", "s14.th3": "إيبوكات", "s14.th4": "التحقق", "s14.th5": "المدة",
+      "s14.r1": "مصنّف الدالة الدلالية (مجمّد)", "s14.r2": "حَكَم مستقل متاع المعنى",
+      "s14.r3": "كودور المصدر متاع السلسلة المنفصلة", "s14.r4": "JSCC سانتاكسي", "s14.r5": "JSCC دلالي",
+      "s14.r6": "دراسة فرق الـ SNR", "s14.r7": "إرسال موجّه للمهمة",
+      "s14.cap": "رسم الأركيتكتير مولّد بـ <code>make_figures.py</code> من الكود روحو.",
+      "th.snr": "SNR", "th.system": "السيستم",
+      "row.syn": "JSCC سانتاكسي", "row.sem": "JSCC دلالي", "row.jpeg": "JPEG + أفضل MCS", "row.bound": "JPEG، حد القدرة",
+      "tag.ext": "امتداد",
+      "foot.p": "مشروع 07 — اتصال دلالي متعلّم لإرسال التصاور و الفيديو. كل الأرقام في هذا التقرير جايين من <code>results/eval/*.csv</code>، مولّدين بالأوامر اللي فوق على قناة محاكية. المراجع: Qin <em>et al.</em>, <em>Semantic Communications: Principles and Challenges</em> ؛ Xie <em>et al.</em>, DeepSC, IEEE TSP 2021 ؛ Zhang <em>et al.</em>, IEEE JSAC 2022 ؛ Bourtsoulatze <em>et al.</em>, deep JSCC ؛ DVST ؛ VQ-DeepSC ؛ معطيات Kodak و Xiph."
+    }
+  };
+
+  var KEY = "semcom.lang";
+  var doc = document.getElementById("doc");
+  var nodes = document.querySelectorAll("[data-i18n]");
+  var buttons = document.querySelectorAll(".seg button[data-lang]");
+  var fr = {};
+
+  // the French text in the markup is the source: cache it before any switch
+  nodes.forEach(function (el) {
+    var k = el.getAttribute("data-i18n");
+    if (!(k in fr)) fr[k] = el.innerHTML;
+  });
+
+  function apply(lang) {
+    var dict = lang === "fr" ? fr : T[lang];
+    if (!dict) { lang = "fr"; dict = fr; }
+    nodes.forEach(function (el) {
+      var k = el.getAttribute("data-i18n");
+      var v = lang === "fr" ? fr[k] : (dict[k] !== undefined ? dict[k] : fr[k]);
+      if (v !== undefined) el.innerHTML = v;
+    });
+    var rtl = lang === "tn";
+    if (doc) {
+      doc.setAttribute("dir", rtl ? "rtl" : "ltr");
+      doc.setAttribute("lang", lang === "tn" ? "ar" : lang);
+    }
+    var note = document.getElementById("langnote");
+    if (note) note.setAttribute("dir", rtl ? "rtl" : "ltr");
+    buttons.forEach(function (b) {
+      b.setAttribute("aria-pressed", b.getAttribute("data-lang") === lang ? "true" : "false");
+    });
+    try { localStorage.setItem(KEY, lang); } catch (e) { /* private window: keep going */ }
+  }
+
+  buttons.forEach(function (b) {
+    b.addEventListener("click", function () { apply(b.getAttribute("data-lang")); });
+  });
+
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) { saved = null; }
+  if (saved === "en" || saved === "tn") apply(saved);
+})();
+</script>

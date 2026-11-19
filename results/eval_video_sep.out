@@ -1,0 +1,20 @@
+video jpeg akiyo QPSK 1/2
+video jpeg foreman QPSK 1/2
+video jpeg bus QPSK 1/2
+video jpeg akiyo QPSK 3/4
+video jpeg foreman QPSK 3/4
+video jpeg bus QPSK 3/4
+video jpeg akiyo 16QAM 1/2
+video jpeg foreman 16QAM 1/2
+video jpeg bus 16QAM 1/2
+video jpeg akiyo 16QAM 3/4
+video jpeg foreman 16QAM 3/4
+video jpeg bus 16QAM 3/4
+video jpeg akiyo 64QAM 2/3
+video jpeg foreman 64QAM 2/3
+video jpeg bus 64QAM 2/3
+video jpeg akiyo 64QAM 3/4
+video jpeg foreman 64QAM 3/4
+video jpeg bus 64QAM 3/4
+wrote results\eval\video_sep.csv 231 rows
+evaluation finished in 18.7 min

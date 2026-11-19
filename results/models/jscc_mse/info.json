@@ -1,0 +1,13 @@
+{
+ "name": "jscc_mse",
+ "kind": "jscc",
+ "loss": "mse",
+ "snr": [
+  0,
+  20
+ ],
+ "epochs": 25,
+ "params": 421715,
+ "train_s": 8087.480097293854,
+ "val_metric": 26.015119552612305
+}

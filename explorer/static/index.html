@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorateur — Projet 07 · communication sémantique</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="dot"></span>
+    <div>
+      <strong>Explorateur de chaîne</strong>
+      <span class="sub">Projet 07 · communication sémantique apprise</span>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button class="tab is-on" data-tab="explore">Explorer</button>
+    <button class="tab" data-tab="compare">Comparer</button>
+    <button class="tab" data-tab="results">Résultats mesurés</button>
+    <button class="tab" data-tab="learn">Concepts</button>
+  </nav>
+  <div class="badges"><span class="badge" id="devBadge">…</span></div>
+</header>
+
+<main>
+<!-- ============================================================ EXPLORER -->
+<section class="panel is-on" id="tab-explore">
+  <aside class="side">
+    <div class="side-block">
+      <h2>Système</h2>
+      <div id="sysList" class="syslist"></div>
+    </div>
+    <div class="side-block">
+      <h2>Réglages</h2>
+      <label class="ctl"><span>Image</span><select id="imgSel"></select></label>
+      <label class="ctl range">
+        <span>SNR <output id="snrOut">10 dB</output></span>
+        <input type="range" id="snr" min="0" max="20" step="1" value="10">
+        <small>0 dB = autant de bruit que de signal · 20 dB = très bonne liaison</small>
+      </label>
+      <label class="ctl"><span>Canal</span><select id="chanSel"></select></label>
+      <label class="ctl"><span>Bande k/n</span><select id="cSel"></select></label>
+      <label class="ctl" id="mcsCtl"><span>MCS (modulation + rendement)</span><select id="mcsSel"></select></label>
+      <label class="ctl"><span>Graine du bruit</span><input type="number" id="seed" value="0" min="0" max="9999"></label>
+      <button class="go" id="runBtn">Relancer la transmission</button>
+      <p class="hint" id="runHint">Chaque réglage relance une transmission réelle : encodeur, canal, décodeur.</p>
+    </div>
+  </aside>
+
+  <div class="stage-area">
+    <div class="sysblurb" id="sysBlurb"></div>
+
+    <figure class="map-wrap">
+      <svg id="map" viewBox="0 0 1240 230" preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="Carte de la chaîne de transmission"></svg>
+    </figure>
+
+    <div class="player">
+      <button class="pbtn" id="first" title="Première étape (Début)">⏮</button>
+      <button class="pbtn" id="prev" title="Étape précédente (←)">◀</button>
+      <button class="pbtn play" id="play" title="Lecture / pause (Espace)">▶</button>
+      <button class="pbtn" id="next" title="Étape suivante (→)">▶❙</button>
+      <button class="pbtn" id="last" title="Dernière étape (Fin)">⏭</button>
+      <input type="range" id="scrub" min="0" max="0" value="0" step="1" aria-label="Avancement">
+      <span class="count" id="count">—</span>
+      <label class="speed"><span>vitesse</span>
+        <select id="speed"><option value="2200">lente</option><option value="1400" selected>normale</option>
+        <option value="800">rapide</option></select>
+      </label>
+    </div>
+
+    <div class="cols">
+      <div class="stagelist-wrap">
+        <h3 class="colhead">Étapes de la transmission</h3>
+        <ol class="stagelist" id="stageList"></ol>
+      </div>
+      <div class="inspector" id="inspector">
+        <p class="placeholder">Chargement…</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ COMPARE -->
+<section class="panel" id="tab-compare">
+  <div class="cmp-head">
+    <h2>Même image, même SNR, même budget — trois façons de traverser le canal</h2>
+    <p>Les réglages sont ceux de l'onglet <em>Explorer</em>. Chaque vignette est une transmission réellement
+      calculée, pas une capture enregistrée.</p>
+    <div class="cmp-ctl">
+      <div id="cmpPick" class="chips"></div>
+      <button class="go" id="cmpBtn">Lancer la comparaison</button>
+    </div>
+  </div>
+  <div class="cmp-grid" id="cmpGrid"></div>
+</section>
+
+<!-- ============================================================ RESULTS -->
+<section class="panel" id="tab-results">
+  <div class="res-head">
+    <h2>Courbes de la campagne complète</h2>
+    <p>Ces points ne sont pas simulés à la volée : ils viennent de <code>results/eval/*.csv</code>, produits par
+      <code>scripts/evaluate.py</code> sur l'ensemble des images. Les courbes fines montrent chaque MCS fixe —
+      c'est là qu'on voit l'effet falaise.</p>
+    <div class="res-ctl">
+      <label class="ctl"><span>Jeu de données</span><select id="resData">
+        <option value="cifar">CIFAR-10</option><option value="kodak">Kodak</option><option value="video">Vidéo</option>
+      </select></label>
+      <label class="ctl"><span>Mesure</span><select id="resMetric"></select></label>
+      <label class="ctl"><span>Canal</span><select id="resChan">
+        <option value="awgn">AWGN</option><option value="rayleigh">Rayleigh</option>
+      </select></label>
+      <label class="ctl check"><input type="checkbox" id="resThin"> <span>montrer chaque MCS fixe</span></label>
+    </div>
+  </div>
+  <figure class="chart-wrap">
+    <svg id="chart" viewBox="0 0 900 480" role="img" aria-label="Courbes de performance"></svg>
+    <figcaption id="chartNote"></figcaption>
+  </figure>
+  <div class="legend" id="chartLegend"></div>
+</section>
+
+<!-- ============================================================ LEARN -->
+<section class="panel" id="tab-learn">
+  <div class="learn" id="learnList"></div>
+</section>
+</main>
+
+<div class="pop" id="pop" hidden></div>
+<footer class="foot">
+  <span>Espace : lecture/pause · ← → : étape · ↑ ↓ : SNR · C : comparer</span>
+  <span id="footState"></span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

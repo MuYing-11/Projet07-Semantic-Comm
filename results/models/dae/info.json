@@ -1,0 +1,8 @@
+{
+ "name": "dae",
+ "kind": "dae",
+ "epochs": 25,
+ "params": 421715,
+ "train_s": 7116.140466213226,
+ "val_metric": 28.65734100341797
+}

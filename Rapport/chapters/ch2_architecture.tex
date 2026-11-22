@@ -1,0 +1,128 @@
+% ============================================================================
+%  CHAPITRE 2 -- PROBLÈME, EXIGENCES ET ARCHITECTURE
+% ============================================================================
+\chapter{Problème, exigences et architecture}
+\label{chap:architecture}
+
+Ce chapitre fixe le cadre expérimental : ce que les trois systèmes doivent partager pour être comparables, ce
+que signifie exactement le budget radio, et l'organisation logicielle qui en découle.
+
+\section{Formulation du problème}
+\label{sec:formulation}
+
+Soit une image $x \in [0,1]^{3 \times H \times W}$. L'émetteur dispose de $k$ symboles complexes pour la
+transmettre sur un canal bruité ; le récepteur produit soit une reconstruction $\hat{x}$, soit directement une
+décision. On note $n = 3HW$ le nombre de valeurs réelles de la source. Le problème comporte deux objectifs
+antagonistes :
+
+\begin{itemize}
+  \item \textbf{fidélité} : $\hat{x}$ doit ressembler à $x$ au sens du pixel (PSNR, SSIM) ;
+  \item \textbf{sens} : $\hat{x}$ doit rester interprétable, c'est-à-dire conduire un système d'analyse
+        indépendant à la même conclusion que $x$.
+\end{itemize}
+
+L'hypothèse du projet est que ces deux objectifs ne sont pas équivalents, et qu'un système peut céder un peu du
+premier pour gagner beaucoup sur le second.
+
+\section{Le budget radio, contrainte commune}
+\label{sec:budget}
+
+Sans budget commun, aucune comparaison n'aurait de sens : il suffirait d'accorder plus de bande à un système
+pour le faire gagner. Le \textbf{rapport de bande} est donc fixé une fois pour toutes :
+\begin{equation}
+  \frac{k}{n} = \frac{\text{symboles complexes émis}}{3HW \text{ valeurs réelles de la source}} .
+  \label{eq:kn}
+\end{equation}
+
+Le point de fonctionnement principal est $k/n = 1/12$ : un symbole radio pour douze nombres d'image. Pour les
+systèmes appris, l'encodeur produit un tenseur latent de 16 canaux au stride 4 ; comme deux valeurs réelles
+voisines forment un symbole complexe, transmettre $c$ canaux donne
+\begin{equation}
+  \frac{k}{n} = \frac{c}{96}, \qquad c \in \{2,4,8,12,16\} \;\Longrightarrow\; \frac{k}{n} \in
+  \left\{\tfrac{1}{48}, \tfrac{1}{24}, \tfrac{1}{12}, \tfrac{1}{8}, \tfrac{1}{6}\right\}.
+  \label{eq:ratio_c}
+\end{equation}
+
+\begin{keybox}[Ce qui varie, et ce qui ne varie pas]
+C'est $k$ qui varie, jamais $n$. Le dénominateur $n = 3HW$ est l'image elle-même : la changer reviendrait à
+changer l'objet transmis, et le PSNR serait calculé contre une autre référence. Faire varier le budget revient
+donc à couper des canaux latents, l'image restant strictement identique.
+\end{keybox}
+
+Cette agilité en bande n'est possible que parce que le nombre de canaux actifs est tiré au hasard pendant
+l'entraînement : les canaux latents s'ordonnent alors spontanément par importance, et un seul modèle couvre les
+cinq rapports sans réentraînement~\cite{kurka2021}. Sans cette précaution, il faudrait cinq modèles distincts
+et la courbe « qualité en fonction de $k/n$ » mélangerait deux effets.
+
+\section{Exigences}
+\label{sec:exigences}
+
+\begin{table}[H]
+\centering
+\caption{Exigences retenues pour que la comparaison soit recevable}
+\label{tab:exigences}
+\small
+\begin{tabularx}{\textwidth}{@{}p{1.1cm}p{4.2cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Réf.} & \textbf{Exigence} & \textbf{Justification et mise en œuvre} \\
+\midrule
+E1 & Budget radio identique pour tous les systèmes & $k$ calculé par l'équation~\eqref{eq:kn} et imposé aux trois chaînes \\
+E2 & Puissance moyenne normalisée à 1 par symbole & empêche le gain trivial par amplification ; \srcfile{power_normalize()} \\
+E3 & Même canal, mêmes tirages de bruit & AWGN et Rayleigh communs ; graines fixées par point de mesure \\
+E4 & Chaîne numérique simulée exactement & chaque paquet est codé, modulé, bruité et décodé par Viterbi, sans modèle analytique \\
+E5 & Juges indépendants de l'entraînement & le classifieur de la perte n'est jamais celui de la mesure (chapitre~\ref{chap:protocole}) \\
+E6 & Architecture identique entre JSCC syntaxique et sémantique & seule la perte diffère, donc tout écart lui est imputable \\
+E7 & Un seul modèle pour toute la plage de SNR et de bande & SNR tiré dans $[0,20]$~dB et bande tirée au hasard à l'entraînement \\
+E8 & Reproductibilité & campagne relançable, résultats écrits en CSV, figures régénérées par script \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Architecture d'ensemble}
+\label{sec:archi}
+
+La figure~\ref{fig:architecture} présente les trois chaînes placées dans les mêmes conditions. Elles ne
+diffèrent que par la manière de franchir le canal.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.97\linewidth]{architecture.png}
+  \caption{Les trois systèmes comparés : (a) chaîne numérique séparée, (b) JSCC syntaxique entraîné sur une
+  perte pixel, (c) JSCC sémantique, de même architecture, entraîné avec les termes de caractéristiques et de
+  tâche. Le canal simulé est commun aux trois.}
+  \label{fig:architecture}
+\end{figure}
+
+\section{Organisation logicielle}
+\label{sec:logiciel}
+
+L'implémentation est en Python et PyTorch. Le code est séparé en un paquet de bibliothèque
+(\srcfile{semcom/}) et des scripts d'exécution (\srcfile{scripts/}), de sorte qu'un composant puisse être
+testé isolément et que la campagne complète soit relançable.
+
+\begin{table}[H]
+\centering
+\caption{Organisation du code du projet}
+\label{tab:code}
+\small
+\begin{tabularx}{\textwidth}{@{}p{3.6cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Module} & \textbf{Contenu} \\
+\midrule
+\srcfile{semcom/channel.py} & normalisation de puissance, AWGN, Rayleigh par blocs avec égalisation ZF, troncature de bande \\
+\srcfile{semcom/models.py} & encodeur et décodeur JSCC, auto-encodeur numérique 4 bits, classifieurs A et B, modèle orienté tâche \\
+\srcfile{semcom/digital.py} & code convolutif $K=7$, poinçonnage 802.11a, QAM de Gray, LLR max-log, Viterbi vectorisé, ajustement du débit JPEG \\
+\srcfile{semcom/metrics.py} & PSNR, SSIM, métriques sémantiques ResNet-18 \\
+\srcfile{semcom/data.py} & chargeurs CIFAR-10, Kodak et Y4M \\
+\srcfile{semcom/train.py} & boucles d'entraînement et description des neuf modèles \\
+\srcfile{semcom/video.py} & transmission image par image et renouvellement conditionnel \\
+\srcfile{scripts/} & téléchargement des données, campagne d'entraînement, évaluation, figures, démonstration, simulateur \\
+\srcfile{explorer/} & simulateur interactif (chapitre~\ref{chap:simulateur}) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Tous les modèles d'image sont \textbf{entièrement convolutifs}. Un réseau entraîné sur des images
+$32\times32$ s'applique donc sans modification à des images $768\times512$ ou à des trames vidéo
+$352\times288$, pourvu que les dimensions soient divisibles par~4. C'est cette propriété qui rend possible
+l'évaluation par transfert du chapitre~\ref{chap:resultats}.

@@ -1,0 +1,44 @@
+% ============================================================================
+%  CONCLUSION GÉNÉRALE ET PERSPECTIVES
+% ============================================================================
+\chapter*{Conclusion générale et perspectives}
+\addcontentsline{toc}{chapter}{Conclusion générale et perspectives}
+\markboth{Conclusion générale et perspectives}{Conclusion générale et perspectives}
+
+Ce projet a comparé trois manières de franchir un canal sans fil bruité simulé, sous un budget radio
+strictement identique : la chaîne séparée de Shannon simulée bit à bit, un codage conjoint source-canal appris
+sur une perte pixel, et le même réseau entraîné avec une perte sémantique. Le dispositif expérimental a été
+construit pour que la comparaison soit recevable — architecture identique entre les deux systèmes appris,
+puissance normalisée, canal et tirages communs, chaîne numérique non approchée, et surtout des juges qui
+n'interviennent dans aucune fonction de perte.
+
+Le résultat principal est stable sur toute la plage étudiée et sur les deux modèles de canal : ajouter à la
+perte un terme de caractéristiques et un terme de tâche, et rien d'autre, échange environ \SI{0.5}{\decibel}
+de PSNR contre 10 à 14~points de précision chez un juge indépendant. Les pixels cédés n'étaient pas ceux qui
+portaient le sens. Le second résultat tient à la nature même du codage conjoint : en supprimant les bits, il
+supprime l'effet falaise — à \SI{0}{\decibel}, là où la chaîne séparée réelle tombe au niveau du hasard, les
+systèmes appris restent exploitables. L'étude de désadaptation montre enfin qu'un modèle entraîné à un SNR
+fixe est inutilisable ailleurs, et que l'entraînement sur une plage est la condition d'un système
+déployable.
+
+Les limites sont tout aussi nettes et doivent être rappelées. Le canal est simulé, et l'information d'état du
+canal est supposée parfaite sous Rayleigh. Les modèles appris n'ont vu que des images $32\times32$ : sur Kodak
+et sur la vidéo, la borne idéale de la chaîne séparée reste devant en PSNR, et il s'agit donc d'un résultat de
+transfert plutôt que d'une défaite de principe du codage conjoint. Enfin, la borne de capacité utilisée comme
+référence haute n'est pas un système constructible.
+
+Les deux extensions indiquent où le gain est le plus grand. Quand la tâche du récepteur est connue à la
+conception, la transmission orientée tâche atteint une précision comparable avec 32~fois moins de bande.
+Quand le contenu est temporellement redondant, le renouvellement conditionnel divise la bande par trois sur
+une scène statique — et ne doit pas être activé ailleurs.
+
+\paragraph{Perspectives.} À court terme, la plus utile est l'\textbf{entraînement sur images naturelles} : les
+résultats Kodak et vidéo sont aujourd'hui des résultats de transfert, et seule une campagne d'entraînement à
+la bonne résolution permettrait de trancher la comparaison avec JPEG. Ensuite, le \textbf{pilotage automatique
+du renouvellement conditionnel} par une mesure de mouvement, qui transformerait un résultat conditionnel en
+méthode utilisable. À moyen terme : une \textbf{estimation imparfaite du canal} sous Rayleigh, plus réaliste
+que la CSI parfaite ; l'étude de la \textbf{robustesse du gain sémantique à d'autres tâches} que la
+classification, par exemple la détection ou la segmentation ; et une \textbf{quantification des symboles
+émis}, nécessaire pour qu'une chaîne analogique apprise puisse rencontrer un émetteur radio réel. À plus long
+terme, la validation sur une liaison matérielle — une radio logicielle — reste l'étape qui manque pour passer
+d'une démonstration en simulation à un résultat de transmission.

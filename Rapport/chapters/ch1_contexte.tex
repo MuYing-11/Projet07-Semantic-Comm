@@ -1,0 +1,129 @@
+% ============================================================================
+%  CHAPITRE 1 -- FONDEMENTS ET ÉTAT DE L'ART
+% ============================================================================
+\chapter{Fondements et état de l'art}
+\label{chap:contexte}
+
+Ce chapitre n'introduit que les notions utilisées par la suite : le théorème de séparation et ses limites, les
+modèles de canal retenus, la chaîne numérique classique et ses mécanismes d'erreur, puis les travaux sur
+lesquels s'appuie la communication sémantique apprise.
+
+\section{Le théorème de séparation et sa limite pratique}
+\label{sec:separation}
+
+Shannon montre qu'un système de communication peut être décomposé sans perte d'optimalité en deux blocs
+indépendants~\cite{shannon1948} : un \textbf{codage de source}, qui retire la redondance de l'information, et un
+\textbf{codage de canal}, qui réintroduit une redondance calculée pour résister au bruit. C'est le fondement de
+toutes les architectures déployées : JPEG puis Wi-Fi, H.264 puis 4G.
+
+Ce résultat est cependant valable à la limite des blocs de longueur infinie, pour un canal stationnaire dont
+la statistique est connue de l'émetteur. Trois hypothèses tombent en pratique :
+
+\begin{itemize}
+  \item \textbf{Les blocs sont courts.} Une image CIFAR-10 au point de fonctionnement étudié dispose de
+        \num{256} symboles complexes, soit quelques centaines de bits utiles. Le gain asymptotique des codes
+        correcteurs n'est pas atteint à cette longueur.
+  \item \textbf{Le SNR réel diffère du SNR prévu.} L'émetteur choisit son schéma de modulation et de codage
+        avant de connaître l'état exact du canal.
+  \item \textbf{Le critère optimisé n'est pas celui du destinataire.} La chaîne minimise une distorsion de
+        reconstruction, alors que la tâche finale est souvent une reconnaissance.
+\end{itemize}
+
+\begin{definition}[Effet falaise]
+Comportement en tout-ou-rien d'une chaîne numérique conçue pour un SNR cible : au-dessus du seuil, la qualité
+sature et la marge disponible n'est pas exploitée ; en dessous, le décodeur de canal décroche, le train binaire
+devient faux et l'information source est perdue en bloc plutôt que dégradée progressivement.
+\end{definition}
+
+\section{Modèles de canal}
+\label{sec:canaux}
+
+Le rapport signal sur bruit s'exprime en décibels, $\mathrm{SNR_{dB}} = 10\log_{10}(P_{\text{signal}} /
+P_{\text{bruit}})$. Une valeur de \SI{0}{\decibel} signifie autant de bruit que de signal, une valeur de
+\SI{20}{\decibel} cent fois moins de bruit que de signal. Deux modèles sont utilisés dans ce travail.
+
+\paragraph{Canal AWGN.} Le modèle thermique idéal : à chaque symbole complexe émis s'ajoute un bruit gaussien
+indépendant,
+\begin{equation}
+  y = x + n, \qquad n \sim \mathcal{CN}(0,\sigma^2), \qquad \sigma^2 = 10^{-\mathrm{SNR_{dB}}/10} .
+  \label{eq:awgn}
+\end{equation}
+
+\paragraph{Canal de Rayleigh par blocs.} Modèle d'une liaison mobile : le signal atteint le récepteur par
+plusieurs trajets réfléchis dont les phases s'additionnent, de sorte que l'amplitude reçue devient aléatoire,
+\begin{equation}
+  y = h\,x + n, \qquad h \sim \mathcal{CN}(0,1) .
+  \label{eq:rayleigh}
+\end{equation}
+Le coefficient $h$ est tiré une fois par image (d'où « par blocs ») et reste constant pendant toute sa
+transmission. Le récepteur est supposé connaître $h$ (CSI parfaite) et divise par $h$ : cette
+\textbf{égalisation par forçage à zéro} ramène le problème à un canal AWGN de rapport signal sur bruit
+instantané $\mathrm{SNR}\cdot|h|^2$, où $|h|^2$ suit une loi exponentielle de moyenne 1. Lorsque le tirage est
+défavorable, l'évanouissement est profond et toute l'image en souffre.
+
+\paragraph{Contrainte de puissance.} Un émetteur ne peut pas augmenter librement son amplitude pour couvrir le
+bruit. La puissance moyenne est donc normalisée à 1 par symbole complexe. Sans cette contrainte, un système
+appris obtiendrait un gain trivial en amplifiant sa sortie, et la comparaison avec la chaîne numérique
+perdrait tout sens.
+
+\section{La chaîne numérique classique}
+\label{sec:chaine_classique}
+
+\paragraph{Modulation QAM.} Les bits sont groupés et associés aux points d'une constellation du plan complexe :
+QPSK transporte 2~bits par symbole, la 16-QAM 4~bits, la 64-QAM 6~bits. Plus la constellation est dense, plus
+le débit est élevé, mais plus les points sont proches et donc sensibles au bruit. Le \textbf{codage de Gray}
+numérote les points de sorte qu'une confusion entre voisins immédiats ne coûte qu'un seul bit faux.
+
+\paragraph{Code convolutif et poinçonnage.} Le code retenu est le code convolutif de contrainte $K=7$ et de
+polynômes générateurs $(133,171)_8$, celui du Wi-Fi 802.11a~\cite{ieee80211a}. Chaque bit émis dépend des sept
+derniers bits d'entrée. Le rendement natif $1/2$ est porté à $2/3$ ou $3/4$ par \textbf{poinçonnage}, c'est-à-dire
+en supprimant certains bits de redondance selon un motif fixe.
+
+\paragraph{Décodage souple et Viterbi.} Le démodulateur ne tranche pas entre 0 et 1 : pour chaque bit il calcule
+un log-rapport de vraisemblance $\mathrm{LLR} = \log\big(P(0)/P(1)\big)$, dont le signe indique le bit le plus
+probable et l'amplitude la confiance. L'algorithme de Viterbi~\cite{viterbi1967} recherche ensuite le chemin le
+plus vraisemblable dans le treillis à $2^{K-1} = 64$ états. Tant que le canal reste au-dessus du seuil du code,
+la correction est quasi parfaite ; en dessous, le décodeur choisit le mauvais chemin et les erreurs passent en
+masse. Le couple (modulation, rendement) est appelé \textbf{MCS}.
+
+\section{Travaux antérieurs}
+\label{sec:etat_art}
+
+\paragraph{Communication sémantique.} Le domaine a été reformulé récemment autour de l'idée de Weaver : ne
+transmettre que ce qui modifie l'interprétation du destinataire~\cite{qin2021,gunduz2023}. Xie
+\emph{et al.}~\cite{xie2021} ont proposé un système de bout en bout pour le texte, Zhang
+\emph{et al.}~\cite{zhang2023} une variante dont l'émetteur ignore la tâche du récepteur, et Fu
+\emph{et al.}~\cite{fu2023} une quantification vectorielle du latent.
+
+\paragraph{JSCC profond pour l'image.} Bourtsoulatze \emph{et al.}~\cite{bourtsoulatze2019} ont introduit le
+codage conjoint source-canal convolutif dont notre système syntaxique est la reprise : encodeur CNN, symboles
+analogiques, canal inséré comme une couche du réseau, décodeur CNN. Kurka et Gündüz~\cite{kurka2021} ont montré
+qu'un seul modèle peut couvrir plusieurs rapports de bande, propriété que nous exploitons par troncature des
+canaux latents. Xu \emph{et al.}~\cite{xu2022} y ont ajouté des modules d'attention, Dai
+\emph{et al.}~\cite{dai2022} une transformée non linéaire.
+
+\paragraph{Vidéo et transmission orientée tâche.} DeepWiVe~\cite{tung2022} et la transmission sémantique
+vidéo~\cite{wang2023} étendent l'approche aux séquences. Shao \emph{et al.}~\cite{shao2022} formulent la
+transmission orientée tâche comme un goulot d'étranglement informationnel : ne transmettre que ce dont
+l'inférence a besoin. Notre extension du chapitre~\ref{chap:extensions} en est une version simple et directe.
+
+\paragraph{Pertes perceptuelles.} Le terme de caractéristiques de notre perte sémantique est une perte
+perceptuelle au sens de Johnson \emph{et al.}~\cite{johnson2016} : comparer les activations internes d'un
+réseau gelé plutôt que les pixels. La nouveauté n'est pas la perte elle-même, mais son usage dans une chaîne de
+transmission et surtout le protocole de mesure qui l'accompagne (chapitre~\ref{chap:protocole}).
+
+\begin{table}[H]
+\centering
+\caption{Positionnement des trois systèmes comparés dans ce projet}
+\label{tab:positionnement}
+\small
+\begin{tabularx}{\textwidth}{@{}p{3.2cm}cc>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Système} & \makecell{\textbf{Bits}\\\textbf{explicites}} & \makecell{\textbf{Effet}\\\textbf{falaise}} & \textbf{Critère optimisé} \\
+\midrule
+Chaîne séparée & \cmark & \cmark & distorsion de source, puis fiabilité binaire \\
+JSCC syntaxique & \xmark & \xmark & erreur quadratique sur les pixels \\
+JSCC sémantique & \xmark & \xmark & pixels \emph{et} caractéristiques \emph{et} tâche \\
+\bottomrule
+\end{tabularx}
+\end{table}

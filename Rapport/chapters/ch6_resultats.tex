@@ -1,0 +1,229 @@
+% ============================================================================
+%  CHAPITRE 6 -- RÉSULTATS ET ANALYSE
+% ============================================================================
+\chapter{Résultats et analyse}
+\label{chap:resultats}
+
+Tous les chiffres de ce chapitre proviennent de la campagne complète, écrite dans \srcfile{results/eval/} et
+résumée par \srcfile{results/tables/summary.md}. Sauf mention contraire, le point de fonctionnement est
+$k/n = 1/12$ sur canal AWGN.
+
+\section{CIFAR-10 : le résultat central}
+\label{sec:res_cifar}
+
+Le tableau~\ref{tab:cifar} compare les quatre systèmes à trois rapports signal sur bruit. La référence est la
+précision du juge B sur les images originales, soit 88,4\,\%.
+
+\begin{table}[H]
+\centering
+\caption{CIFAR-10, $k/n = 1/12$, canal AWGN. Le JSCC sémantique est en gras.}
+\label{tab:cifar}
+\small
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+\textbf{SNR} & \textbf{Système} & \textbf{PSNR (dB)} & \textbf{SSIM} & \textbf{Précision} \\
+\midrule
+\multirow{4}{*}{\SI{0}{\decibel}}
+ & JSCC syntaxique            & 20,08 & 0,669 & 42,0\,\% \\
+ & \textbf{JSCC sémantique}   & \textbf{19,68} & \textbf{0,677} & \textbf{56,4\,\%} \\
+ & Séparé — borne de capacité & 19,65 & 0,600 & 15,3\,\% \\
+ & Séparé — meilleur MCS      & 12,63 & 0,132 & 9,8\,\% \\
+\midrule
+\multirow{4}{*}{\SI{10}{\decibel}}
+ & JSCC syntaxique            & 25,99 & 0,874 & 67,6\,\% \\
+ & \textbf{JSCC sémantique}   & \textbf{25,48} & \textbf{0,874} & \textbf{78,2\,\%} \\
+ & Séparé — borne de capacité & 24,51 & 0,808 & 29,7\,\% \\
+ & Séparé — meilleur MCS      & 19,65 & 0,600 & 15,3\,\% \\
+\midrule
+\multirow{4}{*}{\SI{20}{\decibel}}
+ & JSCC syntaxique            & 27,72 & 0,906 & 70,6\,\% \\
+ & \textbf{JSCC sémantique}   & \textbf{27,15} & \textbf{0,903} & \textbf{80,2\,\%} \\
+ & Séparé — borne de capacité & 27,33 & 0,896 & 67,4\,\% \\
+ & Séparé — meilleur MCS      & 25,71 & 0,850 & 40,5\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.96\linewidth]{cifar_snr.png}
+  \caption{CIFAR-10 à $k/n = 1/12$ : qualité et précision en fonction du SNR du canal. Les courbes fines
+  correspondent aux MCS fixes de la chaîne séparée et montrent l'effet falaise.}
+  \label{fig:cifar_snr}
+\end{figure}
+
+Trois lectures se dégagent.
+
+\paragraph{1. Le compromis sémantique est net et constant.} Environ \SI{0.5}{\decibel} de PSNR cédé, 10 à
+14~points de précision gagnés, à tous les SNR. Le SSIM, lui, ne se dégrade pas : la structure locale est
+préservée. Autrement dit, les pixels sacrifiés n'étaient pas ceux qui portaient le sens.
+
+\paragraph{2. L'effet falaise est massif.} À \SI{0}{\decibel}, la chaîne séparée réelle atteint 9,8\,\%, soit
+exactement le niveau du hasard sur dix classes : l'image est perdue, pas dégradée. Les deux systèmes appris
+restent à 42\,\% et 56,4\,\%. Ce n'est pas un écart de qualité, c'est une différence de nature.
+
+\paragraph{3. La borne idéale elle-même est dépassée en précision.} Même la borne de capacité, qui suppose une
+transmission sans erreur, reste sous les deux JSCC en précision jusqu'à \SI{20}{\decibel}. La raison est que
+cette borne ne corrige pas le \emph{critère} : son codeur de source optimise toujours la fidélité pixel.
+
+\section{Influence du rapport de bande}
+\label{sec:res_bande}
+
+La figure~\ref{fig:cifar_bandwidth} montre la qualité en fonction du budget, de $1/48$ à $1/6$, pour un
+\emph{unique} modèle par système — l'agilité en bande décrite au chapitre~\ref{chap:architecture}.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.96\linewidth]{cifar_bandwidth.png}
+  \caption{Compromis débit/qualité sur CIFAR-10 à trois SNR. Un seul modèle couvre les cinq rapports $k/n$
+  grâce à la troncature des canaux latents ; les points noirs sont la chaîne séparée au meilleur MCS.}
+  \label{fig:cifar_bandwidth}
+\end{figure}
+
+La chaîne séparée n'apparaît qu'aux deux budgets les plus larges, et pour une raison instructive : en dessous,
+le budget de bits ne permet même pas un canal latent complet de l'auto-encodeur. À \SI{4}{\decibel} et
+$k/n = 1/12$, le meilleur MCS ne fait passer qu'\emph{un seul} canal latent sur seize ; tout le reste du budget
+part dans la redondance du code et dans une modulation prudente. C'est la cause directe de la faiblesse de la
+courbe noire à gauche de la figure.
+
+\section{Canal de Rayleigh}
+\label{sec:res_rayleigh}
+
+Le gain sémantique ne dépend pas du modèle de canal. Sous évanouissement par blocs, à \SI{10}{\decibel} et
+$k/n = 1/12$ :
+
+\begin{table}[H]
+\centering
+\caption{CIFAR-10 sur canal de Rayleigh par blocs, \SI{10}{\decibel}, $k/n = 1/12$}
+\label{tab:rayleigh}
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Système} & \textbf{PSNR (dB)} & \textbf{Précision} \\
+\midrule
+JSCC syntaxique          & 24,32 & 60,3\,\% \\
+\textbf{JSCC sémantique} & 23,84 & \textbf{72,4\,\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Le compromis est le même qu'en AWGN : environ \SI{0.5}{\decibel} cédé, 12~points gagnés. L'évanouissement
+dégrade les deux systèmes de façon comparable, sans modifier leur écart.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\linewidth]{rayleigh.png}
+  \caption{Comportement sur canal de Rayleigh par blocs avec CSI parfaite et égalisation par forçage à zéro.}
+  \label{fig:rayleigh}
+\end{figure}
+
+\section{Désadaptation entre SNR d'entraînement et SNR de test}
+\label{sec:res_mismatch}
+
+Trois modèles ont été entraînés chacun à un seul SNR, puis testés sur toute la plage. Le
+tableau~\ref{tab:mismatch} donne la précision du juge B.
+
+\begin{table}[H]
+\centering
+\caption{Désadaptation train/test, JSCC syntaxique, $k/n = 1/12$ (précision du juge B)}
+\label{tab:mismatch}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Entraîné à} & \textbf{testé \SI{0}{\decibel}} & \textbf{testé \SI{10}{\decibel}} & \textbf{testé \SI{20}{\decibel}} \\
+\midrule
+\SI{0}{\decibel}  & 28,9\,\% & 30,2\,\% & 30,5\,\% \\
+\SI{10}{\decibel} & 39,6\,\% & 69,5\,\% & 73,7\,\% \\
+\SI{20}{\decibel} & 33,9\,\% & 67,3\,\% & 75,1\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\linewidth]{snr_mismatch.png}
+  \caption{Désadaptation train/test du SNR. Le cercle marque le point de conception de chaque modèle ; la
+  courbe en tirets est le modèle entraîné sur la plage complète.}
+  \label{fig:mismatch}
+\end{figure}
+
+Le modèle entraîné à \SI{0}{\decibel} plafonne à 30\,\% même dans d'excellentes conditions : il a appris à se
+méfier du canal et n'exploite plus la marge disponible. Celui entraîné à \SI{20}{\decibel} s'effondre dès que
+le canal se dégrade. La conclusion pratique est nette : \textbf{entraîner sur une plage de SNR, et non à un
+point fixe, est ce qui rend un modèle unique utilisable de 0 à \SI{20}{\decibel}.}
+
+\section{Kodak et vidéo : le résultat défavorable}
+\label{sec:res_kodak}
+
+Il serait malhonnête de ne présenter que les cas favorables. Sur les grandes images, la borne de capacité de la
+chaîne séparée l'emporte nettement.
+
+\begin{table}[H]
+\centering
+\caption{PSNR (dB) sur Kodak et vidéo, $k/n = 1/12$, AWGN. La meilleure valeur de chaque ligne est en gras.}
+\label{tab:kodak}
+\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Jeu} & \textbf{SNR} & \textbf{JSCC synt.} & \textbf{JSCC sém.} & \textbf{Séparé (capacité)} & \textbf{Séparé (meilleur MCS)} \\
+\midrule
+Kodak & \SI{0}{\decibel}  & 22,97 & 22,73 & \textbf{26,70} & 12,82 \\
+Kodak & \SI{10}{\decibel} & 27,11 & 27,34 & \textbf{32,27} & 29,77 \\
+Vidéo & \SI{0}{\decibel}  & 21,93 & 21,77 & \textbf{25,28} & 10,41 \\
+Vidéo & \SI{10}{\decibel} & 26,59 & 26,62 & \textbf{31,95} & 29,11 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\linewidth]{kodak_snr.png}
+    \caption{Kodak}
+  \end{subfigure}\hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\linewidth]{video_snr.png}
+    \caption{Vidéo CIF}
+  \end{subfigure}
+  \caption{Images naturelles : qualité et similarité sémantique en fonction du SNR.}
+  \label{fig:kodak_video}
+\end{figure}
+
+Deux explications, qu'il faut énoncer sans les atténuer :
+
+\begin{enumerate}
+  \item \textbf{Les modèles JSCC n'ont été entraînés que sur CIFAR-10 en $32\times32$.} Étant entièrement
+        convolutifs, ils \emph{fonctionnent} sur des images $768\times512$, mais ils n'ont jamais vu les
+        statistiques d'une image naturelle de cette taille. Il s'agit donc d'un résultat de transfert, et JPEG
+        est ici sur son terrain.
+  \item \textbf{La borne de capacité n'est pas un système réalisable.} Elle suppose zéro erreur de
+        transmission ; aucun code réel ne l'atteint sur des paquets courts.
+\end{enumerate}
+
+Face au \emph{vrai} système séparé, la hiérarchie s'inverse dans les mauvaises conditions : à
+\SI{0}{\decibel} sur Kodak, la chaîne séparée au meilleur MCS donne \SI{12.82}{\decibel} de PSNR et 0\,\%
+d'accord top-1, contre environ \SI{23}{\decibel} pour les deux JSCC. L'effet falaise reste le phénomène
+dominant.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\linewidth]{visual.png}
+  \caption{Comparaison visuelle sur une image Kodak : la même image transmise par les différents systèmes au
+  même budget et au même SNR.}
+  \label{fig:visual}
+\end{figure}
+
+\section{Synthèse}
+\label{sec:res_synthese}
+
+\begin{keybox}[Ce que les mesures établissent]
+\begin{enumerate}[leftmargin=1.2em]
+  \item Ajouter un terme sémantique à la perte, sans rien changer d'autre, échange environ
+        \SI{0.5}{\decibel} de PSNR contre 10 à 14~points de précision — en AWGN comme en Rayleigh.
+  \item Le codage conjoint supprime l'effet falaise : à \SI{0}{\decibel} il reste exploitable là où la chaîne
+        séparée réelle est au niveau du hasard.
+  \item Entraîner sur une plage de SNR est indispensable ; un modèle à point fixe est inutilisable ailleurs.
+  \item Sur de grandes images jamais vues à l'entraînement, la borne idéale de la chaîne séparée reste
+        devant en PSNR.
+\end{enumerate}
+\end{keybox}

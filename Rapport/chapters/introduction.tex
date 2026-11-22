@@ -1,0 +1,46 @@
+% ============================================================================
+%  INTRODUCTION GÉNÉRALE
+% ============================================================================
+\chapter*{Introduction générale}
+\addcontentsline{toc}{chapter}{Introduction générale}
+\markboth{Introduction générale}{Introduction générale}
+
+Toute la théorie des communications construite depuis 1948 repose sur une idée de Shannon : transmettre, c'est
+reproduire au récepteur, aussi exactement que possible, la suite de symboles choisie à l'émetteur, sans se
+préoccuper de ce que ces symboles veulent dire~\cite{shannon1948}. Weaver distinguait pourtant déjà trois
+niveaux de problème — le niveau technique (les symboles arrivent-ils ?), le niveau sémantique (le sens
+arrive-t-il ?) et le niveau de l'efficacité (le destinataire agit-il correctement ?) — et constatait que seul le
+premier avait été résolu~\cite{weaver1949}.
+
+Ce découpage a produit l'architecture que nous utilisons tous les jours : on compresse la source d'un côté
+(JPEG, H.264), on protège les bits de l'autre (code correcteur, modulation), et le théorème de séparation
+garantit qu'aucune optimalité n'est perdue à les traiter séparément. La garantie est pourtant
+\emph{asymptotique} : elle suppose des blocs infiniment longs et un canal dont on connaît la statistique.
+Les images sont courtes, et le rapport signal sur bruit réel n'est jamais exactement celui qui a été prévu.
+
+\paragraph{Problème.} Deux conséquences se manifestent. D'abord l'\textbf{effet falaise} : au-dessus du SNR de
+conception la chaîne sature sans exploiter la marge disponible, et en dessous le décodeur décroche et l'image
+est perdue d'un seul coup — pas dégradée, perdue. Ensuite le \textbf{mauvais critère} : la chaîne optimise la
+fidélité pixel, alors que le destinataire est de plus en plus souvent une machine qui cherche seulement à
+reconnaître le contenu. La question posée par ce projet est donc la suivante : \emph{à budget radio égal,
+vaut-il mieux transmettre des pixels fidèles ou transmettre le sens ?}
+
+\paragraph{Démarche et contributions.} Nous avons construit et mesuré trois systèmes complets dans des
+conditions strictement identiques — même image, même rapport de bande, même canal, mêmes métriques. Le premier
+est la chaîne séparée classique, simulée bit à bit et non approchée. Le deuxième est un codage conjoint
+source-canal profond entraîné sur une perte pixel, qui reprend l'architecture de référence de la
+littérature~\cite{bourtsoulatze2019}. Le troisième, notre proposition, est strictement le même réseau et ne
+diffère que par la fonction de perte, à laquelle nous ajoutons un terme de caractéristiques et un terme de
+tâche calculés à travers un classifieur gelé. Comme seule la perte change, tout écart de résultat lui est
+imputable. Deux extensions complètent l'étude : une transmission orientée tâche et un renouvellement
+conditionnel des latents en vidéo. L'ensemble est accompagné d'un simulateur interactif qui déroule une
+transmission réelle étape par étape.
+
+\paragraph{Organisation du rapport.} Le chapitre~\ref{chap:contexte} présente les fondements théoriques et
+l'état de l'art. Le chapitre~\ref{chap:architecture} formule le problème, les exigences et l'architecture
+retenue. Le chapitre~\ref{chap:separee} décrit le canal simulé et la chaîne séparée de référence. Le
+chapitre~\ref{chap:jscc} détaille les systèmes appris et la perte sémantique. Le chapitre~\ref{chap:protocole}
+expose le protocole d'évaluation et les métriques, en insistant sur l'indépendance des juges. Le
+chapitre~\ref{chap:resultats} présente et analyse les résultats, y compris ceux qui nous sont défavorables. Le
+chapitre~\ref{chap:extensions} traite les deux extensions, et le chapitre~\ref{chap:simulateur} l'outil
+interactif développé pour explorer et vérifier la chaîne.

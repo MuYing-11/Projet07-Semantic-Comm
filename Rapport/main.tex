@@ -1,0 +1,52 @@
+% ============================================================================
+%  Rapport de projet -- Projet 07
+%  Communication sémantique apprise pour la transmission d'images et de vidéo
+%
+%  El Dabbabi Mouine · Saddoud Mohamed Amine · Bouchaala Oussema
+%  Lakhader Mohamed Helmi            INSAT -- RT5 -- 2025/2026
+%
+%  Structure et charte reprises du rapport Genow (classe report, géométrie,
+%  en-têtes, bibliographie ieeetr), adaptées à un projet académique.
+%
+%  Compilation :  pdflatex main && bibtex main && pdflatex main && pdflatex main
+%          ou  :  latexmk -pdf main.tex
+% ============================================================================
+\documentclass[11pt,a4paper]{report}
+\input{preamble}
+
+\begin{document}
+
+% ---------------------------------------------------------------- pages liminaires
+\pagenumbering{roman}
+\input{frontmatter/cover}
+\input{frontmatter/abstract}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\input{frontmatter/glossary}
+
+% ----------------------------------------------------------------- corps du rapport
+\cleardoublepage
+\pagenumbering{arabic}
+\input{chapters/introduction}
+\input{chapters/ch1_contexte}
+\input{chapters/ch2_architecture}
+\input{chapters/ch3_chaine_separee}
+\input{chapters/ch4_jscc}
+\input{chapters/ch5_protocole}
+\input{chapters/ch6_resultats}
+\input{chapters/ch7_extensions}
+\input{chapters/ch8_simulateur}
+\input{chapters/conclusion}
+
+% --------------------------------------------------------------- fin de document
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliographie}
+\bibliographystyle{ieeetr}
+{\small\setstretch{1.0}\bibliography{references}}
+
+\appendix
+\input{appendices/appendices}
+
+\end{document}

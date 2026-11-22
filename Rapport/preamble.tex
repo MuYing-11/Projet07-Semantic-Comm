@@ -1,0 +1,116 @@
+% ============================================================================
+%  Préambule partagé. Compatible pdfLaTeX (pas de fontspec), donc compilable
+%  tel quel sur Overleaf, MiKTeX ou TeX Live.
+%  Reprend la charte du rapport Genow : géométrie, couleurs, titres compacts,
+%  en-têtes fancyhdr, listings, tableaux booktabs.
+% ============================================================================
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm, headheight=15pt]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{upgreek}
+\usepackage{siunitx}
+\sisetup{detect-all, range-phrase=--, per-mode=symbol, output-decimal-marker={,}}
+\DeclareSIPrefix{\micro}{\ensuremath{\upmu}}{-6}
+\usepackage{textcomp}
+\usepackage{pifont}
+\usepackage[dvipsnames,table]{xcolor}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,shapes.misc,fit,calc,backgrounds}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\setlist{itemsep=2pt, topsep=4pt}
+\usepackage{url}
+\usepackage[hidelinks,bookmarksnumbered,hypertexnames=false]{hyperref}
+
+\setstretch{1.2}
+\setlength{\parskip}{0.3em}
+\setlength{\emergencystretch}{3em}
+
+% Titres de chapitre compacts : numéro et titre sur un seul bloc.
+\usepackage{titlesec}
+\titleformat{\chapter}[hang]{\normalfont\LARGE\bfseries\color{insatblue}}{\thechapter}{0.6em}{}[\vspace{2pt}\titlerule]
+\titlespacing*{\chapter}{0pt}{-10pt}{14pt}
+\titlespacing*{\section}{0pt}{10pt plus 2pt minus 2pt}{5pt plus 1pt}
+\titlespacing*{\subsection}{0pt}{8pt plus 2pt minus 2pt}{3pt plus 1pt}
+\captionsetup{font=small, labelfont=bf, skip=5pt}
+\captionsetup[sub]{font=footnotesize}
+\setlength{\textfloatsep}{12pt plus 2pt minus 3pt}
+\setlength{\floatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+
+% Permet la coupure des identifiants monospace longs (power_normalize, ...).
+\makeatletter
+\let\tf@origtexttt\texttt
+\renewcommand{\texttt}[1]{\tf@origtexttt{\tf@breakable{#1}}}
+\newcommand{\tf@breakable}[1]{\begingroup\def\_{\textunderscore\allowbreak}#1\endgroup}
+\makeatother
+
+% ------------------------------------------------------------ éléments de base
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+\theoremstyle{definition}
+\newtheorem{definition}{Définition}[chapter]
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\small\nouppercase\rightmark}
+\fancyfoot[R]{\textbf{\thepage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[R]{\textbf{\thepage}}\renewcommand{\headrulewidth}{0pt}}
+
+% -------------------------------------------------------------------- couleurs
+\definecolor{insatblue}{HTML}{1F4E9A}
+\definecolor{codebg}{HTML}{F7F7F5}
+\definecolor{codecomment}{HTML}{6A737D}
+\definecolor{codekw}{HTML}{1F4E9A}
+\definecolor{codestr}{HTML}{A33B00}
+\definecolor{keyfill}{HTML}{EAF1FB}
+\definecolor{keyframe}{HTML}{1F4E9A}
+\definecolor{blk1}{HTML}{DCEAF9}
+\definecolor{blk2}{HTML}{FDE5D8}
+\definecolor{blk3}{HTML}{D7F2E7}
+\definecolor{blk4}{HTML}{ECEAE4}
+
+% -------------------------------------------------------------------- listings
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  frame=single, rulecolor=\color{black!20},
+  breaklines=true, breakatwhitespace=false,
+  numbers=left, numberstyle=\tiny\color{codecomment}, numbersep=6pt,
+  keywordstyle=\color{codekw}\bfseries,
+  commentstyle=\color{codecomment}\itshape,
+  stringstyle=\color{codestr},
+  showstringspaces=false, tabsize=2, columns=fullflexible, keepspaces=true,
+  captionpos=b, xleftmargin=1.5em, framexleftmargin=1.5em,
+  literate={é}{{\'e}}1 {è}{{\`e}}1 {ê}{{\^e}}1 {à}{{\`a}}1 {ç}{{\c c}}1 {ù}{{\`u}}1
+           {µ}{{$\mu$}}1 {°}{{\textdegree}}1 {→}{{$\rightarrow$}}1 {—}{{--}}1 {–}{{-}}1 {×}{{$\times$}}1
+}
+\renewcommand{\lstlistlistingname}{Liste des extraits de code}
+
+% Encadré pour un résultat ou une idée clé.
+\newtcolorbox{keybox}[1][]{colback=keyfill, colframe=keyframe, fonttitle=\bfseries\small,
+  title={#1}, boxrule=0.6pt, arc=2pt, left=6pt, right=6pt, top=4pt, bottom=4pt, fontupper=\small}
+
+% Référence à un fichier source du projet.
+\newcommand{\srcfile}[1]{\texttt{\detokenize{#1}}}

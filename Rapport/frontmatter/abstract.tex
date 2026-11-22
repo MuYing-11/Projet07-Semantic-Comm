@@ -1,0 +1,55 @@
+% ----------------------------------------------------------------------------
+%  Résumé / Abstract
+% ----------------------------------------------------------------------------
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Résumé}
+\markboth{Résumé}{Résumé}
+\vspace*{1cm}
+{\LARGE\bfseries\color{insatblue} Résumé\par}\vspace{2pt}\hrule\vspace{12pt}
+
+\noindent
+Ce projet compare trois manières de transmettre une image sur un canal sans fil bruité simulé, à budget
+radio strictement identique. La première est la chaîne séparée de Shannon, telle qu'elle est déployée
+aujourd'hui : codage de source, code convolutif, modulation QAM, décodage de Viterbi, le tout simulé bit
+à bit. La deuxième est un codage conjoint source-canal profond (\emph{deep JSCC}) entraîné de bout en bout
+sur une perte pixel. La troisième, proposée ici, reprend exactement la même architecture et ne modifie que
+la fonction de perte : s'ajoutent à l'erreur quadratique un terme de caractéristiques et un terme de tâche
+calculés à travers un classifieur gelé.
+
+À architecture, bande et canal identiques, le système sémantique cède environ \SI{0.5}{\decibel} de PSNR
+et gagne 10 à 14 points de précision chez un juge indépendant, en canal AWGN comme en canal de Rayleigh.
+À \SI{0}{\decibel}, là où la chaîne séparée réelle tombe au niveau du hasard, les deux systèmes appris
+restent exploitables : le codage conjoint supprime l'effet falaise. Deux extensions prolongent l'étude,
+une transmission orientée tâche qui atteint une précision comparable avec 32 fois moins de bande, et un
+renouvellement conditionnel des latents qui divise la bande par trois sur une scène vidéo statique. Les
+limites sont énoncées explicitement : le canal est simulé, et sur de grandes images jamais vues à
+l'entraînement la borne idéale de la chaîne séparée reste devant.
+
+\vspace{10pt}
+\noindent\textbf{Mots-clés :} communication sémantique, codage conjoint source-canal, apprentissage profond,
+canal AWGN, évanouissement de Rayleigh, PSNR, SSIM, effet falaise, transmission orientée tâche.
+
+\vspace{1.4cm}
+{\LARGE\bfseries\color{insatblue} Abstract\par}\vspace{2pt}\hrule\vspace{12pt}
+
+\noindent
+This project compares three ways of sending an image over a simulated noisy wireless channel under a
+strictly identical radio budget. The first is the separated Shannon chain as deployed today: source
+coding, convolutional code, QAM modulation and Viterbi decoding, simulated bit by bit. The second is a
+deep joint source-channel code (deep JSCC) trained end to end on a pixel loss. The third, proposed here,
+keeps exactly the same architecture and changes only the loss function, adding a feature term and a task
+term computed through a frozen classifier.
+
+With identical architecture, bandwidth and channel, the semantic system gives up about \SI{0.5}{\decibel}
+of PSNR and gains 10 to 14 accuracy points as measured by an independent judge, on AWGN as well as on
+Rayleigh fading. At \SI{0}{\decibel}, where the real separated chain drops to chance level, both learned
+systems remain usable: joint coding removes the cliff effect. Two extensions complete the study: a
+task-oriented transmitter reaching comparable accuracy with 32 times less bandwidth, and conditional
+replenishment of the latent tensor, which divides bandwidth by three on a static video scene. The
+limitations are stated explicitly: the channel is simulated, and on large images never seen during
+training the ideal bound of the separated chain remains ahead.
+
+\vspace{10pt}
+\noindent\textbf{Keywords:} semantic communication, joint source-channel coding, deep learning, AWGN
+channel, Rayleigh fading, PSNR, SSIM, cliff effect, task-oriented transmission.

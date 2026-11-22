@@ -1,0 +1,107 @@
+% ============================================================================
+%  CHAPITRE 5 -- PROTOCOLE D'ÉVALUATION ET MÉTRIQUES
+% ============================================================================
+\chapter{Protocole d'évaluation et métriques}
+\label{chap:protocole}
+
+Mesurer « le sens » est le point délicat de ce travail : un protocole mal construit produirait des chiffres
+flatteurs et faux. Ce chapitre décrit les jeux de données, les métriques, et surtout la séparation stricte
+entre les réseaux utilisés pour apprendre et ceux utilisés pour juger.
+
+\section{Jeux de données}
+\label{sec:donnees}
+
+\begin{table}[H]
+\centering
+\caption{Jeux de données et rôle de chacun}
+\label{tab:donnees}
+\small
+\begin{tabularx}{\textwidth}{@{}p{2.3cm}p{2.5cm}p{2.6cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Jeu} & \textbf{Taille} & \textbf{Usage} & \textbf{Remarque} \\
+\midrule
+CIFAR-10~\cite{krizhevsky2009} & $32\times32$, 10 classes & entraînement et évaluation & \num{50000} images d'apprentissage ; évaluation sur les \num{5000} premières images de test, pas de \SI{1}{\decibel} \\
+Kodak~\cite{kodak} & $768\times512$, 24 images & évaluation seule & jamais vues à l'entraînement ; 4 images en portrait tournées pour permettre le traitement par lots ; pas de \SI{2}{\decibel} \\
+Vidéo CIF~\cite{xiph} & $352\times288$, 3 clips & évaluation seule & 30 premières images d'\srcfile{akiyo} (statique), \srcfile{foreman} (mouvement modéré) et \srcfile{bus} (panoramique rapide) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Les séquences CIF remplacent les clips UVG~\cite{uvg} suggérés initialement, dont les fichiers bruts en 1080p
+pèsent plusieurs gigaoctets chacun. Les trois clips retenus couvrent volontairement trois régimes de mouvement,
+ce qui s'avère déterminant pour l'extension vidéo du chapitre~\ref{chap:extensions}.
+
+\section{Métriques de fidélité}
+\label{sec:metriques_fidelite}
+
+\paragraph{PSNR.} Le rapport signal sur bruit crête, exprimé en décibels, mesure l'erreur quadratique moyenne
+rapportée à la dynamique du signal :
+\begin{equation}
+  \mathrm{PSNR}(\hat{x},x) = 10\log_{10}\frac{1}{\mathrm{MSE}(\hat{x},x)} \quad \text{(images dans } [0,1]).
+  \label{eq:psnr}
+\end{equation}
+Une valeur de \SI{30}{\decibel} correspond à une bonne reconstruction, \SI{20}{\decibel} à une image
+visiblement dégradée.
+
+\paragraph{SSIM.} L'indice de similarité structurelle~\cite{wang2004} compare localement luminance, contraste
+et structure. Compris entre 0 et 1, il est plus proche du jugement visuel que le PSNR.
+
+\section{Métriques de sens}
+\label{sec:metriques_sens}
+
+\paragraph{Précision du juge (CIFAR-10).} L'image reçue est présentée à un classifieur ; on mesure la
+proportion d'images dont la classe est correctement reconnue. La référence est la précision sur les images
+originales non transmises : \textbf{88,4\,\%} pour le juge utilisé.
+
+\paragraph{Similarité sémantique (images naturelles).} Pour Kodak et la vidéo, où il n'existe pas d'étiquette,
+on utilise un ResNet-18~\cite{he2016} pré-entraîné sur ImageNet : similarité cosinus entre les vecteurs de
+caractéristiques de l'image originale et de l'image reçue (\srcfile{sem_cos}), et accord des étiquettes
+prédites avant et après transmission (\srcfile{top1_agree}, \srcfile{top5_agree}).
+
+\section{L'indépendance des juges}
+\label{sec:juges}
+
+C'est le point méthodologique central du projet.
+
+\begin{keybox}[Règle de séparation]
+Le réseau qui intervient dans la perte n'est jamais celui qui mesure le résultat.
+\end{keybox}
+
+La perte sémantique de l'équation~\eqref{eq:loss_sem} utilise le \textbf{classifieur A}, un petit ResNet. Les
+mesures rapportées dans tout ce rapport utilisent :
+
+\begin{itemize}
+  \item le \textbf{classifieur B}, d'architecture différente (VGG~\cite{simonyan2015}), entraîné séparément et
+        qui n'apparaît dans aucune fonction de perte ;
+  \item un \textbf{ResNet-18 ImageNet} pour les images naturelles, totalement extérieur au projet.
+\end{itemize}
+
+Sans cette séparation, le système sémantique pourrait apprendre à produire des artefacts qui plaisent à son
+propre correcteur : la précision mesurée augmenterait sans que le sens soit réellement mieux transmis. Le
+tableau~\ref{tab:juges} récapitule les rôles.
+
+\begin{table}[H]
+\centering
+\caption{Rôle de chaque réseau : apprentissage ou mesure, jamais les deux}
+\label{tab:juges}
+\small
+\begin{tabularx}{\textwidth}{@{}p{3.4cm}ccX@{}}
+\toprule
+\textbf{Réseau} & \makecell{\textbf{Dans une}\\\textbf{perte}} & \makecell{\textbf{Utilisé pour}\\\textbf{mesurer}} & \textbf{Précision sur images originales} \\
+\midrule
+Classifieur A (ResNet) & \cmark & \xmark & 85,4\,\% \\
+Classifieur B (VGG) & \xmark & \cmark & 88,4\,\% \\
+ResNet-18 ImageNet & \xmark & \cmark & référence pour la similarité sémantique \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Conduite des mesures}
+\label{sec:mesures}
+
+Les points numériques sont simulés exactement, comme indiqué au chapitre~\ref{chap:separee} : pour chaque
+couple (MCS, SNR), les paquets de toutes les images sont codés, modulés, envoyés sur le canal et décodés par
+Viterbi. Les graines aléatoires sont fixées par point de mesure, de sorte que la campagne est reproductible.
+Chaque scheme produit une ligne de CSV dans \srcfile{results/eval/}, et les tableaux et figures du
+chapitre~\ref{chap:resultats} en sont dérivés automatiquement par \srcfile{scripts/make_figures.py} : aucun
+chiffre n'est recopié à la main.

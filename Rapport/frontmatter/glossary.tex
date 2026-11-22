@@ -1,0 +1,42 @@
+\vspace{1.2cm}
+\phantomsection
+\addcontentsline{toc}{chapter}{Liste des abréviations}
+{\LARGE\bfseries\color{insatblue} Liste des abréviations\par}\vspace{2pt}\hrule\vspace{10pt}
+
+\begin{small}
+\begin{tabular}{@{}p{1.6cm}p{5.3cm}@{\hspace{0.6cm}}p{1.6cm}p{5.3cm}@{}}
+\toprule
+AE & Auto-encodeur (\emph{auto-encoder}) & LLR & Log-rapport de vraisemblance \\
+AWGN & Bruit blanc gaussien additif & MCS & Schéma de modulation et de codage \\
+BER & Taux d'erreur binaire & MSE & Erreur quadratique moyenne \\
+CE & Entropie croisée (\emph{cross-entropy}) & PSNR & Rapport signal sur bruit crête \\
+CIF & \emph{Common Intermediate Format} (352$\times$288) & QAM & Modulation d'amplitude en quadrature \\
+CNN & Réseau de neurones convolutif & QPSK & Modulation par déplacement de phase à 4 états \\
+CR & Renouvellement conditionnel & ReLU & \emph{Rectified Linear Unit} \\
+CSI & Information d'état du canal & RGB & Rouge-vert-bleu \\
+DCT & Transformée en cosinus discrète & SNR & Rapport signal sur bruit \\
+GOP & Groupe d'images (\emph{group of pictures}) & SSIM & Indice de similarité structurelle \\
+JPEG & \emph{Joint Photographic Experts Group} & VGG & \emph{Visual Geometry Group} (architecture) \\
+JSCC & Codage conjoint source-canal & ZF & Forçage à zéro (\emph{zero-forcing}) \\
+\bottomrule
+\end{tabular}
+\end{small}
+
+\vspace{14pt}
+{\large\bfseries\color{insatblue} Principales notations\par}\vspace{8pt}
+
+\begin{small}
+\begin{tabular}{@{}p{2.2cm}p{12.6cm}@{}}
+\toprule
+$n$ & Nombre de valeurs réelles de l'image source, $n = 3HW$ \\
+$k$ & Nombre de symboles complexes émis sur le canal \\
+$k/n$ & Rapport de bande ; point de fonctionnement principal $1/12$ \\
+$c$ & Nombre de canaux latents effectivement transmis ($k/n = c/96$) \\
+$\sigma^2$ & Variance du bruit complexe, $\sigma^2 = 10^{-\mathrm{SNR}/10}$ \\
+$h$ & Coefficient de canal de Rayleigh, $h \sim \mathcal{CN}(0,1)$ \\
+$x,\ \hat{x}$ & Image émise et image reconstruite au récepteur \\
+$z$ & Tenseur latent produit par l'encodeur \\
+$\lambda_f,\ \lambda_t$ & Poids des termes de caractéristiques et de tâche dans la perte sémantique \\
+\bottomrule
+\end{tabular}
+\end{small}

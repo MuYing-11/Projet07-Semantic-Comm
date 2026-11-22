@@ -1,0 +1,88 @@
+% ============================================================================
+%  CHAPITRE 8 -- SIMULATEUR INTERACTIF
+% ============================================================================
+\chapter{Simulateur interactif de la chaîne}
+\label{chap:simulateur}
+
+Les courbes du chapitre~\ref{chap:resultats} donnent des moyennes sur des milliers d'images. Elles ne montrent
+pas \emph{ce qui se passe} à l'intérieur d'une transmission. Nous avons donc développé un simulateur
+interactif qui déroule une transmission réelle, étape par étape, et rend visibles les grandeurs intermédiaires
+que les métriques résument.
+
+\section{Objectif et principe}
+\label{sec:sim_principe}
+
+L'outil est lancé par une seule commande :
+
+\begin{lstlisting}[language=bash, caption={Lancement du simulateur}, label={lst:explore}]
+python scripts/explore.py          # ouvre http://127.0.0.1:8077/
+\end{lstlisting}
+
+Le principe directeur est qu'\textbf{aucune étape n'est rejouée ni pré-enregistrée} : chaque étape appelle le
+code du projet — \srcfile{semcom.channel}, \srcfile{semcom.digital}, \srcfile{semcom.models},
+\srcfile{semcom.metrics}. Ce que la page affiche est donc exactement ce que \srcfile{scripts/evaluate.py}
+mesure. Le simulateur est un \emph{observateur} de la chaîne, pas une seconde implémentation qui pourrait
+diverger de la première.
+
+\section{Architecture logicielle}
+\label{sec:sim_archi}
+
+\begin{table}[H]
+\centering
+\caption{Modules du simulateur interactif}
+\label{tab:sim_modules}
+\small
+\begin{tabularx}{\textwidth}{@{}p{3.3cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Module} & \textbf{Rôle} \\
+\midrule
+\srcfile{explorer/trace.py} & exécute une transmission et enregistre chaque étape : grandeurs, explication, vues associées \\
+\srcfile{explorer/catalog.py} & systèmes, images et options proposés ; chargement et mise en cache des modèles \\
+\srcfile{explorer/encode.py} & conversion des tenseurs en objets affichables (PNG, cartes latentes, nuages de symboles) \\
+\srcfile{explorer/server.py} & serveur HTTP et API JSON \\
+\srcfile{explorer/static/} & interface : carte animée, lecteur d'étapes, inspecteur, tracé des courbes \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Le serveur repose sur le module \srcfile{http.server} de la bibliothèque standard et l'interface est écrite en
+HTML, CSS et JavaScript sans bibliothèque externe : le simulateur n'ajoute donc aucune dépendance à celles du
+projet.
+
+\section{Ce que l'on observe}
+\label{sec:sim_vues}
+
+L'émetteur, le canal et le récepteur sont représentés par une carte sur laquelle progresse l'étape courante.
+Un lecteur (lecture, pause, pas à pas, curseur, raccourcis clavier) permet d'avancer dans la transmission.
+Chaque étape affiche la grandeur réellement présente à cet endroit de la chaîne :
+
+\begin{itemize}
+  \item le \textbf{tenseur latent} en pile tridimensionnelle, les canaux transmis en couleur et les canaux
+        tronqués en gris, ce qui rend la notion de budget immédiatement lisible ;
+  \item les \textbf{symboles dans le plan I/Q}, avant et après bruit : nuage continu pour le JSCC,
+        constellation discrète pour la QAM — la différence qui explique l'effet falaise ;
+  \item les \textbf{bits codés}, avec les bits faux marqués, et la comparaison entre le taux d'erreur brut et
+        le taux après décodage de Viterbi ;
+  \item les \textbf{LLR} signés, qui montrent la confiance du démodulateur ;
+  \item l'\textbf{image reçue} et le \textbf{verdict des juges}.
+\end{itemize}
+
+Quatre onglets organisent l'outil : \emph{Explorer} (une transmission détaillée), \emph{Comparer} (plusieurs
+systèmes sur la même image, calculés en direct), \emph{Résultats mesurés} (les courbes de la campagne lues
+dans les CSV) et \emph{Concepts} (les notions de cours, chacune renvoyant au fichier source correspondant).
+L'état complet est encodé dans l'URL, de sorte qu'une étape précise d'une transmission précise peut être
+partagée par simple lien.
+
+\section{Apport pédagogique et apport de vérification}
+\label{sec:sim_apport}
+
+L'outil a servi deux fins. D'abord l'explication : l'onglet \emph{Comparer} à \SI{2}{\decibel} montre en une
+seule vue la thèse du projet — la chaîne séparée rend une image grise, le JSCC syntaxique une image
+reconnaissable mais mal classée, le JSCC sémantique une image correctement classée.
+
+Ensuite la vérification. Parce que le simulateur affiche les grandeurs intermédiaires réelles, il rend
+observables des comportements que les moyennes masquent : le budget binaire insuffisant pour un seul canal
+latent aux MCS robustes sur CIFAR-10 (section~\ref{sec:codage_source}), ou le fait que, très en dessous du
+seuil du code, le décodage de Viterbi peut produire un taux d'erreur \emph{supérieur} au taux brut — le
+décodeur s'engageant alors sur un mauvais chemin du treillis. Ces deux phénomènes sont des conséquences
+correctes de la théorie, mais ils ne se lisent pas sur une courbe de PSNR.

@@ -1,0 +1,80 @@
+% ============================================================================
+%  ANNEXES
+% ============================================================================
+\chapter{Reproduction des résultats}
+\label{app:repro}
+
+L'ensemble de la campagne est relançable depuis la racine du projet. Les modèles déjà entraînés sont ignorés,
+de sorte que la commande peut être relancée après une interruption.
+
+\begin{lstlisting}[language=bash, caption={Installation et campagne complète}, label={lst:repro}]
+python -m venv .venv
+.venv\Scripts\activate              # Linux/macOS : source .venv/bin/activate
+pip install -r requirements.txt
+python scripts/download_data.py     # CIFAR-10, Kodak, 3 clips Xiph, poids ResNet-18 (~250 Mo)
+
+python scripts/run_all.py --workers 4 --threads 4    # entraine les 9 modeles
+python scripts/evaluate.py all --workers 6           # -> results/eval/*.csv
+python scripts/make_figures.py                       # tableaux et figures
+python scripts/demo.py                               # comparaison visuelle
+python scripts/explore.py                            # simulateur interactif
+\end{lstlisting}
+
+Sur un processeur à 16 fils d'exécution, la campagne d'entraînement demande environ \SI{2.5}{\hour} et
+l'évaluation environ \SI{30}{\minute}. Les données ne sont pas versionnées — \SI{391}{\mega\byte}, dont des
+fichiers dépassant la limite de \SI{100}{\mega\byte} par fichier des dépôts Git ; le script de téléchargement
+les régénère.
+
+\chapter{Fichiers de résultats produits}
+\label{app:fichiers}
+
+\begin{table}[H]
+\centering
+\caption{Fichiers de résultats et contenu}
+\label{tab:fichiers}
+\small
+\begin{tabularx}{\textwidth}{@{}p{5.1cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Fichier} & \textbf{Contenu} \\
+\midrule
+\srcfile{results/eval/cifar_analog.csv} & JSCC syntaxique et sémantique, modèles à SNR fixe, orienté tâche, sur CIFAR-10 \\
+\srcfile{results/eval/cifar_digital.csv} & chaîne séparée simulée bit à bit, un point par MCS et par SNR \\
+\srcfile{results/eval/cifar_capacity.csv} & borne de capacité de la chaîne séparée sur CIFAR-10 \\
+\srcfile{results/eval/kodak_jscc.csv} & systèmes appris sur les 24 images Kodak \\
+\srcfile{results/eval/kodak_sep.csv} & chaîne séparée JPEG sur Kodak, et sa borne de capacité \\
+\srcfile{results/eval/video_jscc.csv} & systèmes appris et renouvellement conditionnel sur les 3 clips \\
+\srcfile{results/eval/video_sep.csv} & chaîne séparée JPEG sur les 3 clips \\
+\srcfile{results/eval/video_frames.csv} & qualité trame par trame \\
+\srcfile{results/tables/summary.md} & tableau de synthèse au point $k/n = 1/12$ \\
+\srcfile{results/tables/models.csv} & paramètres, époques et durées d'entraînement des neuf modèles \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\chapter{Paramètres de simulation}
+\label{app:params}
+
+\begin{table}[H]
+\centering
+\caption{Valeurs numériques employées dans toute la campagne}
+\label{tab:params}
+\small
+\begin{tabularx}{\textwidth}{@{}p{6.2cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Paramètre} & \textbf{Valeur} \\
+\midrule
+Canaux latents (total) & 16, au stride 4 \\
+Canaux transmis $c$ & 2, 4, 8, 12, 16 soit $k/n$ de $1/48$ à $1/6$ \\
+Point de fonctionnement principal & $k/n = 1/12$ ($c = 8$) \\
+Plage de SNR & 0 à \SI{20}{\decibel} ; pas de \SI{1}{\decibel} sur CIFAR-10, \SI{2}{\decibel} ailleurs \\
+Puissance moyenne par symbole & 1 \\
+Poids de la perte sémantique & $\lambda_f = 0{,}01$ ; $\lambda_t = 0{,}003$ \\
+Optimiseur & Adam, pas $10^{-3}$, lots de 128 \\
+Code convolutif & $K = 7$, polynômes $(133,171)_8$ \\
+Rendements & 1/2, 2/3, 3/4 (poinçonnage 802.11a) \\
+Modulations & QPSK, 16-QAM, 64-QAM, codage de Gray \\
+Taille de paquet & \num{1024} bits utiles au maximum, 6 bits de queue \\
+Images d'évaluation & \num{5000} (CIFAR-10), 24 (Kodak), $3\times30$ trames (vidéo) \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -24,3 +24,17 @@ venv/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Artefacts de compilation LaTeX
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lot
+*.out
+*.toc
+*.synctex.gz
+Rapport/build.log
+Rapport/main.log

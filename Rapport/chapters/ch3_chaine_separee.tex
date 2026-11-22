@@ -1,54 +1,41 @@
 % ============================================================================
 %  CHAPITRE 3 -- CANAL SIMULÉ ET CHAÎNE SÉPARÉE
 % ============================================================================
-\chapter{Canal simulé et chaîne séparée de référence}
+\chapter{Canal simulé et chaîne séparée}
 \label{chap:separee}
 
-La référence à battre doit être implémentée honnêtement, sinon la comparaison ne vaut rien. Ce chapitre décrit
-le canal commun aux trois systèmes, puis la chaîne numérique complète, simulée bit à bit du codage de source
-jusqu'au décodage de Viterbi.
+La référence à battre doit être implémentée honnêtement, sinon la comparaison ne vaut rien.
 
-\section{Implémentation du canal}
+\section{Le canal}
 \label{sec:canal_impl}
 
-Le canal est une couche traversée par les trois systèmes, implémentée dans \srcfile{semcom/channel.py}. Elle
-enchaîne trois opérations.
+Implémenté dans \srcfile{semcom/channel.py}, il enchaîne trois opérations communes aux trois systèmes.
 
-\paragraph{Troncature de bande.} Seuls les $c$ premiers canaux latents sont émis ; les autres sont remis à zéro
-au récepteur. Le rapport de bande obtenu est celui de l'équation~\eqref{eq:ratio_c}.
-
-\paragraph{Normalisation de puissance.} Les symboles transmis sont mis à l'échelle de sorte que la puissance
-moyenne soit exactement 1 par symbole complexe et par image :
-\begin{equation}
-  x = z_{1:c}\sqrt{\frac{k}{\sum_i z_i^2}}, \qquad
-  k = \tfrac{1}{2}\,\mathrm{card}(z_{1:c}) .
-  \label{eq:power}
-\end{equation}
-
-\paragraph{Bruit.} Le canal AWGN ajoute un bruit gaussien de variance $\sigma^2 = 10^{-\mathrm{SNR}/10}$,
-répartie à parts égales entre les composantes en phase et en quadrature. Le canal de Rayleigh tire d'abord un
-gain $|h|^2$ de loi exponentielle, en déduit un SNR instantané $\mathrm{SNR} + 10\log_{10}|h|^2$, puis applique
-le même bruit : après égalisation par forçage à zéro, tout se passe comme sur un canal AWGN dégradé par
-l'évanouissement.
+\begin{enumerate}
+  \item \textbf{Troncature} : seuls les $c$ premiers canaux latents sont émis, les autres sont mis à zéro au
+        récepteur.
+  \item \textbf{Normalisation} : la puissance moyenne vaut exactement 1 par symbole complexe,
+        \begin{equation}
+          x = z_{1:c}\sqrt{\frac{k}{\sum_i z_i^2}}, \qquad k = \tfrac{1}{2}\,\mathrm{card}(z_{1:c}) .
+          \label{eq:power}
+        \end{equation}
+  \item \textbf{Bruit} : AWGN de variance $\sigma^2 = 10^{-\mathrm{SNR}/10}$, ou Rayleigh — tirage de
+        $|h|^2$, SNR instantané $\mathrm{SNR}+10\log_{10}|h|^2$, puis même bruit.
+\end{enumerate}
 
 \section{Codage de source}
 \label{sec:codage_source}
 
-Le codeur de source dépend de la taille d'image, et ce choix mérite d'être justifié car il conditionne la
-qualité de la référence.
+\paragraph{Grandes images : JPEG.} Sur Kodak et en vidéo, JPEG~\cite{wallace1992} à la plus haute qualité qui
+tienne dans le budget. Au point $1/12$ en QPSK 1/2, une image Kodak dispose de \num{12216}~octets : la
+qualité retenue est 6, pour \num{11084}~octets.
 
-\paragraph{Grandes images : JPEG.} Sur Kodak et sur la vidéo, la chaîne utilise JPEG~\cite{wallace1992} à la plus
-haute qualité qui tienne dans le budget de bits disponible, déterminée par recherche dichotomique sur le
-facteur de qualité. Au point $k/n = 1/12$ et en QPSK 1/2, une image Kodak dispose de \num{12216}~octets ; la
-qualité retenue est alors 6, pour un fichier de \num{11084}~octets.
-
-\paragraph{Petites images : auto-encodeur quantifié.} Sur CIFAR-10, JPEG est inutilisable, et c'est un résultat
-mesuré, non une opinion. Le tableau~\ref{tab:budget_cifar} donne le budget réellement disponible pour chaque
-MCS au point $1/12$, soit $k = \num{256}$ symboles complexes.
+\paragraph{Petites images : auto-encodeur 4 bits.} Sur CIFAR-10, JPEG est inutilisable, et c'est mesuré. Le
+tableau~\ref{tab:budget_cifar} donne le budget réel au point $1/12$ ($k = \num{256}$ symboles).
 
 \begin{table}[H]
 \centering
-\caption{Budget utile par MCS pour une image CIFAR-10 à $k/n = 1/12$ ($k = 256$ symboles)}
+\caption{Budget utile par MCS pour une image CIFAR-10 à $k/n = 1/12$}
 \label{tab:budget_cifar}
 \small
 \begin{tabular}{@{}lrrr@{}}
@@ -65,55 +52,37 @@ QPSK 3/4   & 1,5 & 376  & 47  \\
 \end{tabular}
 \end{table}
 
-Or le plus petit fichier JPEG que l'on puisse produire pour une image $32\times32$, à la qualité minimale,
-pèse entre \num{301} et \num{317}~octets : deux à dix fois le budget. La raison est structurelle. Un fichier
-JPEG porte un coût fixe incompressible — marqueurs, tables de quantification, tables de Huffman — d'environ
-\num{300}~octets avant le premier pixel. Sur une image $768\times512$ ce coût est négligeable ; sur une image
-$32\times32$, il \emph{est} le fichier.
+Or le plus petit JPEG possible d'une image $32\times32$ pèse de \num{301} à \num{317}~octets : deux à dix fois
+le budget. La cause est structurelle — marqueurs et tables de Huffman coûtent environ \num{300}~octets avant
+le premier pixel, négligeables en $768\times512$ mais dominants en $32\times32$.
 
-Utiliser JPEG sur CIFAR-10 produirait donc une image grise à tous les SNR, c'est-à-dire une référence vide de
-sens. La chaîne emploie à la place un \textbf{auto-encodeur dont le latent est quantifié uniformément sur
-4~bits} (\srcfile{DigitalAE}), entraîné sans canal. Chaque canal latent coûte $64 \times 4 = \num{256}$~bits,
-soit 32~octets ; le budget de 142~octets autorise donc 4~canaux au meilleur MCS. Ce choix \emph{avantage}
-délibérément la chaîne séparée.
+La chaîne emploie donc un auto-encodeur dont le latent est quantifié sur 4~bits (\srcfile{DigitalAE}),
+entraîné sans canal : chaque canal latent coûte $64\times4 = \num{256}$~bits, soit 32~octets, et le budget de
+142~octets en autorise 4. Ce choix \emph{avantage} délibérément la chaîne séparée.
 
-\section{Codage de canal, modulation et réception}
+\section{Codage de canal et réception}
 \label{sec:canal_num}
 
-Le train binaire issu du codeur de source est découpé en paquets d'au plus \num{1024}~bits utiles, chacun
-terminé par 6~bits de queue qui ramènent le treillis à l'état zéro. Chaque paquet traverse ensuite :
+Le train binaire est découpé en paquets d'au plus \num{1024}~bits utiles, terminés par 6~bits de queue. Chaque
+paquet traverse : code convolutif $K=7$ poinçonné $\rightarrow$ QAM de Gray $\rightarrow$ canal $\rightarrow$
+LLR max-log $\rightarrow$ Viterbi $\rightarrow$ décodage de source.
 
-\begin{enumerate}
-  \item le \textbf{code convolutif} $K=7$, polynômes $(133,171)_8$, poinçonné au rendement voulu ;
-  \item la \textbf{modulation QAM} de Gray, à énergie moyenne unitaire ;
-  \item le \textbf{canal} (AWGN ou Rayleigh), identique à celui des systèmes appris ;
-  \item la \textbf{démodulation souple}, qui calcule les LLR par l'approximation max-log ;
-  \item le \textbf{décodage de Viterbi} vectorisé sur le treillis à 64 états ;
-  \item le \textbf{décodage de source}, JPEG ou auto-encodeur.
-\end{enumerate}
+Rien n'est approché par une formule de taux d'erreur. Un fichier JPEG refusé par le décodeur devient une image
+grise uniforme : le récepteur n'a rien d'autre à afficher.
 
-Rien n'est approché par une formule de taux d'erreur : les bits sont réellement codés, modulés, bruités et
-décodés. Un fichier JPEG que le décodeur refuse est remplacé par une image grise uniforme, car le récepteur
-n'a rien d'autre à afficher.
-
-\section{Deux bornes pour encadrer la référence}
+\section{Trois formes de référence}
 \label{sec:bornes}
 
-La chaîne séparée est présentée sous trois formes, de la plus réaliste à la plus optimiste.
-
 \begin{description}[leftmargin=1.4cm, style=nextline]
-  \item[MCS fixe] Un couple (modulation, rendement) choisi d'avance, qui révèle l'effet falaise : la courbe
-        plafonne au-dessus du seuil et s'effondre en dessous.
-  \item[Meilleur MCS] Un émetteur « génie » qui connaîtrait le SNR exact et choisirait à chaque point le
-        meilleur des six MCS. C'est la meilleure performance réalisable par adaptation de lien.
-  \item[Borne de capacité] Hypothèse idéale où le canal livre $k\log_2(1+\mathrm{SNR})$ bits
-        \emph{sans aucune erreur}. Aucun code réel ne l'atteint sur des paquets courts : c'est une borne
-        supérieure, pas un système constructible.
+  \item[MCS fixe] couple choisi d'avance : plafonne au-dessus du seuil, s'effondre en dessous.
+  \item[Meilleur MCS] émetteur « génie » qui connaîtrait le SNR : meilleure adaptation de lien réalisable.
+  \item[Borne de capacité] $k\log_2(1+\mathrm{SNR})$ bits \emph{sans erreur} : borne supérieure, pas un
+        système constructible.
 \end{description}
 
-\begin{keybox}[Pourquoi encadrer plutôt que simplement comparer]
-Battre une référence mal implémentée ne prouverait rien. En publiant à la fois le système réel, l'adaptation
-idéale et la borne de capacité, on sait exactement ce qui est dépassé : les résultats du
-chapitre~\ref{chap:resultats} montrent que les systèmes appris dépassent largement la chaîne réelle, dépassent
-la borne de capacité sur CIFAR-10 en précision, mais restent en deçà de cette borne en PSNR sur grandes images.
+\begin{keybox}[Pourquoi encadrer la référence]
+Battre une référence mal implémentée ne prouverait rien. En publiant les trois formes, on sait exactement ce
+qui est dépassé : le chapitre~\ref{chap:resultats} montre que les systèmes appris dépassent largement la
+chaîne réelle, dépassent la borne de capacité en précision sur CIFAR-10, mais restent en deçà de cette borne
+en PSNR sur grandes images.
 \end{keybox}

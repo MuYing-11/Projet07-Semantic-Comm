@@ -4,25 +4,17 @@
 \chapter{Extensions}
 \label{chap:extensions}
 
-Deux extensions prolongent l'étude dans les deux directions où la communication sémantique promet le plus : la
-connaissance de la tâche du récepteur, et la redondance temporelle de la vidéo.
-
 \section{Transmission orientée tâche}
 \label{sec:task}
 
-\subsection{Principe}
-
-Si le récepteur ne veut que l'étiquette, reconstruire l'image est un gaspillage : on dépense de la bande pour
-des pixels que personne ne regardera. L'extension supprime le décodeur image. Un encodeur au stride~8 produit
-une carte latente réduite — $4\times4$ positions sur CIFAR-10 — qui traverse le canal et alimente directement
-une tête de classification. L'ensemble est entraîné par entropie croisée : le réseau n'apprend à transmettre
-que ce qui discrimine les classes.
-
-\subsection{Résultats}
+Si le récepteur ne veut que l'étiquette, reconstruire l'image est un gaspillage. L'extension supprime le
+décodeur image : un encodeur au stride 8 produit une carte latente réduite — $4\times4$ positions sur
+CIFAR-10 — qui traverse le canal et alimente directement une tête de classification, entraînée par entropie
+croisée.
 
 \begin{table}[H]
 \centering
-\caption{Transmission orientée tâche sur CIFAR-10, canal AWGN (précision)}
+\caption{Transmission orientée tâche sur CIFAR-10, AWGN (précision)}
 \label{tab:task}
 \small
 \begin{tabular}{@{}lrrr@{}}
@@ -37,42 +29,30 @@ $1/48$  & 64 & 72,4\,\% & 76,9\,\% \\
 \end{tabular}
 \end{table}
 
+À $1/384$, soit \textbf{32 fois moins de bande} que le JSCC complet, la précision atteint 70,5\,\% contre
+78,2\,\%. À $1/48$ elle atteint 76,9\,\%. À \SI{0}{\decibel}, avec 8 symboles seulement, le système orienté
+tâche fait déjà mieux (57,4\,\%) que le JSCC sémantique complet (56,4\,\%).
+
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{task_oriented.png}
-  \caption{Extension orientée tâche comparée à la stratégie « reconstruire puis classer », en fonction du
-  nombre de symboles complexes par image.}
+  \includegraphics[width=0.88\linewidth]{task_oriented.png}
+  \caption{Orienté tâche contre « reconstruire puis classer », en fonction du nombre de symboles par image.}
   \label{fig:task}
 \end{figure}
 
-Le résultat est spectaculaire : à $k/n = 1/384$, soit \textbf{32 fois moins de bande} que le JSCC complet au
-point $1/12$, la précision à \SI{10}{\decibel} atteint 70,5\,\% contre 78,2\,\%. À $1/48$ — huit fois moins de
-bande — elle atteint 76,9\,\%, soit pratiquement la performance du système complet. À \SI{0}{\decibel}, le
-système orienté tâche avec seulement 8~symboles fait déjà mieux (57,4\,\%) que le JSCC sémantique complet
-(56,4\,\%).
-
 \begin{keybox}[Interprétation]
 L'information nécessaire à une décision parmi dix classes est très inférieure à celle qui décrit une image.
-Quand la tâche du récepteur est connue à la conception, la transmettre directement est le point extrême de la
-communication sémantique. La contrepartie est l'absence totale de polyvalence : ce récepteur ne sait rien
-faire d'autre que classer, et ne peut pas afficher l'image.
+La contrepartie est l'absence de polyvalence : ce récepteur ne sait que classer, il ne peut pas afficher
+l'image.
 \end{keybox}
 
 \section{Renouvellement conditionnel en vidéo}
 \label{sec:cr}
 
-\subsection{Principe}
-
-Deux images vidéo consécutives se ressemblent. Plutôt que de transmettre chaque trame indépendamment,
-l'extension envoie une image clé complète, puis uniquement les \emph{blocs latents qui ont changé}. Le
-récepteur conserve les blocs précédents pour les zones stables. Une signalisation indique quels blocs sont
-renouvelés ; elle représente ici 12,7\,\% du débit total, et elle est comptabilisée dans le rapport de bande
-annoncé.
-
-Le paramètre \srcfile{frac} fixe la proportion de blocs renouvelés par trame ; les résultats ci-dessous
-correspondent à $\mathrm{frac} = 0{,}2$ et $c = 8$ canaux latents.
-
-\subsection{Résultats}
+Deux trames consécutives se ressemblent. L'extension envoie une image clé complète, puis uniquement les
+\emph{blocs latents qui ont changé} ; le récepteur conserve les précédents pour les zones stables. La
+signalisation des blocs renouvelés représente 12,7\,\% du débit et est comptée dans le rapport annoncé. Les
+résultats correspondent à $\mathrm{frac} = 0{,}2$ et $c = 8$.
 
 \begin{table}[H]
 \centering
@@ -83,8 +63,8 @@ correspondent à $\mathrm{frac} = 0{,}2$ et $c = 8$ canaux latents.
 \toprule
 \textbf{Séquence} & \textbf{$k/n$ (CR)} & \textbf{PSNR CR} & \textbf{PSNR à $1/12$} & \textbf{Lecture} \\
 \midrule
-\srcfile{akiyo} (statique)        & $1/37$ & 26,40 & 26,48 & même qualité pour 3 fois moins de bande \\
-\srcfile{foreman} (mouvement modéré) & $1/37$ & 25,15 & 28,06 & \SI{2.9}{\decibel} perdus \\
+\srcfile{akiyo} (statique)           & $1/37$ & 26,40 & 26,48 & même qualité, 3 fois moins de bande \\
+\srcfile{foreman} (modéré)           & $1/37$ & 25,15 & 28,06 & \SI{2.9}{\decibel} perdus \\
 \srcfile{bus} (panoramique rapide)   & $1/37$ & 18,50 & 25,32 & \SI{6.8}{\decibel} perdus \\
 \bottomrule
 \end{tabularx}
@@ -92,19 +72,14 @@ correspondent à $\mathrm{frac} = 0{,}2$ et $c = 8$ canaux latents.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.82\linewidth]{video_rate.png}
-  \caption{Débit effectivement utilisé par le renouvellement conditionnel au fil des trames, pour les trois
-  régimes de mouvement.}
+  \includegraphics[width=0.76\linewidth]{video_rate.png}
+  \caption{Débit effectivement utilisé au fil des trames, pour les trois régimes de mouvement.}
   \label{fig:video_rate}
 \end{figure}
 
-Sur une scène statique, le gain est franc : la même qualité pour trois fois moins de bande. Sur un panoramique
-rapide, il disparaît et devient un coût — presque tous les blocs changent à chaque trame, et forcer le
-renouvellement partiel dégrade l'image de \SI{6.8}{\decibel}.
-
-\begin{keybox}[Un résultat conditionnel, et c'est normal]
-La méthode exploite la redondance temporelle : elle ne peut donc rien apporter là où cette redondance n'existe
-pas. Le résultat n'est pas « le renouvellement conditionnel fonctionne », mais « il fonctionne sur les scènes
+\begin{keybox}[Un résultat conditionnel]
+La méthode exploite la redondance temporelle : elle n'apporte rien là où cette redondance n'existe pas. Le
+résultat n'est pas « le renouvellement conditionnel fonctionne », mais « il fonctionne sur les scènes
 statiques et doit être désactivé sur les scènes très mobiles ». Un système réel le piloterait par une mesure
-de mouvement, ce qui constitue une perspective immédiate de ce travail.
+de mouvement.
 \end{keybox}

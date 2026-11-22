@@ -35,7 +35,11 @@ FR = {
     "Classification accuracy": "Précision de classification",
     "Accuracy of judge B": "Précision du juge B",
     "Complex channel symbols per image": "Symboles complexes par image",
-    "ImageNet feature cosine similarity": "Similarité cosinus des caractéristiques ImageNet",
+    "ImageNet feature cosine similarity": "Similarité cosinus ImageNet",
+    "ImageNet feature cosine": "Similarité cosinus ImageNet",
+    "Top-1 label agreement": "Accord top-1",
+    "Top-5 label agreement": "Accord top-5",
+    "SSIM": "SSIM",
     "Frame index": "Numéro de trame",
     "Epoch": "Époque",
     # titres
@@ -89,6 +93,14 @@ PREFIX_FR = [
     ("Training losses:", "Pertes d'entraînement :"),
 ]
 
+# Fragments composés à l'exécution par les scripts du projet.
+EXTRA_FR = [
+    ("Separated: MCS chosen on the average SNR", "Séparé : MCS choisi sur le SNR moyen"),
+    ("models trained on CIFAR-10", "modèles entraînés sur CIFAR-10"),
+    ("frame-by-frame", "image par image"),
+    ("simulation", "simulation"),
+]
+
 # Titres construits par f-string dans demo.py : traduits par morceaux.
 PIECES_FR = [
     ("sem. cos", "cos. sém."),
@@ -97,16 +109,32 @@ PIECES_FR = [
 ]
 
 
+def wrap(s, width=76):
+    """Replie les titres longs : sur une figure étroite, une ligne unique déborde du cadre."""
+    if "\n" in s or len(s) <= width:
+        return s
+    import textwrap
+
+    return "\n".join(textwrap.wrap(s, width))
+
+
 def tr(s):
     """Traduit une chaîne affichée ; laisse inchangé ce qui n'est pas dans la table."""
     if not isinstance(s, str) or not s.strip():
         return s
     if s in FR:
-        return FR[s]
+        return wrap(FR[s])
     for en, fr in PREFIX_FR:
         if s.startswith(en):
-            return fr + s[len(en):]
+            return wrap(fr + words(s[len(en):]))
+    return wrap(words(s))
+
+
+def words(s):
+    """Remplacements terme à terme, pour les chaînes composées à l'exécution."""
     out = s
+    for en, fr in EXTRA_FR:
+        out = out.replace(en, fr)
     for en, fr in PIECES_FR:
         out = out.replace(en, fr)
     for en, fr in [(" dB", " dB"), ("Separated", "Séparé"), ("Semantic", "Sémantique"),
@@ -116,6 +144,31 @@ def tr(s):
                    ("frames", "trames"), ("frame", "trame")]:
         out = out.replace(en, fr)
     return out
+
+
+def patch_layout():
+    """Empile verticalement les figures à plusieurs panneaux et les agrandit.
+
+    Les fonctions du projet demandent des dispositions en ligne (1 x N) : chaque panneau est alors étroit une
+    fois la figure réduite à la largeur du texte. On renvoie la disposition transposée (N x 1), ce qui ne
+    change rien à l'indexation puisque le tableau d'axes reste à une dimension.
+    """
+    orig_subplots = plt.subplots
+
+    def subplots(nrows=1, ncols=1, **kw):
+        if nrows == 1 and ncols > 1:
+            kw["figsize"] = (7.4, 3.5 * ncols)
+            kw.setdefault("constrained_layout", True)
+            return orig_subplots(ncols, 1, **kw)
+        if nrows == 1 and ncols == 1:
+            w, h = kw.get("figsize", (6.4, 4.8))
+            kw["figsize"] = (max(w, 7.0), max(h, 4.4))
+        return orig_subplots(nrows, ncols, **kw)
+
+    plt.subplots = subplots
+    plt.rcParams.update({"font.size": 10.5, "axes.titlesize": 11.5, "axes.labelsize": 11,
+                         "xtick.labelsize": 10, "ytick.labelsize": 10, "legend.fontsize": 9.5,
+                         "lines.linewidth": 2.2, "lines.markersize": 5})
 
 
 def patch():
@@ -149,7 +202,8 @@ def patch():
     orig_legend = maxes.Axes.legend
 
     def legend(self, *a, **kw):
-        if kw.get("fontsize", 10) <= 7:
+        if kw.get("fontsize", 10) <= 8:
+            kw["fontsize"] = 9          # les légendes minuscules deviennent illisibles une fois imprimées
             kw.setdefault("frameon", True)
             kw.setdefault("framealpha", 0.92)
             kw.setdefault("facecolor", "white")
@@ -164,6 +218,8 @@ def main():
     patch()
 
     from scripts import make_figures as mf
+
+    patch_layout()  # après l'import : make_figures fixe ses rcParams au chargement
 
     mf.FIG = OUT
     mf.LABEL = {"jscc_mse": "JSCC syntaxique (MSE)", "jscc_sem": "JSCC sémantique (proposé)",
